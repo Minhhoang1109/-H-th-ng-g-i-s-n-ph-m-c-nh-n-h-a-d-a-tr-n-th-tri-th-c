@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>K/H Team Electronics - Gợi ý Cá nhân hóa dựa trên Đồ thị Tri thức</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top Utility Header Bar -->
+  <div class="top-utility-bar">
+    <div class="top-utility-inner">
+      <div class="top-util-left">
+        <span class="user-greeting">Xin chào, <b id="topGreetingUser">Alice Nguyễn</b>!</span>
+        <span class="divider">|</span>
+        <div class="user-switch-inline">
+          <label for="userSelect">Đổi tài khoản:</label>
+          <select id="userSelect" class="header-user-select"></select>
+        </div>
+        <span class="divider">|</span>
+        <a href="#tab-survey" class="util-link nav-shortcut" data-target="survey">Khảo sát nhu cầu</a>
+        <span class="divider">|</span>
+        <a href="#tab-cold-start" class="util-link nav-shortcut" data-target="cold-start">Người dùng mới (Cold-Start)</a>
+      </div>
+      <div class="top-util-right">
+        <span class="util-link">Hàng hiệu giảm giá</span>
+        <span class="util-link">Trợ giúp & Liên hệ</span>
+        <span class="util-link">Mục đã lưu (Watchlist) ♡</span>
+        <div class="algo-quick-select">
+          <label for="algoSelect">⚙️ Thuật toán:</label>
+          <select id="algoSelect" class="header-algo-select">
+            <option value="hybrid">Hybrid (PPR + Meta-path)</option>
+            <option value="ppr">Personalized PageRank</option>
+            <option value="metapath">Meta-path Traversal</option>
+          </select>
+        </div>
+        <span class="cart-icon">🛒 Giỏ hàng (2)</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main eBay Header -->
+  <header class="ebay-main-header">
+    <div class="ebay-header-inner">
+      <!-- K/H Team Logo -->
+      <a href="#" class="ebay-logo kh-logo" onclick="window.location.reload(); return false;">
+        <span class="logo-k">K</span><span class="logo-slash">/</span><span class="logo-h">H</span>
+        <span class="logo-team">Team</span>
+        <span class="logo-tag">KG-RecSys</span>
+      </a>
+
+      <!-- Shop by category dropdown -->
+      <div class="shop-by-cat-btn" id="btnShopByCat">
+        <span>Mua theo danh mục</span>
+        <span class="arrow-down">▼</span>
+      </div>
+
+      <!-- eBay Search Bar -->
+      <div class="ebay-search-bar">
+        <div class="search-input-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="Tìm kiếm sản phẩm, linh kiện (MacBook, RTX 4080, i9, RAM...)" />
+        </div>
+        <div class="search-cat-dropdown">
+          <select id="searchCategorySelect">
+            <option value="all">Tất cả danh mục</option>
+          </select>
+        </div>
+        <button id="btnSearch" class="btn-ebay-search">Tìm kiếm</button>
+      </div>
+
+      <!-- Advanced link -->
+      <div class="header-advanced-link">
+        <span id="headerMetricsBadge" class="metrics-pill">Đồ thị: 48 nút • 115 cạnh</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Sub-bar -->
+  <nav class="ebay-nav-subbar">
+    <div class="ebay-nav-inner">
+      <ul class="nav-links-list">
+        <li class="nav-item active" data-tab="recommendations"><span>✨ Dành riêng cho bạn (Gợi ý)</span></li>
+        <li class="nav-item" data-tab="survey"><span>📋 Khảo sát Nhu cầu</span></li>
+        <li class="nav-item" data-tab="cold-start"><span>❄️ Thử nghiệm Khởi động lạnh</span></li>
+        <li class="nav-item" data-tab="analytics"><span>📊 Thống kê Đồ thị & Thuật toán</span></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Container -->
+  <main class="ebay-container">
+
+    <!-- TAB 1: RECOMMENDATIONS (MAIN SHOP) -->
+    <section id="tab-recommendations" class="tab-content active">
+      <!-- eBay Hero Banner -->
+      <div class="ebay-hero-banner">
+        <div class="hero-content">
+          <span class="hero-badge">ĐỀ XUẤT CÁ NHÂN HÓA HÔM NAY</span>
+          <h2 id="heroTitle">Thiết bị Công nghệ & Linh kiện Hàng đầu Dành Cho Bạn</h2>
+          <p id="heroSubtitle">Thuật toán Đồ thị Tri thức phân tích hành vi và độ tương thích phần cứng để đưa ra mức giá tốt nhất.</p>
+          <div class="hero-cta-row">
+            <button class="btn btn-ebay-primary" id="btnRefreshRecs">🔄 Tải lại Gợi ý</button>
+            <button class="btn btn-ebay-outline" id="btnOpenSurvey">📋 Làm Khảo sát Sở thích</button>
+          </div>
+        </div>
+        <div class="hero-user-card" id="userProfileCard">
+          <img id="userAvatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" alt="Avatar" class="user-avatar-img" />
+          <div class="user-meta">
+            <h4 id="userName">Alice Nguyễn</h4>
+            <span class="user-role-tag" id="userRole">Tín đồ công nghệ Apple</span>
+            <div class="user-stats-mini" id="userInteractions"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Marketplace Layout: Sidebar Filters + Products Grid -->
+      <div class="marketplace-body">
+        <!-- Left Sidebar Filters -->
+        <aside class="ebay-sidebar">
+          <div class="sidebar-block">
+            <h4 class="sidebar-title">Danh mục Sản phẩm</h4>
+            <ul class="category-filter-list" id="categoryFilterList">
+              <li class="cat-filter-item active" data-cat="all">Tất cả sản phẩm</li>
+            </ul>
+          </div>
+
+          <div class="sidebar-block">
+            <h4 class="sidebar-title">Thương hiệu Ưu tiên</h4>
+            <div class="sidebar-checkbox-list" id="sidebarBrandList">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+
+          <div class="sidebar-block">
+            <h4 class="sidebar-title">Khoảng Giá (VND)</h4>
+            <div class="sidebar-checkbox-list">
+              <label class="filter-checkbox"><input type="radio" name="price_filter" value="all" checked><span>Tất cả mức giá</span></label>
+              <label class="filter-checkbox"><input type="radio" name="price_filter" value="under_5m"><span>Dưới 5.000.000 ₫</span></label>
+              <label class="filter-checkbox"><input type="radio" name="price_filter" value="5m_15m"><span>5.000.000 ₫ – 15.000.000 ₫</span></label>
+              <label class="filter-checkbox"><input type="radio" name="price_filter" value="15m_30m"><span>15.000.000 ₫ – 30.000.000 ₫</span></label>
+              <label class="filter-checkbox"><input type="radio" name="price_filter" value="above_30m"><span>Trên 30.000.000 ₫</span></label>
+            </div>
+          </div>
+
+          <div class="sidebar-block">
+            <h4 class="sidebar-title">Tình trạng & Giao hàng</h4>
+            <div class="sidebar-checkbox-list">
+              <label class="filter-checkbox"><input type="checkbox" checked disabled><span>Mới 100% Nguyên Hộp (Brand New)</span></label>
+              <label class="filter-checkbox"><input type="checkbox" checked disabled><span>Miễn phí giao hàng (Free Shipping)</span></label>
+              <label class="filter-checkbox"><input type="checkbox" checked disabled><span>Bảo hành chính hãng</span></label>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Right Content: Products Listing -->
+        <div class="ebay-listing-content">
+          <div class="listing-toolbar">
+            <div class="listing-count-info">
+              <span id="resultsCount">Đang tải sản phẩm đề xuất...</span>
+            </div>
+            <div class="listing-sort-wrap">
+              <label for="sortSelect">Sắp xếp theo:</label>
+              <select id="sortSelect" class="styled-select">
+                <option value="score_desc">Độ tương thích cao nhất (% Match)</option>
+                <option value="price_asc">Giá: Thấp đến Cao</option>
+                <option value="price_desc">Giá: Cao đến Thấp</option>
+                <option value="rating_desc">Đánh giá sao cao nhất</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Product Cards Grid -->
+          <div class="ebay-product-grid" id="recommendationsGrid">
+            <div class="loading-box"><div class="spinner"></div><p>Đang tìm kiếm gợi ý trên Đồ thị Tri thức...</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: KHẢO SÁT NGƯỜI DÙNG (EBAY BUYER SURVEY) -->
+    <section id="tab-survey" class="tab-content">
+      <div class="ebay-card-container">
+        <div class="survey-page-header">
+          <span class="ebay-badge">EBAY BUYER SURVEY</span>
+          <h2>Khảo sát Nhu cầu Mua sắm & Đánh giá Gợi ý Thiết bị Điện tử</h2>
+          <p>Dữ liệu khảo sát được <b>ánh xạ vào Đồ thị Tri thức</b> để tinh chỉnh trọng số liên kết (Meta-path weights) và đề xuất thiết bị chính xác tuyệt đối.</p>
+        </div>
+
+        <form id="surveyForm" class="ebay-form">
+          <div class="ebay-card">
+            <h3 class="ebay-card-title"><span class="step-circle">1</span> Mục đích sử dụng thiết bị chính của bạn:</h3>
+            <p class="card-subtitle">Chọn tất cả mục đích phù hợp:</p>
+            <div class="purpose-chips-wrap">
+              <label class="ebay-chip"><input type="checkbox" name="survey_purpose" value="t_laptrinh"><span>💻 Lập trình & Đa nhiệm</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="survey_purpose" value="t_gaming"><span>🎮 Gaming đồ họa cao</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="survey_purpose" value="t_dohoa"><span>🎨 Dựng hình 3D & Render</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="survey_purpose" value="t_vanphong"><span>💼 Văn phòng mỏng nhẹ</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="survey_purpose" value="t_chongon"><span>🎧 Âm thanh & Chống ồn ANC</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="survey_purpose" value="t_caocap"><span>✨ Flagship cao cấp</span></label>
+            </div>
+          </div>
+
+          <div class="ebay-card">
+            <h3 class="ebay-card-title"><span class="step-circle">2</span> Thương hiệu bạn tin tưởng và ưa chuộng nhất:</h3>
+            <p class="card-subtitle">Hệ thống sẽ ưu tiên các sản phẩm trong cùng hệ sinh thái thương hiệu:</p>
+            <div class="grid-2col" id="surveyBrands"></div>
+          </div>
+
+          <div class="ebay-card">
+            <h3 class="ebay-card-title"><span class="step-circle">3</span> Ngành hàng bạn quan tâm mua sắm:</h3>
+            <div class="grid-2col" id="surveyCategories"></div>
+          </div>
+
+          <div class="ebay-card">
+            <h3 class="ebay-card-title"><span class="step-circle">4</span> Ngân sách dự kiến & Tiêu chí ưu tiên:</h3>
+            <div class="form-row-2">
+              <div class="form-col">
+                <label class="form-label">Mức ngân sách dự kiến:</label>
+                <select id="surveyBudget" class="styled-select w-100">
+                  <option value="all">Tất cả mức giá</option>
+                  <option value="under_5m">Dưới 5.000.000 ₫ (Linh kiện & Phụ kiện)</option>
+                  <option value="5m_15m">5.000.000 ₫ – 15.000.000 ₫ (Tầm trung)</option>
+                  <option value="15m_30m">15.000.000 ₫ – 30.000.000 ₫ (Cận cao cấp)</option>
+                  <option value="above_30m">Trên 30.000.000 ₫ (Flagship & Cấu hình khủng)</option>
+                </select>
+              </div>
+              <div class="form-col">
+                <label class="form-label">Đặc tính ưu tiên số 1:</label>
+                <select id="surveyPriorityTag" class="styled-select w-100">
+                  <option value="">Tự động tối ưu theo hành vi</option>
+                  <option value="t_laptrinh">💻 Lập trình & Đa nhiệm mượt mà</option>
+                  <option value="t_gaming">🎮 Hiệu năng Gaming mạnh mẽ</option>
+                  <option value="t_dohoa">🎨 Màn hình chuẩn màu đồ họa</option>
+                  <option value="t_tannhiet">❄️ Tản nhiệt mát & Đèn RGB</option>
+                  <option value="t_pinlau">🔋 Thời lượng Pin trâu</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="ebay-card feedback-highlight-card">
+            <h3 class="ebay-card-title"><span class="step-circle">5</span> Đánh giá Độ hài lòng về Hệ thống (Feedback CSAT):</h3>
+            <p class="card-subtitle">Phục vụ cho dữ liệu thực nghiệm đề tài nghiên cứu:</p>
+
+            <div class="rating-box">
+              <span class="form-label">Mức độ chính xác của các sản phẩm gợi ý:</span>
+              <div class="star-rating" id="starRating">
+                <span class="star active" data-val="1">★</span>
+                <span class="star active" data-val="2">★</span>
+                <span class="star active" data-val="3">★</span>
+                <span class="star active" data-val="4">★</span>
+                <span class="star active" data-val="5">★</span>
+                <span class="rating-text" id="ratingText">5/5 – Rất hài lòng</span>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:14px;">
+              <label class="form-label">Độ rõ ràng của lời giải thích (Explainable AI):</label>
+              <div class="radio-pill-group">
+                <label class="radio-pill"><input type="radio" name="survey_explain" value="Rất trực quan, dễ hiểu" checked><span>Rất trực quan, dễ hiểu</span></label>
+                <label class="radio-pill"><input type="radio" name="survey_explain" value="Bình thường"><span>Bình thường</span></label>
+                <label class="radio-pill"><input type="radio" name="survey_explain" value="Cần cải thiện"><span>Cần cải thiện</span></label>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:14px;">
+              <label for="surveyComment" class="form-label">Nhận xét hoặc góp ý bổ sung của bạn:</label>
+              <textarea id="surveyComment" class="styled-input w-100" rows="3" placeholder="Ví dụ: Gợi ý rất thông minh, đặc biệt tính năng gợi ý linh kiện PC tương thích rất hữu ích!"></textarea>
+            </div>
+          </div>
+
+          <div class="form-actions-center">
+            <button type="submit" class="btn btn-ebay-primary btn-lg">
+              Hoàn Tất Khảo Sát & Xem Gợi Ý Ngay
+            </button>
+          </div>
+        </form>
+
+        <div class="ebay-card survey-stats-summary">
+          <div class="summary-header">
+            <h4>📊 Thống kê Khảo sát Người dùng trong Hệ thống</h4>
+            <span class="ebay-pill-green">Dữ liệu thực nghiệm</span>
+          </div>
+          <div class="stats-row" id="surveyStatsContent"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: COLD-START SIMULATOR -->
+    <section id="tab-cold-start" class="tab-content">
+      <div class="ebay-card-container">
+        <div class="survey-page-header">
+          <span class="ebay-badge">COLD-START SIMULATOR</span>
+          <h2>Thử nghiệm Người dùng Mới & Giải quyết Khởi động Lạnh</h2>
+          <p>Chứng minh khả năng của Đồ thị Tri thức: Người dùng mới chưa hề có lịch sử mua sắm vẫn nhận được gợi ý chuẩn xác ngay sau bước Onboarding!</p>
+        </div>
+
+        <div class="ebay-card">
+          <form id="coldStartForm" class="ebay-form">
+            <div class="form-group">
+              <label for="newUserName" class="form-label">Họ và tên người dùng mới:</label>
+              <input type="text" id="newUserName" class="styled-input w-100" placeholder="Ví dụ: Hoàng Minh Long" required />
+            </div>
+            <div class="form-group">
+              <label for="newUserRole" class="form-label">Nghề nghiệp / Nhu cầu chính:</label>
+              <input type="text" id="newUserRole" class="styled-input w-100" placeholder="Ví dụ: Lập trình viên AI / Sinh viên ĐH Lạc Hồng" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">1. Chọn Danh mục thiết bị quan tâm:</label>
+              <div class="grid-2col" id="coldStartCategories"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">2. Chọn Thương hiệu ưa thích:</label>
+              <div class="grid-2col" id="coldStartBrands"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">3. Chọn Đặc tính mong muốn:</label>
+              <div class="grid-2col" id="coldStartTags"></div>
+            </div>
+            <div class="form-actions-center">
+              <button type="submit" class="btn btn-ebay-primary btn-lg">🚀 Tạo Người Dùng & Xem Gợi Ý Cold-Start</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: ANALYTICS -->
+    <section id="tab-analytics" class="tab-content">
+      <div class="ebay-card-container">
+        <div class="survey-page-header">
+          <span class="ebay-badge">SYSTEM ANALYTICS</span>
+          <h2>Thống kê Đồ thị Tri thức & Nguyên lý Thuật toán</h2>
+          <p>Các chỉ số đo lường hiệu năng đồ thị và kiến trúc thuật toán phục vụ cho bài báo cáo đề tài.</p>
+        </div>
+
+        <div class="analytics-metrics-grid" id="metricsGrid"></div>
+
+        <div class="ebay-card" style="margin-top:24px;">
+          <h3 class="ebay-card-title">Chi tiết Kiến trúc Thuật toán Gợi ý</h3>
+          <div class="algo-explanation-grid">
+            <div class="algo-box">
+              <h4>1. Personalized PageRank (PPR)</h4>
+              <p>Mô hình hóa quá trình người dùng lướt và khám phá mạng lưới quan hệ bằng thuật toán Random Walk with Restart. Đặt xác suất dịch chuyển tập trung vào nút người dùng hiện tại.</p>
+            </div>
+            <div class="algo-box">
+              <h4>2. Meta-path Traversal & Reasoning</h4>
+              <p>Khai thác các đường đi ngữ nghĩa có ý nghĩa nghiệp vụ:</p>
+              <ul>
+                <li><code>U → P1 → [bought_together] → P2</code>: Tương thích phần cứng & bán chéo linh kiện.</li>
+                <li><code>U → P1 → Brand → P2</code>: Cùng hệ sinh thái thương hiệu.</li>
+                <li><code>U → P1 → Category/Tag → P2</code>: Cùng nhóm linh kiện & nhu cầu.</li>
+                <li><code>U → Preference → P2</code>: Gợi ý cho người dùng mới (Cold-Start).</li>
+              </ul>
+            </div>
+            <div class="algo-box">
+              <h4>3. Explainable AI (XAI)</h4>
+              <p>Mỗi đề xuất đều gắn kèm đường đi giải thích ngắn gọn, minh bạch, giúp tăng mức độ tin cậy và tỷ lệ chuyển đổi cho khách hàng.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Explanation Modal (eBay Style) -->
+  <div class="modal-backdrop" id="explanationModal" style="display:none;">
+    <div class="modal-dialog ebay-modal">
+      <button class="modal-close-btn" id="btnCloseModal">×</button>
+      <div class="modal-header">
+        <span class="modal-badge-ebay" id="modalBadge">Lý do gợi ý</span>
+        <h3 id="modalProductName">Tên sản phẩm</h3>
+      </div>
+      <div class="modal-body">
+        <div class="explanation-box-ebay">
+          <span class="sparkle-icon">💡</span>
+          <p id="modalExplanationText">Lời giải thích tự nhiên...</p>
+        </div>
+        <h5 class="chain-title">Đường dẫn suy luận trên Đồ thị Tri thức (Reasoning Path):</h5>
+        <div class="reasoning-chain" id="modalReasoningChain"></div>
+        <div class="modal-product-summary" id="modalProductSummary"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ebay-primary" id="btnModalClose">Đã Hiểu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- eBay Footer -->
+  <footer class="ebay-footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h5>Mua sắm</h5>
+        <ul>
+          <li>Đăng ký tài khoản</li>
+          <li>Đảm bảo hoàn tiền eBay</li>
+          <li>Gợi ý cá nhân hóa KG-RecSys</li>
+          <li>Khuyến mãi thương hiệu</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Học phần Đồ án</h5>
+        <ul>
+          <li>Đề tài: Hệ thống Gợi ý dựa trên Đồ thị Tri thức</li>
+          <li>Sinh viên: Trần Minh Hoàng - 123001183</li>
+          <li>GVHD: ThS. Phan Mạnh Thường</li>
+          <li>Đại học Lạc Hồng (LHU)</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Về K/H Team KG-RecSys</h5>
+        <ul>
+          <li>Thuật toán: Personalized PageRank & Meta-Path</li>
+          <li>Cơ sở tri thức: Electronics & PC Components</li>
+          <li>Explainable AI (XAI)</li>
+          <li>Thời gian phản hồi thời gian thực</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>Copyright © 2026 K/H Team. All Rights Reserved. Tích hợp Hệ thống Gợi ý Đồ thị Tri thức.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,1260 @@
+{
+  "nodes": [
+    {
+      "id": "u1",
+      "type": "User",
+      "name": "Alice Nguyễn",
+      "role": "Content Creator & Tín đồ Apple",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
+      "color": "#3b82f6",
+      "last_survey_rating": 5,
+      "last_survey_comment": "",
+      "last_survey_explainability": "Rất trực quan, dễ hiểu"
+    },
+    {
+      "id": "u2",
+      "type": "User",
+      "name": "Bob Trần",
+      "role": "Hardcore Gamer & PC Builder",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150",
+      "color": "#3b82f6",
+      "last_survey_rating": 5,
+      "last_survey_comment": "Hệ thống gợi ý linh kiện PC cực kỳ chuẩn xác và tương thích cao!",
+      "last_survey_explainability": "Rất trực quan, dễ hiểu"
+    },
+    {
+      "id": "u3",
+      "type": "User",
+      "name": "Charlie Lê",
+      "role": "Senior Software Engineer",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "u4",
+      "type": "User",
+      "name": "Diana Phạm",
+      "role": "Dân Văn phòng & Tối giản",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "u5",
+      "type": "User",
+      "name": "Edward Vũ",
+      "role": "Kỹ sư Đồ họa 3D & AI",
+      "avatar": "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "u_new",
+      "type": "User",
+      "name": "Khách hàng mới (Cold-Start Demo)",
+      "role": "Chưa có lịch sử mua sắm",
+      "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150",
+      "color": "#3b82f6",
+      "last_survey_rating": 5,
+      "last_survey_comment": "",
+      "last_survey_explainability": "Rất trực quan, dễ hiểu"
+    },
+    {
+      "id": "c_phone",
+      "type": "Category",
+      "name": "Điện thoại thông minh",
+      "icon": "📱",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "c_laptop",
+      "type": "Category",
+      "name": "Laptop & Máy tính xách tay",
+      "icon": "💻",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "c_component",
+      "type": "Category",
+      "name": "Linh kiện máy tính (PC Parts)",
+      "icon": "⚙️",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "c_accessory",
+      "type": "Category",
+      "name": "Phụ kiện & Ngoại vi",
+      "icon": "⌨️",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "c_audio",
+      "type": "Category",
+      "name": "Âm thanh & Tai nghe",
+      "icon": "🎧",
+      "color": "#f59e0b"
+    },
+    {
+      "id": "b_apple",
+      "type": "Brand",
+      "name": "Apple",
+      "country": "USA",
+      "color": "#10b981"
+    },
+    {
+      "id": "b_samsung",
+      "type": "Brand",
+      "name": "Samsung",
+      "country": "Korea",
+      "color": "#10b981"
+    },
+    {
+      "id": "b_asus",
+      "type": "Brand",
+      "name": "ASUS ROG",
+      "country": "Taiwan",
+      "color": "#10b981"
+    },
+    {
+      "id": "b_dell",
+      "type": "Brand",
+      "name": "Dell",
+      "country": "USA",
+      "color": "#10b981"
+    },
+    {
+      "id": "b_nvidia",
+      "type": "Brand",
+      "name": "NVIDIA",
+      "country": "USA",
+      "color": "#10b981"
+    },
+    {
+      "id": "b_intel",
+      "type": "Brand",
+      "name": "Intel",
+      "country": "USA",
+      "color": "#10b981"
+    },
+    {
+      "id": "b_corsair",
+      "type": "Brand",
+      "name": "Corsair",
+      "country": "USA",
+      "color": "#10b981"
+    },
+    {
+      "id": "b_logitech",
+      "type": "Brand",
+      "name": "Logitech",
+      "country": "Switzerland",
+      "color": "#10b981"
+    },
+    {
+      "id": "b_sony",
+      "type": "Brand",
+      "name": "Sony",
+      "country": "Japan",
+      "color": "#10b981"
+    },
+    {
+      "id": "b_anker",
+      "type": "Brand",
+      "name": "Anker",
+      "country": "USA",
+      "color": "#10b981"
+    },
+    {
+      "id": "t_gaming",
+      "type": "Tag",
+      "name": "Gaming cao cấp",
+      "color": "#ec4899"
+    },
+    {
+      "id": "t_laptrinh",
+      "type": "Tag",
+      "name": "Lập trình & Đa nhiệm",
+      "color": "#ec4899"
+    },
+    {
+      "id": "t_dohoa",
+      "type": "Tag",
+      "name": "Đồ họa & Render 3D",
+      "color": "#ec4899"
+    },
+    {
+      "id": "t_vanphong",
+      "type": "Tag",
+      "name": "Văn phòng mỏng nhẹ",
+      "color": "#ec4899"
+    },
+    {
+      "id": "t_caocap",
+      "type": "Tag",
+      "name": "Flagship sang trọng",
+      "color": "#ec4899"
+    },
+    {
+      "id": "t_chongon",
+      "type": "Tag",
+      "name": "Chống ồn ANC",
+      "color": "#ec4899"
+    },
+    {
+      "id": "t_tannhiet",
+      "type": "Tag",
+      "name": "Tản nhiệt mát & RGB",
+      "color": "#ec4899"
+    },
+    {
+      "id": "t_pinlau",
+      "type": "Tag",
+      "name": "Pin siêu trâu",
+      "color": "#ec4899"
+    },
+    {
+      "id": "p_iphone15",
+      "type": "Product",
+      "name": "iPhone 15 Pro Max 256GB Titan Tự Nhiên",
+      "price": 29490000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400",
+      "description": "Chip Apple A17 Pro 3nm, khung titan cao cấp, quay video ProRes Log chuyên nghiệp.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_s24ultra",
+      "type": "Product",
+      "name": "Samsung Galaxy S24 Ultra 5G AI 256GB",
+      "price": 26990000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400",
+      "description": "Màn hình Dynamic AMOLED 2X phẳng, bút S-Pen quyền năng, Galaxy AI thông minh.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_rogphone8",
+      "type": "Product",
+      "name": "ASUS ROG Phone 8 Pro Gaming Phone",
+      "price": 24990000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1598327105666-5b89351aff97?w=400",
+      "description": "Snapdragon 8 Gen 3, màn hình 165Hz siêu mượt, hệ thống tản nhiệt GameCool 8 đỉnh cao.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_airpodspro",
+      "type": "Product",
+      "name": "Tai nghe Apple AirPods Pro 2 USB-C",
+      "price": 5490000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=400",
+      "description": "Chống ồn chủ động ANC gấp 2 lần, âm thanh thích ứng và sạc chuẩn USB-C tiện lợi.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_macbookm3",
+      "type": "Product",
+      "name": "MacBook Pro 14 inch M3 Pro (18GB/512GB)",
+      "price": 44990000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
+      "description": "Hiệu năng bùng nổ với CPU 11 nhân, GPU 14 nhân, màn hình Liquid Retina XDR 120Hz.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_dellxps15",
+      "type": "Product",
+      "name": "Dell XPS 15 9530 Core i7-13700H RTX 4060",
+      "price": 42500000,
+      "rating": 4.7,
+      "image": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400",
+      "description": "Vỏ nhôm nguyên khối CNC, màn hình 3.5K OLED rực rỡ, chuẩn mực laptop sáng tạo nội dung.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_zephyrusg16",
+      "type": "Product",
+      "name": "Laptop Gaming ASUS ROG Zephyrus G16 OLED",
+      "price": 51990000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400",
+      "description": "Intel Core Ultra 9, RTX 4080, màn hình OLED ROG Nebula 240Hz trong thân máy siêu mỏng nhẹ.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_macbookair",
+      "type": "Product",
+      "name": "MacBook Air 13 inch M3 (16GB/256GB)",
+      "price": 28990000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=400",
+      "description": "Thiết kế mỏng nhẹ không quạt hoàn toàn yên tĩnh, thời lượng pin ấn tượng lên đến 18 tiếng.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_rtx4080",
+      "type": "Product",
+      "name": "Card Màn Hình ASUS ROG Strix GeForce RTX 4080 Super 16GB",
+      "price": 31500000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400",
+      "description": "Kiến trúc Ada Lovelace, DLSS 3 trí tuệ nhân tạo, tản nhiệt buồng hơi MaxContact siêu mát.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_i914900k",
+      "type": "Product",
+      "name": "CPU Intel Core i9-14900K (24 nhân, 32 luồng, up to 6.0GHz)",
+      "price": 14900000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=400",
+      "description": "Bộ vi xử lý máy tính mạnh hàng đầu thế giới cho gaming đỉnh cao và dựng hình render 3D.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_ramcorsair",
+      "type": "Product",
+      "name": "RAM Corsair Vengeance RGB 32GB (2x16GB) DDR5 6000MHz",
+      "price": 3450000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=400",
+      "description": "Băng thông DDR5 siêu tốc, tản nhiệt nhôm nguyên chất, đèn LED RGB đa vùng điều khiển qua iCUE.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_ssdsamsung",
+      "type": "Product",
+      "name": "Ổ Cứng SSD Samsung 990 Pro 2TB PCIe 4.0 NVMe",
+      "price": 4790000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400",
+      "description": "Tốc độ đọc tuần tự lên đến 7450 MB/s, kiểm soát nhiệt thông minh cho game thủ và chuyên gia.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_psucorsair",
+      "type": "Product",
+      "name": "Nguồn Máy Tính Corsair RM850x 850W 80 Plus Gold",
+      "price": 3690000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=400",
+      "description": "Toàn bộ tụ điện Nhật Bản 105°C, Full Modular tháo rời cáp, hoạt động êm ái với Zero RPM.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_mainasus",
+      "type": "Product",
+      "name": "Bo Mạch Chủ ASUS ROG Maximus Z790 Dark Hero",
+      "price": 17800000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1518770660439-4636190af475?w=400",
+      "description": "Bo mạch chủ chipset Z790 cao cấp nhất hỗ trợ ép xung cực đỉnh, PCIe 5.0 và WiFi 7.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_mxmaster3s",
+      "type": "Product",
+      "name": "Chuột Không Dây Logitech MX Master 3S",
+      "price": 2350000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400",
+      "description": "Chuột công thái học cao cấp cho lập trình viên, cuộn MagSpeed 1000 dòng/giây, click tĩnh âm.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_mxkeyss",
+      "type": "Product",
+      "name": "Bàn Phím Không Dây Logitech MX Keys S",
+      "price": 2690000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400",
+      "description": "Phím cắt kéo định hình đầu ngón tay gõ êm ái, đèn nền cảm biến tự động sáng khi tay đến gần.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_dellmonitor",
+      "type": "Product",
+      "name": "Màn Hình Chuyên Nghiệp Dell UltraSharp U2724D 27 inch 2K 120Hz",
+      "price": 10990000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400",
+      "description": "Công nghệ IPS Black cho tỷ lệ tương phản 2000:1, chuẩn màu 98% DCI-P3, cổng Type-C 90W.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_sonywh1000",
+      "type": "Product",
+      "name": "Tai Nghe Chụp Tai Sony WH-1000XM5 Chống Ồn",
+      "price": 7890000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+      "description": "Chống ồn thông minh thích ứng môi trường, đệm da cao cấp êm ái, pin bền bỉ 30 giờ.",
+      "color": "#8b5cf6"
+    },
+    {
+      "id": "p_ankercharger",
+      "type": "Product",
+      "name": "Củ Sạc Nhanh GaN Anker Prime 100W 3 Cổng",
+      "price": 1490000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400",
+      "description": "Công nghệ sạc nhanh GaNPrime nhỏ gọn, sạc cùng lúc MacBook Pro, iPhone và phụ kiện.",
+      "color": "#8b5cf6"
+    }
+  ],
+  "edges": [
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u1",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u1",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "viewed",
+      "weight": 1.2,
+      "label": "viewed",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u1",
+      "target": "c_phone"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u1",
+      "target": "b_apple"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u2",
+      "target": "p_rtx4080"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u2",
+      "target": "p_i914900k"
+    },
+    {
+      "type": "viewed",
+      "weight": 1.2,
+      "label": "viewed",
+      "source": "u2",
+      "target": "p_ramcorsair"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "prefers_category",
+      "source": "u2",
+      "target": "c_accessory"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u2",
+      "target": "b_logitech"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u2",
+      "target": "b_dell"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "prefers_tag",
+      "source": "u2",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u3",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u3",
+      "target": "p_mxmaster3s"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u3",
+      "target": "p_mxkeyss"
+    },
+    {
+      "type": "viewed",
+      "weight": 1.2,
+      "label": "viewed",
+      "source": "u3",
+      "target": "p_dellmonitor"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u4",
+      "target": "p_macbookair"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u4",
+      "target": "p_sonywh1000"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u4",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u4",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u4",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u4",
+      "target": "p_mxmaster3s"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u4",
+      "target": "p_dellmonitor"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u5",
+      "target": "p_dellxps15"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u5",
+      "target": "p_dellmonitor"
+    },
+    {
+      "type": "viewed",
+      "weight": 1.2,
+      "label": "viewed",
+      "source": "u5",
+      "target": "p_rtx4080"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u_new",
+      "target": "p_rtx4080"
+    },
+    {
+      "type": "likes",
+      "weight": 2.5,
+      "label": "likes",
+      "source": "u_new",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_new",
+      "target": "c_phone"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_new",
+      "target": "c_laptop"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_new",
+      "target": "c_component"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_new",
+      "target": "c_accessory"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_new",
+      "target": "c_audio"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_apple"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_samsung"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_asus"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_dell"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_nvidia"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_intel"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_corsair"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_logitech"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_sony"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_new",
+      "target": "b_anker"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "quan tâm nhãn",
+      "source": "u_new",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "quan tâm nhãn",
+      "source": "u_new",
+      "target": "t_gaming"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "quan tâm nhãn",
+      "source": "u_new",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "quan tâm nhãn",
+      "source": "u_new",
+      "target": "t_vanphong"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "quan tâm nhãn",
+      "source": "u_new",
+      "target": "t_chongon"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "quan tâm nhãn",
+      "source": "u_new",
+      "target": "t_caocap"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_iphone15",
+      "target": "c_phone"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_iphone15",
+      "target": "b_apple"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_iphone15",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_iphone15",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_s24ultra",
+      "target": "c_phone"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_s24ultra",
+      "target": "b_samsung"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_s24ultra",
+      "target": "t_caocap"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_rogphone8",
+      "target": "c_phone"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_rogphone8",
+      "target": "b_asus"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_rogphone8",
+      "target": "t_gaming"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_airpodspro",
+      "target": "c_audio"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_airpodspro",
+      "target": "b_apple"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_airpodspro",
+      "target": "t_chongon"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_airpodspro",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_macbookm3",
+      "target": "c_laptop"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_macbookm3",
+      "target": "b_apple"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_macbookm3",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_macbookm3",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_macbookm3",
+      "target": "p_mxmaster3s"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_macbookm3",
+      "target": "p_dellmonitor"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_macbookm3",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_dellxps15",
+      "target": "c_laptop"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_dellxps15",
+      "target": "b_dell"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_dellxps15",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_dellxps15",
+      "target": "p_dellmonitor"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_dellxps15",
+      "target": "p_mxmaster3s"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_zephyrusg16",
+      "target": "c_laptop"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_zephyrusg16",
+      "target": "b_asus"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_zephyrusg16",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_zephyrusg16",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_macbookair",
+      "target": "c_laptop"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_macbookair",
+      "target": "b_apple"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_macbookair",
+      "target": "t_vanphong"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_macbookair",
+      "target": "t_pinlau"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_rtx4080",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_rtx4080",
+      "target": "b_asus"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_rtx4080",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_rtx4080",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_rtx4080",
+      "target": "p_psucorsair"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_rtx4080",
+      "target": "p_i914900k"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_i914900k",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_i914900k",
+      "target": "b_intel"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_i914900k",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_i914900k",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_i914900k",
+      "target": "p_mainasus"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_ramcorsair",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_ramcorsair",
+      "target": "b_corsair"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_ramcorsair",
+      "target": "t_tannhiet"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_ssdsamsung",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_ssdsamsung",
+      "target": "b_samsung"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_psucorsair",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_psucorsair",
+      "target": "b_corsair"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_psucorsair",
+      "target": "t_tannhiet"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_mainasus",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_mainasus",
+      "target": "b_asus"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_mainasus",
+      "target": "t_tannhiet"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mainasus",
+      "target": "p_ramcorsair"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mainasus",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_mxmaster3s",
+      "target": "c_accessory"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_mxmaster3s",
+      "target": "b_logitech"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_mxmaster3s",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mxmaster3s",
+      "target": "p_mxkeyss"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_mxkeyss",
+      "target": "c_accessory"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_mxkeyss",
+      "target": "b_logitech"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_mxkeyss",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_dellmonitor",
+      "target": "c_accessory"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_dellmonitor",
+      "target": "b_dell"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_dellmonitor",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_sonywh1000",
+      "target": "c_audio"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_sonywh1000",
+      "target": "b_sony"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_sonywh1000",
+      "target": "t_chongon"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_ankercharger",
+      "target": "c_accessory"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_ankercharger",
+      "target": "b_anker"
+    }
+  ]
+}
