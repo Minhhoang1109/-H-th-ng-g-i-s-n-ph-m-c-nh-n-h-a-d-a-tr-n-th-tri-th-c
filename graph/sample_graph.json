@@ -399,6 +399,28 @@
       "image": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=400",
       "description": "Công nghệ sạc nhanh GaNPrime nhỏ gọn, sạc cùng lúc MacBook Pro, iPhone và phụ kiện.",
       "color": "#8b5cf6"
+    },
+    {
+      "id": "u_hoangit",
+      "type": "User",
+      "name": "Hoàng Minh Long",
+      "username": "hoangit",
+      "email": "hoangit@gmail.com",
+      "role": "Lập trình viên & IT",
+      "password_hash": "6e659deaa85842cdabb5c6305fcc40033ba43772ec00d45c2a3c921741a5e377",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=hoangit",
+      "color": "#3b82f6"
+    },
+    {
+      "id": "u_user_1790264284",
+      "type": "User",
+      "name": "Hoàng Minh Long",
+      "username": "user_1790264284",
+      "email": "user_1790264284@gmail.com",
+      "role": "Lập trình viên & IT",
+      "password_hash": "6e659deaa85842cdabb5c6305fcc40033ba43772ec00d45c2a3c921741a5e377",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=user_1790264284",
+      "color": "#3b82f6"
     }
   ],
   "edges": [
@@ -426,14 +448,14 @@
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u1",
       "target": "c_phone"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u1",
       "target": "b_apple"
     },
@@ -601,147 +623,147 @@
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_new",
       "target": "c_phone"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_new",
       "target": "c_laptop"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_new",
       "target": "c_component"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_new",
       "target": "c_accessory"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_new",
       "target": "c_audio"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_apple"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_samsung"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_asus"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_dell"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_nvidia"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_intel"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_corsair"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_logitech"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_sony"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_new",
       "target": "b_anker"
     },
     {
       "type": "prefers_tag",
       "weight": 2.5,
-      "label": "quan tâm nhãn",
+      "label": "prefers_tag",
       "source": "u_new",
       "target": "t_laptrinh"
     },
     {
       "type": "prefers_tag",
       "weight": 2.5,
-      "label": "quan tâm nhãn",
+      "label": "prefers_tag",
       "source": "u_new",
       "target": "t_gaming"
     },
     {
       "type": "prefers_tag",
       "weight": 2.5,
-      "label": "quan tâm nhãn",
+      "label": "prefers_tag",
       "source": "u_new",
       "target": "t_dohoa"
     },
     {
       "type": "prefers_tag",
       "weight": 2.5,
-      "label": "quan tâm nhãn",
+      "label": "prefers_tag",
       "source": "u_new",
       "target": "t_vanphong"
     },
     {
       "type": "prefers_tag",
       "weight": 2.5,
-      "label": "quan tâm nhãn",
+      "label": "prefers_tag",
       "source": "u_new",
       "target": "t_chongon"
     },
     {
       "type": "prefers_tag",
       "weight": 2.5,
-      "label": "quan tâm nhãn",
+      "label": "prefers_tag",
       "source": "u_new",
       "target": "t_caocap"
     },
@@ -1255,6 +1277,62 @@
       "label": "produced_by",
       "source": "p_ankercharger",
       "target": "b_anker"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "prefers_category",
+      "source": "u_hoangit",
+      "target": "c_laptop"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "prefers_category",
+      "source": "u_hoangit",
+      "target": "c_accessory"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.0,
+      "label": "prefers_brand",
+      "source": "u_hoangit",
+      "target": "b_apple"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.0,
+      "label": "prefers_brand",
+      "source": "u_hoangit",
+      "target": "b_logitech"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_user_1790264284",
+      "target": "c_laptop"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_user_1790264284",
+      "target": "c_accessory"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.0,
+      "label": "chuộng thương hiệu",
+      "source": "u_user_1790264284",
+      "target": "b_apple"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.0,
+      "label": "chuộng thương hiệu",
+      "source": "u_user_1790264284",
+      "target": "b_logitech"
     }
   ]
 }

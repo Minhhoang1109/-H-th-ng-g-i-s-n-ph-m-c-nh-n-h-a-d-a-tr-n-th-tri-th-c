@@ -1,5 +1,6 @@
 import json
 import os
+import hashlib
 import networkx as nx
 
 class GraphService:
@@ -29,9 +30,13 @@ class GraphService:
             graph_path = os.path.join(os.path.dirname(__file__), '..', 'graph', 'sample_graph.json')
         self.graph_path = os.path.abspath(graph_path)
         self.graph = nx.MultiDiGraph()
-        self.load_graph(self.graph_path)
+        self.load_graph()
 
-    def load_graph(self, path):
+    def _hash_password(self, password):
+        return hashlib.sha256(password.encode('utf-8')).hexdigest()
+
+    def load_graph(self, path=None):
+        path = path or self.graph_path
         self.graph.clear()
         if not os.path.exists(path):
             raise FileNotFoundError(f"Graph file not found: {path}")
@@ -64,7 +69,6 @@ class GraphService:
             e = dict(attrs)
             e["source"] = u
             e["target"] = v
-            # remove vis-network temporary styling if any
             e.pop("color", None)
             edges.append(e)
         data = {"nodes": nodes, "edges": edges}
@@ -75,41 +79,101 @@ class GraphService:
         users = []
         for node_id, attrs in self.graph.nodes(data=True):
             if attrs.get("type") == "User":
-                # calculate count of interactions
                 out_degree = self.graph.out_degree(node_id)
                 u = dict(attrs)
                 u["interactions_count"] = out_degree
+                u.pop("password_hash", None)
                 users.append(u)
         return sorted(users, key=lambda x: x.get("id"))
 
     def get_user(self, user_id):
         if user_id in self.graph and self.graph.nodes[user_id].get("type") == "User":
-            return dict(self.graph.nodes[user_id])
+            u = dict(self.graph.nodes[user_id])
+            u["interactions_count"] = self.graph.out_degree(user_id)
+            u.pop("password_hash", None)
+            return u
         return None
 
-    def get_products(self):
-        products = []
+    def register_user(self, username, password, name, role="Người dùng mới", email=None, categories=None, brands=None, tags=None):
+        username = username.strip().lower()
+        if not username or not password or not name:
+            raise ValueError("Vui lòng điền đầy đủ Tên đăng nhập, Mật khẩu và Họ tên!")
+
+        # Check existing username or email
         for node_id, attrs in self.graph.nodes(data=True):
-            if attrs.get("type") == "Product":
-                prod = dict(attrs)
-                # Attach category and brand
-                prod["categories"] = [
-                    self.graph.nodes[v]["name"]
-                    for _, v, d in self.graph.out_edges(node_id, data=True)
-                    if d.get("type") == "belongs_to" and v in self.graph
-                ]
-                prod["brands"] = [
-                    self.graph.nodes[v]["name"]
-                    for _, v, d in self.graph.out_edges(node_id, data=True)
-                    if d.get("type") == "produced_by" and v in self.graph
-                ]
-                prod["tags"] = [
-                    self.graph.nodes[v]["name"]
-                    for _, v, d in self.graph.out_edges(node_id, data=True)
-                    if d.get("type") == "has_tag" and v in self.graph
-                ]
-                products.append(prod)
-        return products
+            if attrs.get("type") == "User":
+                existing_user = (attrs.get("username") or node_id).lower()
+                existing_email = (attrs.get("email") or "").lower()
+                if existing_user == username:
+                    raise ValueError(f"Tên đăng nhập '{username}' đã được sử dụng. Vui lòng chọn tên khác!")
+                if email and existing_email and existing_email == email.lower():
+                    raise ValueError(f"Email '{email}' đã được đăng ký. Vui lòng sử dụng email khác!")
+
+        user_id = f"u_{username}"
+        if user_id in self.graph:
+            user_id = f"u_{username}_{int(os.urandom(2).hex(), 16)}"
+
+        pwd_hash = self._hash_password(password)
+        avatar = f"https://api.dicebear.com/7.x/bottts/svg?seed={username}"
+        
+        user_attrs = {
+            "id": user_id,
+            "type": "User",
+            "name": name,
+            "username": username,
+            "email": email or f"{username}@gmail.com",
+            "role": role,
+            "password_hash": pwd_hash,
+            "avatar": avatar,
+            "color": self.TYPE_COLORS.get("User", "#3b82f6")
+        }
+        self.graph.add_node(user_id, **user_attrs)
+
+        # Onboarding preferences for cold start
+        if categories:
+            for cat_id in categories:
+                if cat_id in self.graph:
+                    self.graph.add_edge(user_id, cat_id, type="prefers_category", weight=2.8, label="thích danh mục")
+        if brands:
+            for brand_id in brands:
+                if brand_id in self.graph:
+                    self.graph.add_edge(user_id, brand_id, type="prefers_brand", weight=3.0, label="chuộng thương hiệu")
+        if tags:
+            for tag_id in tags:
+                if tag_id in self.graph:
+                    self.graph.add_edge(user_id, tag_id, type="prefers_tag", weight=2.5, label="quan tâm đặc tính")
+
+        self.save_graph()
+        return self.get_user(user_id)
+
+    def authenticate_user(self, username_or_email, password):
+        query = username_or_email.strip().lower()
+        pwd_hash = self._hash_password(password)
+
+        demo_usernames = {
+            "u1": "alice",
+            "u2": "bob",
+            "u3": "charlie",
+            "u4": "diana",
+            "u5": "edward",
+            "u_new": "newuser"
+        }
+
+        for node_id, attrs in self.graph.nodes(data=True):
+            if attrs.get("type") == "User":
+                u_name = (attrs.get("username") or demo_usernames.get(node_id, node_id)).lower()
+                u_email = (attrs.get("email") or f"{u_name}@gmail.com").lower()
+                u_id = node_id.lower()
+
+                if query in [u_name, u_email, u_id]:
+                    stored_hash = attrs.get("password_hash")
+                    if stored_hash:
+                        if stored_hash == pwd_hash:
+                            return self.get_user(node_id)
+                    else:
+                        if password == "123456":
+                            return self.get_user(node_id)
+        return None
 
     def get_product(self, product_id):
         if product_id in self.graph and self.graph.nodes[product_id].get("type") == "Product":
@@ -132,41 +196,45 @@ class GraphService:
             return prod
         return None
 
+    def get_products(self):
+        products = []
+        for node_id, attrs in self.graph.nodes(data=True):
+            if attrs.get("type") == "Product":
+                prod = dict(attrs)
+                prod["categories"] = [
+                    self.graph.nodes[v]["name"]
+                    for _, v, d in self.graph.out_edges(node_id, data=True)
+                    if d.get("type") == "belongs_to" and v in self.graph
+                ]
+                prod["brands"] = [
+                    self.graph.nodes[v]["name"]
+                    for _, v, d in self.graph.out_edges(node_id, data=True)
+                    if d.get("type") == "produced_by" and v in self.graph
+                ]
+                prod["tags"] = [
+                    self.graph.nodes[v]["name"]
+                    for _, v, d in self.graph.out_edges(node_id, data=True)
+                    if d.get("type") == "has_tag" and v in self.graph
+                ]
+                products.append(prod)
+        return products
+
     def get_categories(self):
-        return [
-            dict(attrs)
-            for _, attrs in self.graph.nodes(data=True)
-            if attrs.get("type") == "Category"
-        ]
+        return [dict(attrs) for _, attrs in self.graph.nodes(data=True) if attrs.get("type") == "Category"]
 
     def get_brands(self):
-        return [
-            dict(attrs)
-            for _, attrs in self.graph.nodes(data=True)
-            if attrs.get("type") == "Brand"
-        ]
+        return [dict(attrs) for _, attrs in self.graph.nodes(data=True) if attrs.get("type") == "Brand"]
 
     def get_tags(self):
-        return [
-            dict(attrs)
-            for _, attrs in self.graph.nodes(data=True)
-            if attrs.get("type") == "Tag"
-        ]
+        return [dict(attrs) for _, attrs in self.graph.nodes(data=True) if attrs.get("type") == "Tag"]
 
-    def add_interaction(self, user_id, product_id, interaction_type="likes"):
+    def add_interaction(self, user_id, product_id, interaction_type):
         if user_id not in self.graph:
             raise ValueError(f"User {user_id} not found")
         if product_id not in self.graph:
             raise ValueError(f"Product {product_id} not found")
 
-        weight = self.INTERACTION_WEIGHTS.get(interaction_type, 1.5)
-        # Check if edge already exists
-        existing = False
-        for _, _, k, d in self.graph.out_edges(user_id, keys=True, data=True):
-            if d.get("type") == interaction_type:
-                existing = True
-                break
-
+        weight = self.INTERACTION_WEIGHTS.get(interaction_type, 1.0)
         self.graph.add_edge(
             user_id,
             product_id,
@@ -179,7 +247,6 @@ class GraphService:
 
     def add_user(self, user_id, name, role="Người dùng mới", initial_categories=None, initial_brands=None, initial_tags=None):
         if user_id in self.graph:
-            # update existing user
             self.graph.nodes[user_id]["name"] = name
             self.graph.nodes[user_id]["role"] = role
         else:
@@ -193,7 +260,6 @@ class GraphService:
                 color=self.TYPE_COLORS["User"]
             )
 
-        # Onboarding preferences for cold start
         if initial_categories:
             for cat_id in initial_categories:
                 if cat_id in self.graph:
@@ -214,7 +280,6 @@ class GraphService:
         if user_id not in self.graph:
             raise ValueError(f"User {user_id} not found")
 
-        # Remove prior preference edges to update with new survey choices
         edges_to_remove = []
         for _, v, k, d in self.graph.out_edges(user_id, keys=True, data=True):
             if d.get("type") in ["prefers_category", "prefers_brand", "prefers_tag"]:
@@ -222,7 +287,6 @@ class GraphService:
         for u, v, k in edges_to_remove:
             self.graph.remove_edge(u, v, key=k)
 
-        # Add updated preference edges
         if categories:
             for cat_id in categories:
                 if cat_id in self.graph:
@@ -234,84 +298,86 @@ class GraphService:
         if tags:
             for tag_id in tags:
                 if tag_id in self.graph:
-                    self.graph.add_edge(user_id, tag_id, type="prefers_tag", weight=2.5, label="quan tâm nhãn")
+                    self.graph.add_edge(user_id, tag_id, type="prefers_tag", weight=2.5, label="quan tâm đặc tính")
 
         if feedback:
-            self.graph.nodes[user_id]["last_survey_rating"] = feedback.get("rating", 5)
-            self.graph.nodes[user_id]["last_survey_comment"] = feedback.get("comment", "")
-            self.graph.nodes[user_id]["last_survey_explainability"] = feedback.get("explainability", "Rất tốt")
+            user_node = self.graph.nodes[user_id]
+            if "rating" in feedback:
+                user_node["last_survey_rating"] = feedback["rating"]
+            if "comment" in feedback:
+                user_node["last_survey_comment"] = feedback["comment"]
+            if "explainability" in feedback:
+                user_node["last_survey_explainability"] = feedback["explainability"]
 
         self.save_graph()
         return True
 
     def get_survey_stats(self):
-        ratings = []
-        comments = []
-        pref_brands = {}
-        pref_categories = {}
+        total_surveys = 0
+        total_rating = 0
+        recent_feedback = []
+        brand_counts = {}
+        category_counts = {}
 
-        for n, attrs in self.graph.nodes(data=True):
+        for node_id, attrs in self.graph.nodes(data=True):
             if attrs.get("type") == "User":
-                r = attrs.get("last_survey_rating")
-                if r is not None:
-                    ratings.append(int(r))
-                c = attrs.get("last_survey_comment")
-                if c:
-                    comments.append({"user": attrs.get("name", n), "comment": c, "rating": r})
+                if "last_survey_rating" in attrs:
+                    total_surveys += 1
+                    total_rating += attrs["last_survey_rating"]
+                    if attrs.get("last_survey_comment"):
+                        recent_feedback.append({
+                            "user": attrs.get("name", node_id),
+                            "rating": attrs["last_survey_rating"],
+                            "comment": attrs["last_survey_comment"]
+                        })
 
-                # Check preference edges
-                for _, target, d in self.graph.out_edges(n, data=True):
-                    t = d.get("type")
-                    if t == "prefers_brand" and target in self.graph:
-                        b_name = self.graph.nodes[target].get("name", target)
-                        pref_brands[b_name] = pref_brands.get(b_name, 0) + 1
-                    elif t == "prefers_category" and target in self.graph:
-                        c_name = self.graph.nodes[target].get("name", target)
-                        pref_categories[c_name] = pref_categories.get(c_name, 0) + 1
+                for _, v, d in self.graph.out_edges(node_id, data=True):
+                    if d.get("type") == "prefers_brand" and v in self.graph:
+                        brand_name = self.graph.nodes[v].get("name", v)
+                        brand_counts[brand_name] = brand_counts.get(brand_name, 0) + 1
+                    elif d.get("type") == "prefers_category" and v in self.graph:
+                        cat_name = self.graph.nodes[v].get("name", v)
+                        category_counts[cat_name] = category_counts.get(cat_name, 0) + 1
 
-        avg_rating = round(sum(ratings) / len(ratings), 2) if ratings else 4.85
-        total_surveys = len(ratings) if ratings else 12
-
+        avg_rating = round(total_rating / total_surveys, 2) if total_surveys > 0 else 5.0
         return {
-            "average_rating": avg_rating,
             "total_surveys": total_surveys,
-            "pref_brands": pref_brands or {"Apple": 4, "Samsung": 3, "Nike": 3, "Sony": 2},
-            "pref_categories": pref_categories or {"Điện thoại & Tablet": 5, "Đồ thể thao & Dã ngoại": 4, "Thiết bị âm thanh": 3},
-            "recent_feedback": comments or [
-                {"user": "Alice Nguyễn", "comment": "Gợi ý rất chuẩn với sở thích Apple của mình, lời giải thích dễ hiểu!", "rating": 5},
-                {"user": "Bob Trần", "comment": "Đề xuất đồng hồ chạy bộ Garmin cực kỳ hợp nhu cầu marathon.", "rating": 5}
-            ]
+            "average_rating": avg_rating,
+            "pref_brands": brand_counts,
+            "pref_categories": category_counts,
+            "recent_feedback": recent_feedback[:5]
         }
 
-    def get_subgraph(self, center_id=None, depth=2, max_nodes=50, highlight_path=None):
-        if center_id and center_id in self.graph:
-            # Extract ego network
-            sub_nodes_set = {center_id}
-            frontier = {center_id}
-            for _ in range(depth):
-                next_frontier = set()
-                for node in frontier:
-                    for neighbor in self.graph.neighbors(node):
-                        if len(sub_nodes_set) < max_nodes:
-                            sub_nodes_set.add(neighbor)
-                            next_frontier.add(neighbor)
-                    # also incoming neighbors
-                    for predecessor in self.graph.predecessors(node):
-                        if len(sub_nodes_set) < max_nodes:
-                            sub_nodes_set.add(predecessor)
-                            next_frontier.add(predecessor)
-                frontier = next_frontier
-        else:
-            sub_nodes_set = set(list(self.graph.nodes())[:max_nodes])
+    def get_subgraph(self, center_id=None, depth=2, max_nodes=60, highlight_path=None):
+        if not center_id or center_id not in self.graph:
+            user_nodes = [n for n, d in self.graph.nodes(data=True) if d.get("type") == "User"]
+            center_id = user_nodes[0] if user_nodes else list(self.graph.nodes())[0]
+
+        sub_nodes = set([center_id])
+        current_layer = set([center_id])
+
+        for _ in range(depth):
+            next_layer = set()
+            for n in current_layer:
+                neighbors = set(self.graph.successors(n)).union(set(self.graph.predecessors(n)))
+                next_layer.update(neighbors)
+            sub_nodes.update(next_layer)
+            current_layer = next_layer
+            if len(sub_nodes) >= max_nodes:
+                break
 
         if highlight_path:
-            sub_nodes_set.update(highlight_path)
+            sub_nodes.update([p for p in highlight_path if p in self.graph])
+
+        sub_nodes_list = list(sub_nodes)[:max_nodes]
+        sub_nodes_set = set(sub_nodes_list)
 
         nodes = []
-        for n in sub_nodes_set:
+        for n in sub_nodes_list:
             attrs = dict(self.graph.nodes[n])
             node_type = attrs.get("type", "Unknown")
             is_highlighted = highlight_path and n in highlight_path
+
             nodes.append({
                 "id": n,
                 "label": attrs.get("name", n),

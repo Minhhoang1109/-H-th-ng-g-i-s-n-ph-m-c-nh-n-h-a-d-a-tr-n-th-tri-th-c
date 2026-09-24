@@ -16,10 +16,20 @@
   <div class="top-utility-bar">
     <div class="top-utility-inner">
       <div class="top-util-left">
-        <span class="user-greeting">Xin chào, <b id="topGreetingUser">Alice Nguyễn</b>!</span>
+        <!-- Dynamic User Greeting / Auth Status -->
+        <div id="authStatusHeader" class="auth-status-wrap">
+          <span class="user-greeting">Xin chào, <b id="topGreetingUser">Alice Nguyễn</b>!</span>
+          <button id="btnLogout" class="btn-auth-text" title="Đăng xuất tài khoản">Đăng xuất 🚪</button>
+        </div>
+        <div id="guestStatusHeader" class="auth-status-wrap" style="display:none;">
+          <span class="user-greeting">Xin chào quý khách!</span>
+          <button id="btnOpenLoginModal" class="btn-auth-link">Đăng nhập</button>
+          <span>hoặc</span>
+          <button id="btnOpenRegisterModal" class="btn-auth-link">Đăng ký</button>
+        </div>
         <span class="divider">|</span>
         <div class="user-switch-inline">
-          <label for="userSelect">Đổi tài khoản:</label>
+          <label for="userSelect">Đổi nhanh tài khoản:</label>
           <select id="userSelect" class="header-user-select"></select>
         </div>
         <span class="divider">|</span>
@@ -44,7 +54,7 @@
     </div>
   </div>
 
-  <!-- Main eBay Header -->
+  <!-- Main Header -->
   <header class="ebay-main-header">
     <div class="ebay-header-inner">
       <!-- K/H Team Logo -->
@@ -60,7 +70,7 @@
         <span class="arrow-down">▼</span>
       </div>
 
-      <!-- eBay Search Bar -->
+      <!-- Search Bar -->
       <div class="ebay-search-bar">
         <div class="search-input-wrap">
           <span class="search-icon">🔍</span>
@@ -74,7 +84,7 @@
         <button id="btnSearch" class="btn-ebay-search">Tìm kiếm</button>
       </div>
 
-      <!-- Advanced link -->
+      <!-- Advanced link / Metrics Pill -->
       <div class="header-advanced-link">
         <span id="headerMetricsBadge" class="metrics-pill">Đồ thị: 48 nút • 115 cạnh</span>
       </div>
@@ -98,7 +108,7 @@
 
     <!-- TAB 1: RECOMMENDATIONS (MAIN SHOP) -->
     <section id="tab-recommendations" class="tab-content active">
-      <!-- eBay Hero Banner -->
+      <!-- Hero Banner -->
       <div class="ebay-hero-banner">
         <div class="hero-content">
           <span class="hero-badge">ĐỀ XUẤT CÁ NHÂN HÓA HÔM NAY</span>
@@ -107,6 +117,7 @@
           <div class="hero-cta-row">
             <button class="btn btn-ebay-primary" id="btnRefreshRecs">🔄 Tải lại Gợi ý</button>
             <button class="btn btn-ebay-outline" id="btnOpenSurvey">📋 Làm Khảo sát Sở thích</button>
+            <button class="btn btn-ebay-outline" id="btnHeroAuth">👤 Đăng Nhập / Đổi Tài Khoản</button>
           </div>
         </div>
         <div class="hero-user-card" id="userProfileCard">
@@ -183,11 +194,11 @@
       </div>
     </section>
 
-    <!-- TAB 2: KHẢO SÁT NGƯỜI DÙNG (EBAY BUYER SURVEY) -->
+    <!-- TAB 2: KHẢO SÁT NGƯỜI DÙNG -->
     <section id="tab-survey" class="tab-content">
       <div class="ebay-card-container">
         <div class="survey-page-header">
-          <span class="ebay-badge">EBAY BUYER SURVEY</span>
+          <span class="ebay-badge">BUYER SURVEY</span>
           <h2>Khảo sát Nhu cầu Mua sắm & Đánh giá Gợi ý Thiết bị Điện tử</h2>
           <p>Dữ liệu khảo sát được <b>ánh xạ vào Đồ thị Tri thức</b> để tinh chỉnh trọng số liên kết (Meta-path weights) và đề xuất thiết bị chính xác tuyệt đối.</p>
         </div>
@@ -370,7 +381,113 @@
 
   </main>
 
-  <!-- Explanation Modal (eBay Style) -->
+  <!-- AUTH MODAL (LOGIN & REGISTER) -->
+  <div class="modal-backdrop" id="authModal" style="display:none;">
+    <div class="modal-dialog ebay-modal auth-modal-dialog">
+      <button class="modal-close-btn" id="btnCloseAuthModal">×</button>
+      
+      <!-- Modal Tabs Header -->
+      <div class="auth-modal-header">
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" id="tabBtnLogin" data-auth="login">🔑 Đăng Nhập</button>
+          <button class="auth-tab-btn" id="tabBtnRegister" data-auth="register">✨ Đăng Ký Tài Khoản</button>
+        </div>
+      </div>
+
+      <div class="modal-body auth-modal-body">
+        
+        <!-- LOGIN FORM -->
+        <div id="authLoginForm" class="auth-pane active">
+          <div class="auth-pane-desc">Đăng nhập tài khoản để nhận gợi ý thiết bị điện tử & linh kiện chuẩn xác nhất.</div>
+          
+          <form id="formLogin">
+            <div class="form-group">
+              <label for="loginUsername" class="form-label">Tên đăng nhập hoặc Email:</label>
+              <input type="text" id="loginUsername" class="styled-input w-100" placeholder="Ví dụ: alice hoặc alice@gmail.com" required autocomplete="username" />
+            </div>
+            <div class="form-group">
+              <label for="loginPassword" class="form-label">Mật khẩu:</label>
+              <div class="pwd-input-wrap">
+                <input type="password" id="loginPassword" class="styled-input w-100" placeholder="Nhập mật khẩu (mặc định demo: 123456)" required autocomplete="current-password" />
+                <button type="button" class="btn-toggle-pwd" id="btnToggleLoginPwd">👁️</button>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:10px;">
+              Đăng Nhập Ngay
+            </button>
+          </form>
+
+          <!-- 1-Click Demo Accounts -->
+          <div class="demo-accounts-section">
+            <div class="demo-heading"><span>Hoặc Đăng nhập 1-Click với Tài khoản Demo:</span></div>
+            <div class="demo-users-grid" id="demoUsersContainer">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div id="authRegisterForm" class="auth-pane">
+          <div class="auth-pane-desc">Tạo tài khoản mới và thiết lập sở thích công nghệ ban đầu (Knowledge Graph Onboarding).</div>
+          
+          <form id="formRegister">
+            <div class="form-row-2">
+              <div class="form-col">
+                <label for="regName" class="form-label">Họ và tên của bạn:</label>
+                <input type="text" id="regName" class="styled-input w-100" placeholder="Ví dụ: Nguyễn Văn Hoàng" required />
+              </div>
+              <div class="form-col">
+                <label for="regUsername" class="form-label">Tên đăng nhập (Username):</label>
+                <input type="text" id="regUsername" class="styled-input w-100" placeholder="Ví dụ: hoangnv" required autocomplete="username" />
+              </div>
+            </div>
+
+            <div class="form-row-2" style="margin-top:12px;">
+              <div class="form-col">
+                <label for="regEmail" class="form-label">Email liên hệ:</label>
+                <input type="email" id="regEmail" class="styled-input w-100" placeholder="hoangnv@gmail.com" />
+              </div>
+              <div class="form-col">
+                <label for="regPassword" class="form-label">Mật khẩu:</label>
+                <div class="pwd-input-wrap">
+                  <input type="password" id="regPassword" class="styled-input w-100" placeholder="Tối thiểu 6 ký tự" required autocomplete="new-password" />
+                  <button type="button" class="btn-toggle-pwd" id="btnToggleRegPwd">👁️</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-top:12px;">
+              <label for="regRole" class="form-label">Nhu cầu / Vai trò công nghệ chính:</label>
+              <select id="regRole" class="styled-select w-100">
+                <option value="Lập trình viên & IT">💻 Lập trình viên & Kỹ sư IT (Thích MacBook, ThinkPad, Phím cơ)</option>
+                <option value="Hardcore Gamer & PC Builder">🎮 Game thủ & Tự build PC (Thích RTX 4080, CPU i9, Tản nhiệt)</option>
+                <option value="Content Creator & Đồ họa 3D">🎨 Sáng tạo nội dung & Dựng phim (Màn hình 4K, Apple, Dell XPS)</option>
+                <option value="Văn phòng & Sinh viên">💼 Dân văn phòng & Sinh viên (Mỏng nhẹ, Pin trâu, Giá tốt)</option>
+                <option value="Người yêu công nghệ">⚡ Người đam mê khám phá công nghệ mới</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-top:12px;">
+              <label class="form-label">1. Thương hiệu ưa chuộng ban đầu (Tùy chọn):</label>
+              <div class="grid-2col" id="regBrandOptions"></div>
+            </div>
+
+            <div class="form-group" style="margin-top:12px;">
+              <label class="form-label">2. Danh mục quan tâm nhất (Tùy chọn):</label>
+              <div class="grid-2col" id="regCatOptions"></div>
+            </div>
+
+            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:16px;">
+              ✨ Hoàn Tất Đăng Ký & Trải Nghiệm Ngay
+            </button>
+          </form>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Explanation Modal -->
   <div class="modal-backdrop" id="explanationModal" style="display:none;">
     <div class="modal-dialog ebay-modal">
       <button class="modal-close-btn" id="btnCloseModal">×</button>
@@ -396,14 +513,14 @@
   <!-- Toast Notification -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <!-- eBay Footer -->
+  <!-- Footer -->
   <footer class="ebay-footer">
     <div class="footer-inner">
       <div class="footer-col">
         <h5>Mua sắm</h5>
         <ul>
           <li>Đăng ký tài khoản</li>
-          <li>Đảm bảo hoàn tiền eBay</li>
+          <li>Đảm bảo hoàn tiền</li>
           <li>Gợi ý cá nhân hóa KG-RecSys</li>
           <li>Khuyến mãi thương hiệu</li>
         </ul>

@@ -18,6 +18,74 @@ graph_service = GraphService()
 def serve_index():
     return send_from_directory(app.static_folder, 'index.html')
 
+# --- AUTHENTICATION ROUTES ---
+@app.route('/api/auth/register', methods=['POST'])
+def auth_register():
+    data = request.json or {}
+    username = (data.get('username') or '').strip().lower()
+    password = (data.get('password') or '').strip()
+    name = (data.get('name') or '').strip()
+    role = (data.get('role') or 'Khách hàng mới').strip()
+    email = (data.get('email') or '').strip()
+    categories = data.get('categories', [])
+    brands = data.get('brands', [])
+    tags = data.get('tags', [])
+
+    if not username or not password or not name:
+        return jsonify({'success': False, 'error': 'Vui lòng điền đầy đủ Tên đăng nhập, Mật khẩu và Họ tên!'}), 400
+
+    try:
+        user = graph_service.register_user(
+            username=username,
+            password=password,
+            name=name,
+            role=role,
+            email=email,
+            categories=categories,
+            brands=brands,
+            tags=tags
+        )
+        return jsonify({
+            'success': True,
+            'message': f'Đăng ký tài khoản thành công! Chào mừng {name}.',
+            'user': user
+        })
+    except ValueError as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Lỗi máy chủ: {str(e)}'}), 500
+
+@app.route('/api/auth/login', methods=['POST'])
+def auth_login():
+    data = request.json or {}
+    username = (data.get('username') or '').strip()
+    password = (data.get('password') or '').strip()
+
+    if not username or not password:
+        return jsonify({'success': False, 'error': 'Vui lòng nhập Tên đăng nhập và Mật khẩu!'}), 400
+
+    user = graph_service.authenticate_user(username, password)
+    if not user:
+        return jsonify({'success': False, 'error': 'Tên đăng nhập hoặc Mật khẩu không chính xác!'}), 401
+
+    return jsonify({
+        'success': True,
+        'message': f'Đăng nhập thành công! Xin chào {user.get("name")}.',
+        'user': user
+    })
+
+@app.route('/api/auth/demo-accounts', methods=['GET'])
+def get_demo_accounts():
+    accounts = [
+        {'id': 'u1', 'username': 'alice', 'name': 'Alice Nguyễn', 'role': 'Tín đồ Apple', 'avatar': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', 'password': '123456'},
+        {'id': 'u2', 'username': 'bob', 'name': 'Bob Trần', 'role': 'Hardcore Gamer & PC Builder', 'avatar': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', 'password': '123456'},
+        {'id': 'u3', 'username': 'charlie', 'name': 'Charlie Lê', 'role': 'Senior Software Engineer', 'avatar': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', 'password': '123456'},
+        {'id': 'u4', 'username': 'diana', 'name': 'Diana Phạm', 'role': 'Dân Văn phòng & Tối giản', 'avatar': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', 'password': '123456'},
+        {'id': 'u5', 'username': 'edward', 'name': 'Edward Vũ', 'role': 'Kỹ sư Đồ họa 3D & AI', 'avatar': 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150', 'password': '123456'}
+    ]
+    return jsonify({'success': True, 'accounts': accounts})
+
+# --- DATA ROUTES ---
 @app.route('/api/users', methods=['GET'])
 def get_users():
     users = graph_service.get_users()

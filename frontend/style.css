@@ -1,4 +1,4 @@
-/* eBay E-commerce Theme for KG-RecSys */
+/* K/H Team Electronics Theme for KG-RecSys */
 :root {
   --ebay-blue: #3665f3;
   --ebay-blue-hover: #2954dc;
@@ -58,8 +58,45 @@ body {
   gap: 12px;
 }
 
+.auth-status-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .user-greeting b {
   color: var(--text-main);
+}
+
+.btn-auth-link {
+  background: transparent;
+  border: none;
+  color: var(--ebay-blue);
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.btn-auth-link:hover {
+  text-decoration: underline;
+}
+
+.btn-auth-text {
+  background: #f1f5f9;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-size: 11px;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-auth-text:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: var(--ebay-red);
 }
 
 .divider {
@@ -97,7 +134,7 @@ body {
   color: var(--text-main);
 }
 
-/* --- Main eBay Header --- */
+/* --- Main Header --- */
 .ebay-main-header {
   background: #ffffff;
   border-bottom: 1px solid var(--border-light);
@@ -113,7 +150,7 @@ body {
   gap: 24px;
 }
 
-/* eBay Logo */
+/* K/H Team Logo */
 .ebay-logo {
   text-decoration: none;
   display: flex;
@@ -121,12 +158,6 @@ body {
   cursor: pointer;
 }
 
-.logo-e { font-size: 34px; font-weight: 900; color: #e53238; letter-spacing: -1.5px; }
-.logo-b { font-size: 34px; font-weight: 900; color: #0064d2; letter-spacing: -1.5px; }
-.logo-a { font-size: 34px; font-weight: 900; color: #f5af02; letter-spacing: -1.5px; }
-.logo-y { font-size: 34px; font-weight: 900; color: #86b817; letter-spacing: -1.5px; }
-
-/* K/H Team Logo Colors & Styling */
 .kh-logo {
   gap: 2px;
 }
@@ -169,7 +200,7 @@ body {
 
 .arrow-down { font-size: 9px; }
 
-/* eBay Search Bar */
+/* Search Bar */
 .ebay-search-bar {
   flex: 1;
   display: flex;
@@ -341,6 +372,7 @@ body {
 .hero-cta-row {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .hero-user-card {
@@ -487,14 +519,14 @@ body {
   color: var(--text-muted);
 }
 
-/* eBay Product Grid */
+/* Product Grid */
 .ebay-product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
 }
 
-/* eBay Product Card */
+/* Product Card */
 .ebay-card-item {
   background: #ffffff;
   border: 1px solid var(--border-light);
@@ -1004,11 +1036,161 @@ body {
 
 .w-100 { width: 100%; }
 
-/* Modal */
+/* --- AUTH MODAL STYLING --- */
+.auth-modal-dialog {
+  max-width: 580px;
+}
+
+.auth-modal-header {
+  padding: 16px 20px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.auth-tabs {
+  display: flex;
+  gap: 16px;
+}
+
+.auth-tab-btn {
+  background: transparent;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+}
+
+.auth-tab-btn:hover {
+  color: var(--text-main);
+}
+
+.auth-tab-btn.active {
+  color: var(--ebay-blue);
+  font-weight: 800;
+  border-bottom-color: var(--ebay-blue);
+}
+
+.auth-modal-body {
+  padding: 20px 24px;
+}
+
+.auth-pane {
+  display: none;
+}
+
+.auth-pane.active {
+  display: block;
+  animation: fadeInAuth 0.2s ease-out;
+}
+
+@keyframes fadeInAuth {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.auth-pane-desc {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 18px;
+  line-height: 1.45;
+}
+
+.pwd-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.pwd-input-wrap input {
+  padding-right: 40px;
+}
+
+.btn-toggle-pwd {
+  position: absolute;
+  right: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.demo-accounts-section {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border-light);
+}
+
+.demo-heading {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.demo-users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.demo-user-card {
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.demo-user-card:hover {
+  background: #eff6ff;
+  border-color: var(--ebay-blue);
+  transform: translateY(-1px);
+}
+
+.demo-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.demo-info {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.demo-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.demo-role {
+  font-size: 10px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Modal General */
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.55);
   backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
@@ -1021,9 +1203,10 @@ body {
   background: #fff;
   border-radius: var(--radius-md);
   width: 100%;
-  max-width: 520px;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  overflow: hidden;
   position: relative;
 }
 
@@ -1036,6 +1219,7 @@ body {
   font-size: 22px;
   cursor: pointer;
   color: var(--text-muted);
+  z-index: 10;
 }
 
 .modal-header {
@@ -1138,6 +1322,12 @@ body {
   border-radius: var(--radius-sm);
   font-size: 13px;
   box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+  animation: slideToast 0.25s ease-out;
+}
+
+@keyframes slideToast {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 /* Footer */

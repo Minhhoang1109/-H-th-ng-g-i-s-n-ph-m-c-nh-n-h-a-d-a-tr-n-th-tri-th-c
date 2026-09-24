@@ -1,8 +1,9 @@
-// eBay E-commerce Marketplace Logic for KG-RecSys
+// K/H Team Electronics Marketplace Logic with Full Authentication & Knowledge Graph
 const API_BASE = '/api';
 
 let appState = {
   users: [],
+  currentUser: null,
   selectedUserId: 'u1',
   selectedAlgorithm: 'hybrid',
   selectedCategory: 'all',
@@ -11,7 +12,8 @@ let appState = {
   searchQuery: '',
   sortBy: 'score_desc',
   recommendations: [],
-  metadata: { categories: [], brands: [], tags: [] }
+  metadata: { categories: [], brands: [], tags: [] },
+  demoAccounts: []
 };
 
 let userSelectedRating = 5;
@@ -25,6 +27,19 @@ const btnSearch = document.getElementById('btnSearch');
 const sortSelect = document.getElementById('sortSelect');
 const recsGrid = document.getElementById('recommendationsGrid');
 
+// Auth Modals & Elements
+const authModal = document.getElementById('authModal');
+const tabBtnLogin = document.getElementById('tabBtnLogin');
+const tabBtnRegister = document.getElementById('tabBtnRegister');
+const authLoginForm = document.getElementById('authLoginForm');
+const authRegisterForm = document.getElementById('authRegisterForm');
+const btnOpenLoginModal = document.getElementById('btnOpenLoginModal');
+const btnOpenRegisterModal = document.getElementById('btnOpenRegisterModal');
+const btnLogout = document.getElementById('btnLogout');
+const btnHeroAuth = document.getElementById('btnHeroAuth');
+const btnCloseAuthModal = document.getElementById('btnCloseAuthModal');
+
+// Explanation Modal
 const explanationModal = document.getElementById('explanationModal');
 const modalBadge = document.getElementById('modalBadge');
 const modalProductName = document.getElementById('modalProductName');
@@ -34,9 +49,12 @@ const modalReasoningChain = document.getElementById('modalReasoningChain');
 document.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
   setupEventListeners();
+  setupAuthEvents();
   setupSurveyEvents();
   await loadMetadata();
+  await loadDemoAccounts();
   await loadUsers();
+  restoreAuthSession();
   await loadRecommendations();
   await loadMetrics();
   await loadSurveyStats();
@@ -70,10 +88,13 @@ function setupNavigation() {
 }
 
 function setupEventListeners() {
-  // User switcher
+  // Quick user switcher
   userSelect.addEventListener('change', async (e) => {
     appState.selectedUserId = e.target.value;
-    updateUserProfile();
+    const user = appState.users.find(u => u.id === e.target.value);
+    if (user) {
+      setCurrentUser(user);
+    }
     await loadRecommendations();
   });
 
@@ -112,7 +133,7 @@ function setupEventListeners() {
   // Hero CTA buttons
   document.getElementById('btnRefreshRecs')?.addEventListener('click', async () => {
     await loadRecommendations();
-    showToast('Đã làm mới danh mục đề xuất eBay!', 'success');
+    showToast('Đã làm mới danh mục đề xuất K/H Team!', 'success');
   });
 
   document.getElementById('btnOpenSurvey')?.addEventListener('click', () => {
@@ -126,6 +147,209 @@ function setupEventListeners() {
 
   // Cold start form
   document.getElementById('coldStartForm')?.addEventListener('submit', handleColdStartSubmit);
+}
+
+// --- AUTHENTICATION LOGIC ---
+function setupAuthEvents() {
+  btnOpenLoginModal?.addEventListener('click', () => openAuthModal('login'));
+  btnOpenRegisterModal?.addEventListener('click', () => openAuthModal('register'));
+  btnHeroAuth?.addEventListener('click', () => openAuthModal('login'));
+  btnCloseAuthModal?.addEventListener('click', () => authModal.style.display = 'none');
+
+  tabBtnLogin?.addEventListener('click', () => switchAuthTab('login'));
+  tabBtnRegister?.addEventListener('click', () => switchAuthTab('register'));
+
+  btnLogout?.addEventListener('click', handleLogout);
+
+  // Toggle password visibility
+  document.getElementById('btnToggleLoginPwd')?.addEventListener('click', () => {
+    const inp = document.getElementById('loginPassword');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+
+  document.getElementById('btnToggleRegPwd')?.addEventListener('click', () => {
+    const inp = document.getElementById('regPassword');
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  });
+
+  // Login Form Submit
+  document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'Đăng nhập thành công!', 'success');
+        authModal.style.display = 'none';
+        setCurrentUser(data.user);
+        await loadUsers();
+        await loadRecommendations();
+      } else {
+        showToast(data.error || 'Đăng nhập thất bại!', 'error');
+      }
+    } catch (err) {
+      showToast('Lỗi kết nối khi đăng nhập!', 'error');
+    }
+  });
+
+  // Register Form Submit
+  document.getElementById('formRegister')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('regName').value.trim();
+    const username = document.getElementById('regUsername').value.trim();
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value.trim();
+    const role = document.getElementById('regRole').value;
+
+    const categories = Array.from(document.querySelectorAll('input[name="reg_cat"]:checked')).map(cb => cb.value);
+    const brands = Array.from(document.querySelectorAll('input[name="reg_brand"]:checked')).map(cb => cb.value);
+
+    try {
+      const res = await fetch(`${API_BASE}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, username, email, password, role, categories, brands })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'Đăng ký tài khoản thành công!', 'success');
+        authModal.style.display = 'none';
+        setCurrentUser(data.user);
+        await loadUsers();
+        await loadRecommendations();
+        await loadMetrics();
+      } else {
+        showToast(data.error || 'Đăng ký thất bại!', 'error');
+      }
+    } catch (err) {
+      showToast('Lỗi kết nối khi đăng ký!', 'error');
+    }
+  });
+}
+
+function openAuthModal(tab = 'login') {
+  authModal.style.display = 'flex';
+  switchAuthTab(tab);
+}
+
+function switchAuthTab(tab) {
+  if (tab === 'login') {
+    tabBtnLogin.classList.add('active');
+    tabBtnRegister.classList.remove('active');
+    authLoginForm.classList.add('active');
+    authRegisterForm.classList.remove('active');
+  } else {
+    tabBtnRegister.classList.add('active');
+    tabBtnLogin.classList.remove('active');
+    authRegisterForm.classList.add('active');
+    authLoginForm.classList.remove('active');
+  }
+}
+
+async function loadDemoAccounts() {
+  try {
+    const res = await fetch(`${API_BASE}/auth/demo-accounts`);
+    const data = await res.json();
+    if (data.success) {
+      appState.demoAccounts = data.accounts;
+      renderDemoUsers(data.accounts);
+    }
+  } catch (err) { console.error('Error loading demo accounts:', err); }
+}
+
+function renderDemoUsers(accounts) {
+  const container = document.getElementById('demoUsersContainer');
+  if (!container) return;
+  container.innerHTML = accounts.map(acc => `
+    <div class="demo-user-card" onclick="loginWithDemo('${acc.username}', '${acc.password}')" title="Bấm để đăng nhập ngay tài khoản ${acc.name}">
+      <img src="${acc.avatar}" alt="${acc.name}" class="demo-avatar" />
+      <div class="demo-info">
+        <span class="demo-name">${acc.name}</span>
+        <span class="demo-role">${acc.role}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function loginWithDemo(username, password) {
+  document.getElementById('loginUsername').value = username;
+  document.getElementById('loginPassword').value = password;
+  try {
+    const res = await fetch(`${API_BASE}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(`Đăng nhập thành công: ${data.user.name}!`, 'success');
+      authModal.style.display = 'none';
+      setCurrentUser(data.user);
+      await loadRecommendations();
+    } else {
+      showToast(data.error || 'Lỗi đăng nhập demo!', 'error');
+    }
+  } catch (err) {
+    showToast('Lỗi kết nối máy chủ!', 'error');
+  }
+}
+
+function setCurrentUser(user) {
+  appState.currentUser = user;
+  appState.selectedUserId = user.id;
+  userSelect.value = user.id;
+  localStorage.setItem('kg_auth_user', JSON.stringify(user));
+  updateUserProfile();
+  updateHeaderAuthUI();
+}
+
+function restoreAuthSession() {
+  const saved = localStorage.getItem('kg_auth_user');
+  if (saved) {
+    try {
+      const user = JSON.parse(saved);
+      const exists = appState.users.find(u => u.id === user.id);
+      if (exists) {
+        setCurrentUser(exists);
+        return;
+      }
+    } catch (e) {}
+  }
+  // Default to first user (Alice)
+  if (appState.users.length > 0) {
+    setCurrentUser(appState.users[0]);
+  }
+}
+
+function handleLogout() {
+  localStorage.removeItem('kg_auth_user');
+  showToast('Đã đăng xuất tài khoản.', 'success');
+  if (appState.users.length > 0) {
+    setCurrentUser(appState.users[0]);
+  }
+  loadRecommendations();
+}
+
+function updateHeaderAuthUI() {
+  const authWrap = document.getElementById('authStatusHeader');
+  const guestWrap = document.getElementById('guestStatusHeader');
+  const topGreeting = document.getElementById('topGreetingUser');
+
+  if (appState.currentUser) {
+    if (authWrap) authWrap.style.display = 'flex';
+    if (guestWrap) guestWrap.style.display = 'none';
+    if (topGreeting) topGreeting.textContent = appState.currentUser.name;
+  } else {
+    if (authWrap) authWrap.style.display = 'none';
+    if (guestWrap) guestWrap.style.display = 'flex';
+  }
 }
 
 function handleSearch() {
@@ -163,8 +387,28 @@ async function loadMetadata() {
       renderSearchCategoryDropdown(data.categories);
       renderColdStartOptions(data);
       renderSurveyOptions(data);
+      renderRegisterOptions(data);
     }
   } catch (err) { console.error('Error loading metadata:', err); }
+}
+
+function renderRegisterOptions(data) {
+  const brandWrap = document.getElementById('regBrandOptions');
+  const catWrap = document.getElementById('regCatOptions');
+  if (brandWrap) {
+    brandWrap.innerHTML = data.brands.map(b => `
+      <label class="cb-item-ebay">
+        <input type="checkbox" name="reg_brand" value="${b.id}">
+        <span>${b.name}</span>
+      </label>`).join('');
+  }
+  if (catWrap) {
+    catWrap.innerHTML = data.categories.map(c => `
+      <label class="cb-item-ebay">
+        <input type="checkbox" name="reg_cat" value="${c.id}">
+        <span>${c.icon || ''} ${c.name}</span>
+      </label>`).join('');
+  }
 }
 
 function renderSearchCategoryDropdown(categories) {
@@ -247,19 +491,29 @@ async function loadUsers() {
     if (data.success) {
       appState.users = data.users;
       userSelect.innerHTML = data.users.map(u => `<option value="${u.id}" ${u.id === appState.selectedUserId ? 'selected' : ''}>${u.name} (${u.role || u.id})</option>`).join('');
+      if (appState.currentUser) {
+        userSelect.value = appState.currentUser.id;
+      }
       updateUserProfile();
     }
   } catch (err) { console.error(err); }
 }
 
 function updateUserProfile() {
-  const user = appState.users.find(u => u.id === appState.selectedUserId);
+  const user = appState.currentUser || appState.users.find(u => u.id === appState.selectedUserId);
   if (!user) return;
-  document.getElementById('topGreetingUser').textContent = user.name;
-  document.getElementById('userName').textContent = user.name;
-  document.getElementById('userRole').textContent = user.role || 'Thành viên eBay';
+  const topGreeting = document.getElementById('topGreetingUser');
+  if (topGreeting) topGreeting.textContent = user.name;
+  
+  const userNameEl = document.getElementById('userName');
+  if (userNameEl) userNameEl.textContent = user.name;
+
+  const roleEl = document.getElementById('userRole');
+  if (roleEl) roleEl.textContent = user.role || 'Thành viên K/H Team';
+
   const avatar = document.getElementById('userAvatar');
   if (user.avatar && avatar) avatar.src = user.avatar;
+
   const wrap = document.getElementById('userInteractions');
   if (wrap) wrap.innerHTML = `Đã liên kết <b>${user.interactions_count || 0}</b> mối quan hệ trong Đồ thị Tri thức`;
 }
@@ -280,7 +534,7 @@ async function loadRecommendations() {
   }
 }
 
-// Filter, Sort & Render eBay Grid
+// Filter, Sort & Render Grid
 function filterAndRenderRecs() {
   let list = [...appState.recommendations];
 
@@ -385,7 +639,7 @@ async function handleInteraction(productId, type) {
     });
     const data = await res.json();
     if (data.success) {
-      showToast(`Đã thêm quan hệ [${type.toUpperCase()}] vào Đồ thị Tri thức eBay!`, 'success');
+      showToast(`Đã thêm quan hệ [${type.toUpperCase()}] vào Đồ thị Tri thức!`, 'success');
       await loadUsers(); await loadRecommendations(); await loadMetrics();
     }
   } catch (err) { showToast('Lỗi khi tương tác!', 'error'); }
@@ -471,7 +725,7 @@ async function loadSurveyStats() {
 async function handleColdStartSubmit(e) {
   e.preventDefault();
   const name = document.getElementById('newUserName').value.trim();
-  const role = document.getElementById('newUserRole').value.trim() || 'Thành viên mới eBay';
+  const role = document.getElementById('newUserRole').value.trim() || 'Thành viên mới K/H Team';
   const cats = Array.from(document.querySelectorAll('input[name="cold_cat"]:checked')).map(cb => cb.value);
   const brands = Array.from(document.querySelectorAll('input[name="cold_brand"]:checked')).map(cb => cb.value);
   const tags = Array.from(document.querySelectorAll('input[name="cold_tag"]:checked')).map(cb => cb.value);
