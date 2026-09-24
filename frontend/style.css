@@ -1186,6 +1186,54 @@ body {
   text-overflow: ellipsis;
 }
 
+/* --- ONBOARDING MODAL STYLES --- */
+.onboarding-modal-dialog {
+  max-width: 650px;
+  border-top: 5px solid var(--ebay-blue);
+}
+
+.onboarding-header {
+  padding: 22px 24px 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.onboarding-badge {
+  font-size: 10px;
+  font-weight: 800;
+  background: #e0e7ff;
+  color: var(--ebay-blue);
+  padding: 3px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.onboarding-header h3 {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.onboarding-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+.onboarding-section {
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+
+.onboarding-sec-title {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text-main);
+}
+
 /* Modal General */
 .modal-backdrop {
   position: fixed;

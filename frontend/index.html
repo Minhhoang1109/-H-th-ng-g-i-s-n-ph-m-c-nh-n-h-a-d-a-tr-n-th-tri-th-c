@@ -143,9 +143,7 @@
 
           <div class="sidebar-block">
             <h4 class="sidebar-title">Thương hiệu Ưu tiên</h4>
-            <div class="sidebar-checkbox-list" id="sidebarBrandList">
-              <!-- Dynamically populated -->
-            </div>
+            <div class="sidebar-checkbox-list" id="sidebarBrandList"></div>
           </div>
 
           <div class="sidebar-block">
@@ -420,33 +418,32 @@
           <!-- 1-Click Demo Accounts -->
           <div class="demo-accounts-section">
             <div class="demo-heading"><span>Hoặc Đăng nhập 1-Click với Tài khoản Demo:</span></div>
-            <div class="demo-users-grid" id="demoUsersContainer">
-              <!-- Dynamically populated -->
-            </div>
+            <div class="demo-users-grid" id="demoUsersContainer"></div>
           </div>
         </div>
 
         <!-- REGISTER FORM -->
         <div id="authRegisterForm" class="auth-pane">
-          <div class="auth-pane-desc">Tạo tài khoản mới và thiết lập sở thích công nghệ ban đầu (Knowledge Graph Onboarding).</div>
+          <div class="auth-pane-desc">Tạo tài khoản mới để trải nghiệm gợi ý cá nhân hóa thông minh. Sau khi tạo tài khoản, hệ thống sẽ mở bảng khảo sát sở thích ngắn để tối ưu hóa gợi ý cho bạn.</div>
           
           <form id="formRegister">
-            <div class="form-row-2">
-              <div class="form-col">
-                <label for="regName" class="form-label">Họ và tên của bạn:</label>
-                <input type="text" id="regName" class="styled-input w-100" placeholder="Ví dụ: Nguyễn Văn Hoàng" required />
-              </div>
-              <div class="form-col">
-                <label for="regUsername" class="form-label">Tên đăng nhập (Username):</label>
-                <input type="text" id="regUsername" class="styled-input w-100" placeholder="Ví dụ: hoangnv" required autocomplete="username" />
-              </div>
+            <div class="form-group">
+              <label for="regName" class="form-label">Họ và tên của bạn:</label>
+              <input type="text" id="regName" class="styled-input w-100" placeholder="Ví dụ: Nguyễn Văn Hoàng" required />
             </div>
 
             <div class="form-row-2" style="margin-top:12px;">
               <div class="form-col">
+                <label for="regUsername" class="form-label">Tên đăng nhập (Username):</label>
+                <input type="text" id="regUsername" class="styled-input w-100" placeholder="Ví dụ: hoangnv" required autocomplete="username" />
+              </div>
+              <div class="form-col">
                 <label for="regEmail" class="form-label">Email liên hệ:</label>
                 <input type="email" id="regEmail" class="styled-input w-100" placeholder="hoangnv@gmail.com" />
               </div>
+            </div>
+
+            <div class="form-row-2" style="margin-top:12px;">
               <div class="form-col">
                 <label for="regPassword" class="form-label">Mật khẩu:</label>
                 <div class="pwd-input-wrap">
@@ -454,35 +451,87 @@
                   <button type="button" class="btn-toggle-pwd" id="btnToggleRegPwd">👁️</button>
                 </div>
               </div>
+              <div class="form-col">
+                <label for="regRole" class="form-label">Nhu cầu / Vai trò chính:</label>
+                <select id="regRole" class="styled-select w-100">
+                  <option value="Lập trình viên & IT">💻 Lập trình viên & Kỹ sư IT</option>
+                  <option value="Hardcore Gamer & PC Builder">🎮 Game thủ & Tự build PC</option>
+                  <option value="Content Creator & Đồ họa 3D">🎨 Sáng tạo nội dung & Đồ họa</option>
+                  <option value="Văn phòng & Sinh viên">💼 Dân văn phòng & Sinh viên</option>
+                  <option value="Người yêu công nghệ">⚡ Khám phá công nghệ mới</option>
+                </select>
+              </div>
             </div>
 
-            <div class="form-group" style="margin-top:12px;">
-              <label for="regRole" class="form-label">Nhu cầu / Vai trò công nghệ chính:</label>
-              <select id="regRole" class="styled-select w-100">
-                <option value="Lập trình viên & IT">💻 Lập trình viên & Kỹ sư IT (Thích MacBook, ThinkPad, Phím cơ)</option>
-                <option value="Hardcore Gamer & PC Builder">🎮 Game thủ & Tự build PC (Thích RTX 4080, CPU i9, Tản nhiệt)</option>
-                <option value="Content Creator & Đồ họa 3D">🎨 Sáng tạo nội dung & Dựng phim (Màn hình 4K, Apple, Dell XPS)</option>
-                <option value="Văn phòng & Sinh viên">💼 Dân văn phòng & Sinh viên (Mỏng nhẹ, Pin trâu, Giá tốt)</option>
-                <option value="Người yêu công nghệ">⚡ Người đam mê khám phá công nghệ mới</option>
-              </select>
-            </div>
-
-            <div class="form-group" style="margin-top:12px;">
-              <label class="form-label">1. Thương hiệu ưa chuộng ban đầu (Tùy chọn):</label>
-              <div class="grid-2col" id="regBrandOptions"></div>
-            </div>
-
-            <div class="form-group" style="margin-top:12px;">
-              <label class="form-label">2. Danh mục quan tâm nhất (Tùy chọn):</label>
-              <div class="grid-2col" id="regCatOptions"></div>
-            </div>
-
-            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:16px;">
-              ✨ Hoàn Tất Đăng Ký & Trải Nghiệm Ngay
+            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:18px;">
+              ✨ Hoàn Tất Đăng Ký & Tiếp Tục
             </button>
           </form>
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- ONBOARDING WELCOME SURVEY MODAL (Appears 1 time right after registration) -->
+  <div class="modal-backdrop" id="onboardingSurveyModal" style="display:none;">
+    <div class="modal-dialog ebay-modal onboarding-modal-dialog">
+      <button class="modal-close-btn" id="btnCloseOnboardingModal">×</button>
+      
+      <div class="modal-header onboarding-header">
+        <span class="onboarding-badge">🎉 BƯỚC KHỞI ĐẦU DÀNH CHO THÀNH VIÊN MỚI</span>
+        <h3 id="onboardingWelcomeTitle">Khảo Sát Nhu Cầu & Tối Ưu Hóa Gợi Ý</h3>
+        <p class="onboarding-sub">Chào mừng bạn! Hãy dành 30 giây chọn sở thích để Hệ thống Đồ thị Tri thức thiết lập danh mục đề xuất thiết bị điện tử & linh kiện chuẩn xác nhất cho bạn.</p>
+      </div>
+
+      <div class="modal-body">
+        <form id="onboardingSurveyForm">
+          <!-- Step 1 -->
+          <div class="onboarding-section">
+            <h4 class="onboarding-sec-title">1. Mục đích sử dụng thiết bị chính:</h4>
+            <div class="purpose-chips-wrap">
+              <label class="ebay-chip"><input type="checkbox" name="onboard_purpose" value="t_laptrinh" checked><span>💻 Lập trình & Đa nhiệm</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="onboard_purpose" value="t_gaming"><span>🎮 Gaming đồ họa cao</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="onboard_purpose" value="t_dohoa"><span>🎨 Dựng hình 3D & Render</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="onboard_purpose" value="t_vanphong"><span>💼 Văn phòng mỏng nhẹ</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="onboard_purpose" value="t_chongon"><span>🎧 Âm thanh & Chống ồn ANC</span></label>
+              <label class="ebay-chip"><input type="checkbox" name="onboard_purpose" value="t_caocap"><span>✨ Flagship cao cấp</span></label>
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="onboarding-section" style="margin-top:14px;">
+            <h4 class="onboarding-sec-title">2. Thương hiệu bạn ưa chuộng nhất:</h4>
+            <div class="grid-2col" id="onboardingBrandList"></div>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="onboarding-section" style="margin-top:14px;">
+            <h4 class="onboarding-sec-title">3. Ngành hàng đang có nhu cầu mua sắm:</h4>
+            <div class="grid-2col" id="onboardingCategoryList"></div>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="onboarding-section" style="margin-top:14px;">
+            <h4 class="onboarding-sec-title">4. Khoảng ngân sách dự kiến:</h4>
+            <select id="onboardingBudget" class="styled-select w-100">
+              <option value="all">Tất cả mức giá</option>
+              <option value="under_5m">Dưới 5.000.000 ₫ (Linh kiện & Phụ kiện)</option>
+              <option value="5m_15m">5.000.000 ₫ – 15.000.000 ₫ (Tầm trung)</option>
+              <option value="15m_30m">15.000.000 ₫ – 30.000.000 ₫ (Cận cao cấp)</option>
+              <option value="above_30m">Trên 30.000.000 ₫ (Flagship & Cấu hình khủng)</option>
+            </select>
+          </div>
+
+          <div class="onboarding-actions" style="margin-top:20px; display:flex; gap:10px;">
+            <button type="submit" class="btn btn-ebay-primary btn-lg" style="flex:2;">
+              🚀 Hoàn Tất Khảo Sát & Nhận Gợi Ý Ngay
+            </button>
+            <button type="button" class="btn btn-ebay-outline" id="btnSkipOnboarding" style="flex:1;">
+              Khảo sát sau
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </div>

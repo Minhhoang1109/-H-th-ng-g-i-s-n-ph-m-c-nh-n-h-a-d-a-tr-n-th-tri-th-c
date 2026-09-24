@@ -1,4 +1,4 @@
-// K/H Team Electronics Marketplace Logic with Full Authentication & Knowledge Graph
+// K/H Team Electronics Marketplace Logic with Automatic 1-Time Onboarding Survey
 const API_BASE = '/api';
 
 let appState = {
@@ -39,6 +39,11 @@ const btnLogout = document.getElementById('btnLogout');
 const btnHeroAuth = document.getElementById('btnHeroAuth');
 const btnCloseAuthModal = document.getElementById('btnCloseAuthModal');
 
+// Onboarding Survey Modal (1-time after register)
+const onboardingSurveyModal = document.getElementById('onboardingSurveyModal');
+const btnCloseOnboardingModal = document.getElementById('btnCloseOnboardingModal');
+const btnSkipOnboarding = document.getElementById('btnSkipOnboarding');
+
 // Explanation Modal
 const explanationModal = document.getElementById('explanationModal');
 const modalBadge = document.getElementById('modalBadge');
@@ -51,6 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupEventListeners();
   setupAuthEvents();
   setupSurveyEvents();
+  setupOnboardingEvents();
   await loadMetadata();
   await loadDemoAccounts();
   await loadUsers();
@@ -199,7 +205,7 @@ function setupAuthEvents() {
     }
   });
 
-  // Register Form Submit
+  // Register Form Submit -> Triggers 1-Time Onboarding Survey!
   document.getElementById('formRegister')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('regName').value.trim();
@@ -208,23 +214,23 @@ function setupAuthEvents() {
     const password = document.getElementById('regPassword').value.trim();
     const role = document.getElementById('regRole').value;
 
-    const categories = Array.from(document.querySelectorAll('input[name="reg_cat"]:checked')).map(cb => cb.value);
-    const brands = Array.from(document.querySelectorAll('input[name="reg_brand"]:checked')).map(cb => cb.value);
-
     try {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, username, email, password, role, categories, brands })
+        body: JSON.stringify({ name, username, email, password, role })
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showToast(data.message || 'Đăng ký tài khoản thành công!', 'success');
+        showToast('Đăng ký tài khoản thành công! Hãy hoàn tất khảo sát sở thích.', 'success');
         authModal.style.display = 'none';
         setCurrentUser(data.user);
         await loadUsers();
         await loadRecommendations();
         await loadMetrics();
+
+        // 🌟 AUTOMATICALLY TRIGGER 1-TIME ONBOARDING SURVEY MODAL!
+        openOnboardingSurveyModal(data.user);
       } else {
         showToast(data.error || 'Đăng ký thất bại!', 'error');
       }
@@ -250,6 +256,70 @@ function switchAuthTab(tab) {
     tabBtnLogin.classList.remove('active');
     authRegisterForm.classList.add('active');
     authLoginForm.classList.remove('active');
+  }
+}
+
+// --- 1-TIME ONBOARDING SURVEY LOGIC ---
+function setupOnboardingEvents() {
+  btnCloseOnboardingModal?.addEventListener('click', () => {
+    closeOnboardingSurvey();
+  });
+
+  btnSkipOnboarding?.addEventListener('click', () => {
+    closeOnboardingSurvey();
+    showToast('Bạn có thể làm khảo sát bất kỳ lúc nào tại mục Khảo sát Nhu cầu.', 'info');
+  });
+
+  document.getElementById('onboardingSurveyForm')?.addEventListener('submit', handleOnboardingSurveySubmit);
+}
+
+function openOnboardingSurveyModal(user) {
+  const titleEl = document.getElementById('onboardingWelcomeTitle');
+  if (titleEl && user) {
+    titleEl.textContent = `Khảo Sát Nhu Cầu Dành Cho ${user.name}`;
+  }
+  onboardingSurveyModal.style.display = 'flex';
+}
+
+function closeOnboardingSurvey() {
+  onboardingSurveyModal.style.display = 'none';
+  if (appState.currentUser) {
+    localStorage.setItem('survey_done_' + appState.currentUser.id, 'true');
+  }
+}
+
+async function handleOnboardingSurveySubmit(e) {
+  e.preventDefault();
+  const purposes = Array.from(document.querySelectorAll('input[name="onboard_purpose"]:checked')).map(cb => cb.value);
+  const brands = Array.from(document.querySelectorAll('input[name="onboard_brand"]:checked')).map(cb => cb.value);
+  const categories = Array.from(document.querySelectorAll('input[name="onboard_cat"]:checked')).map(cb => cb.value);
+  const budget = document.getElementById('onboardingBudget')?.value || 'all';
+
+  try {
+    const res = await fetch(`${API_BASE}/survey`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: appState.selectedUserId,
+        categories,
+        brands,
+        tags: purposes,
+        feedback: { rating: 5, comment: 'Hoàn thành khảo sát chào mừng thành viên mới!', explainability: 'Rất trực quan, dễ hiểu' }
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('🎉 Đã thiết lập hồ sơ sở thích thành công! Đang tối ưu hóa gợi ý...', 'success');
+      closeOnboardingSurvey();
+      await loadUsers();
+      await loadRecommendations();
+      await loadMetrics();
+      await loadSurveyStats();
+    } else {
+      showToast(data.error || 'Lỗi khi lưu khảo sát!', 'error');
+    }
+  } catch (err) {
+    showToast('Lỗi kết nối khi gửi khảo sát!', 'error');
   }
 }
 
@@ -387,25 +457,25 @@ async function loadMetadata() {
       renderSearchCategoryDropdown(data.categories);
       renderColdStartOptions(data);
       renderSurveyOptions(data);
-      renderRegisterOptions(data);
+      renderOnboardingOptions(data);
     }
   } catch (err) { console.error('Error loading metadata:', err); }
 }
 
-function renderRegisterOptions(data) {
-  const brandWrap = document.getElementById('regBrandOptions');
-  const catWrap = document.getElementById('regCatOptions');
+function renderOnboardingOptions(data) {
+  const brandWrap = document.getElementById('onboardingBrandList');
+  const catWrap = document.getElementById('onboardingCategoryList');
   if (brandWrap) {
     brandWrap.innerHTML = data.brands.map(b => `
       <label class="cb-item-ebay">
-        <input type="checkbox" name="reg_brand" value="${b.id}">
+        <input type="checkbox" name="onboard_brand" value="${b.id}">
         <span>${b.name}</span>
       </label>`).join('');
   }
   if (catWrap) {
     catWrap.innerHTML = data.categories.map(c => `
       <label class="cb-item-ebay">
-        <input type="checkbox" name="reg_cat" value="${c.id}">
+        <input type="checkbox" name="onboard_cat" value="${c.id}">
         <span>${c.icon || ''} ${c.name}</span>
       </label>`).join('');
   }
