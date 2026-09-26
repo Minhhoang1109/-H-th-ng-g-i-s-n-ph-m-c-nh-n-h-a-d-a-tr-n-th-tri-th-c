@@ -9,7 +9,53 @@
       "color": "#3b82f6",
       "last_survey_rating": 5,
       "last_survey_comment": "",
-      "last_survey_explainability": "Rất trực quan, dễ hiểu"
+      "last_survey_explainability": "Rất trực quan, dễ hiểu",
+      "survey_completed": true,
+      "detailed_survey": {
+        "categories": [
+          "c_laptop"
+        ],
+        "brands": [
+          "b_apple",
+          "b_sony"
+        ],
+        "tags": [],
+        "hardware_specs": {
+          "cpu": "apple_silicon",
+          "gpu": "apple_gpu",
+          "ram": "32gb_plus",
+          "ssd": "1tb_plus"
+        },
+        "budget": "above_30m"
+      },
+      "wishlist": [
+        {
+          "query": "MacBook Pro M3",
+          "timestamp": "64d8f1f8",
+          "items": "t_laptrinh"
+        },
+        {
+          "query": "MacBook Pro M3",
+          "timestamp": "bad2f859",
+          "items": "t_laptrinh"
+        },
+        {
+          "query": "MacBook Pro M3",
+          "timestamp": "827b7388",
+          "items": "t_laptrinh"
+        },
+        {
+          "query": "MacBook Pro M3",
+          "timestamp": "2c0caf87",
+          "items": "t_laptrinh"
+        },
+        {
+          "query": "MacBook Pro M3",
+          "timestamp": "98fda6f2",
+          "items": "t_laptrinh"
+        }
+      ],
+      "last_target_need": "MacBook Pro M3"
     },
     {
       "id": "u2",
@@ -255,10 +301,39 @@
       "type": "Product",
       "name": "MacBook Pro 14 inch M3 Pro (18GB/512GB)",
       "price": 44990000,
-      "rating": 4.9,
+      "rating": 5.0,
       "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
       "description": "Hiệu năng bùng nổ với CPU 11 nhân, GPU 14 nhân, màn hình Liquid Retina XDR 120Hz.",
-      "color": "#8b5cf6"
+      "color": "#8b5cf6",
+      "reviews": [
+        {
+          "user_id": "u1",
+          "user_name": "Alice Nguyễn",
+          "rating": 5,
+          "comment": "Rat nhanh va muot",
+          "pros": "Hieu nang manh",
+          "cons": "Gia hoi cao",
+          "date": "Vừa xong"
+        },
+        {
+          "user_id": "u1",
+          "user_name": "Alice Nguyễn",
+          "rating": 5,
+          "comment": "Rat nhanh va muot",
+          "pros": "Hieu nang manh",
+          "cons": "Gia hoi cao",
+          "date": "Vừa xong"
+        },
+        {
+          "user_id": "u1",
+          "user_name": "Alice Nguyễn",
+          "rating": 5,
+          "comment": "Rat nhanh va muot",
+          "pros": "Hieu nang manh",
+          "cons": "Gia hoi cao",
+          "date": "Vừa xong"
+        }
+      ]
     },
     {
       "id": "p_dellxps15",
@@ -460,9 +535,79 @@
       "target": "p_iphone15"
     },
     {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "mong muốn",
+      "source": "u1",
+      "target": "p_iphone15"
+    },
+    {
       "type": "likes",
       "weight": 2.5,
       "label": "likes",
+      "source": "u1",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "mong muốn",
       "source": "u1",
       "target": "p_airpodspro"
     },
@@ -474,18 +619,221 @@
       "target": "p_macbookm3"
     },
     {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "reviewed",
+      "weight": 2.0,
+      "label": "reviewed",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "reviewed",
+      "weight": 2.0,
+      "label": "reviewed",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "mong muốn",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "reviewed",
+      "weight": 2.0,
+      "label": "đã đánh giá",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_rogphone8"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_rogphone8"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_rogphone8"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_rogphone8"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "mong muốn",
+      "source": "u1",
+      "target": "p_rogphone8"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookair"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookair"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookair"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookair"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "mong muốn",
+      "source": "u1",
+      "target": "p_macbookair"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "mong muốn",
+      "source": "u1",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "mong muốn",
+      "source": "u1",
+      "target": "p_ankercharger"
+    },
+    {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "prefers_category",
+      "label": "thích danh mục",
       "source": "u1",
-      "target": "c_phone"
+      "target": "c_laptop"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "prefers_brand",
+      "label": "chuộng thương hiệu",
       "source": "u1",
       "target": "b_apple"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u1",
+      "target": "b_sony"
     },
     {
       "type": "purchased",
@@ -1456,63 +1804,63 @@
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_minh hoàng",
       "target": "c_phone"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_minh hoàng",
       "target": "c_laptop"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_minh hoàng",
       "target": "c_audio"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_minh hoàng",
       "target": "b_samsung"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_minh hoàng",
       "target": "b_asus"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_minh hoàng",
       "target": "b_dell"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_minh hoàng",
       "target": "b_nvidia"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_minh hoàng",
       "target": "b_intel"
     },
     {
       "type": "prefers_tag",
       "weight": 2.5,
-      "label": "quan tâm đặc tính",
+      "label": "prefers_tag",
       "source": "u_minh hoàng",
       "target": "t_gaming"
     }
