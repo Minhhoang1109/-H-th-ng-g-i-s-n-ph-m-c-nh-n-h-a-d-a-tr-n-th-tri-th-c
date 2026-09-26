@@ -1,85 +1,70 @@
-// K/H Team Electronics Marketplace Logic with Automatic 1-Time Onboarding Survey
+// K/H Team Electronics - KG-RecSys Full Application Logic
 const API_BASE = '/api';
 
 let appState = {
   users: [],
   currentUser: null,
+  isGuest: false,
+  isAdmin: false,
   selectedUserId: 'u1',
   selectedAlgorithm: 'hybrid',
   selectedCategory: 'all',
-  selectedBrand: 'all',
-  selectedPriceFilter: 'all',
+  selectedPurpose: 'all',
+  selectedBrands: [],
+  priceMin: null,
+  priceMax: null,
   searchQuery: '',
-  sortBy: 'score_desc',
+  sortBy: 'kg_score',
   recommendations: [],
-  metadata: { categories: [], brands: [], tags: [] },
-  demoAccounts: []
+  products: [],
+  metadata: { categories: [], brands: [], purposes: [] },
+  adminVisNetwork: null,
+  adminGraphData: null
 };
-
-let userSelectedRating = 5;
-
-// DOM Elements
-const userSelect = document.getElementById('userSelect');
-const algoSelect = document.getElementById('algoSelect');
-const searchInput = document.getElementById('searchInput');
-const searchCatSelect = document.getElementById('searchCategorySelect');
-const btnSearch = document.getElementById('btnSearch');
-const sortSelect = document.getElementById('sortSelect');
-const recsGrid = document.getElementById('recommendationsGrid');
-
-// Auth Modals & Elements
-const authModal = document.getElementById('authModal');
-const tabBtnLogin = document.getElementById('tabBtnLogin');
-const tabBtnRegister = document.getElementById('tabBtnRegister');
-const authLoginForm = document.getElementById('authLoginForm');
-const authRegisterForm = document.getElementById('authRegisterForm');
-const btnOpenLoginModal = document.getElementById('btnOpenLoginModal');
-const btnOpenRegisterModal = document.getElementById('btnOpenRegisterModal');
-const btnLogout = document.getElementById('btnLogout');
-const btnHeroAuth = document.getElementById('btnHeroAuth');
-const btnCloseAuthModal = document.getElementById('btnCloseAuthModal');
-
-// Onboarding Survey Modal (1-time after register)
-const onboardingSurveyModal = document.getElementById('onboardingSurveyModal');
-const btnCloseOnboardingModal = document.getElementById('btnCloseOnboardingModal');
-const btnSkipOnboarding = document.getElementById('btnSkipOnboarding');
-
-// Explanation Modal
-const explanationModal = document.getElementById('explanationModal');
-const modalBadge = document.getElementById('modalBadge');
-const modalProductName = document.getElementById('modalProductName');
-const modalExplanationText = document.getElementById('modalExplanationText');
-const modalReasoningChain = document.getElementById('modalReasoningChain');
 
 document.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
-  setupEventListeners();
-  setupAuthEvents();
-  setupSurveyEvents();
-  setupOnboardingEvents();
+  setup3FacetSearch();
+  setupAuth();
+  setupWishlistModal();
+  setupReviewModal();
+  setupOnboardingAndSurvey();
+  setupAdminPanel();
+  setupFiltersAndSort();
+
   await loadMetadata();
-  await loadDemoAccounts();
   await loadUsers();
-  restoreAuthSession();
+  restoreSessionOrGuest();
   await loadRecommendations();
   await loadMetrics();
-  await loadSurveyStats();
 });
 
-// Navigation & Tab Switching
+// ========================================================
+// NAVIGATION & TABS
+// ========================================================
 function setupNavigation() {
   const navItems = document.querySelectorAll('.nav-item');
   const tabContents = document.querySelectorAll('.tab-content');
 
   navItems.forEach(item => {
     item.addEventListener('click', () => {
+      const target = item.getAttribute('data-tab');
+      if (target === 'admin' && !appState.isAdmin) {
+        showToast('Chế độ Quản trị viên chưa được kích hoạt! Nhấp nút "⚙️ Chế độ Quản lý" ở góc trên.', 'warning');
+        return;
+      }
       navItems.forEach(i => i.classList.remove('active'));
       tabContents.forEach(c => c.classList.remove('active'));
 
       item.classList.add('active');
-      const target = item.getAttribute('data-tab');
       const content = document.getElementById(`tab-${target}`);
       if (content) content.classList.add('active');
+
+      if (target === 'admin') {
+        initAdminGraph();
+        loadAdminProducts();
+        loadAdminUsers();
+      }
     });
   });
 
@@ -93,93 +78,88 @@ function setupNavigation() {
   });
 }
 
-function setupEventListeners() {
-  // Quick user switcher
-  userSelect.addEventListener('change', async (e) => {
-    appState.selectedUserId = e.target.value;
-    const user = appState.users.find(u => u.id === e.target.value);
-    if (user) {
-      setCurrentUser(user);
+// ========================================================
+// 3-FACET SEARCH (Keyword + Category + Purpose)
+// ========================================================
+function setup3FacetSearch() {
+  const btnSearch = document.getElementById('btnSearch');
+  const searchInput = document.getElementById('searchInput');
+  const searchCategorySelect = document.getElementById('searchCategorySelect');
+  const searchPurposeSelect = document.getElementById('searchPurposeSelect');
+
+  const executeSearch = () => {
+    appState.searchQuery = searchInput.value.trim();
+    appState.selectedCategory = searchCategorySelect.value;
+    appState.selectedPurpose = searchPurposeSelect.value;
+    
+    // Update active purpose pill
+    const pill = document.getElementById('activePurposePill');
+    if (appState.selectedPurpose !== 'all' && pill) {
+      pill.style.display = 'inline-block';
+      pill.textContent = `Mục đích: ${searchPurposeSelect.options[searchPurposeSelect.selectedIndex].text}`;
+    } else if (pill) {
+      pill.style.display = 'none';
     }
-    await loadRecommendations();
-  });
 
-  // Algorithm switcher
-  algoSelect.addEventListener('change', async (e) => {
-    appState.selectedAlgorithm = e.target.value;
-    await loadRecommendations();
-  });
+    updateSidebarCategoryUI(appState.selectedCategory);
+    filterAndRenderProducts();
+  };
 
-  // Search
-  btnSearch?.addEventListener('click', handleSearch);
+  btnSearch?.addEventListener('click', executeSearch);
   searchInput?.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') handleSearch();
+    if (e.key === 'Enter') executeSearch();
   });
 
-  searchCatSelect?.addEventListener('change', (e) => {
-    appState.selectedCategory = e.target.value;
-    updateSidebarCategoryUI(e.target.value);
-    filterAndRenderRecs();
-  });
-
-  // Sort
-  sortSelect?.addEventListener('change', (e) => {
-    appState.sortBy = e.target.value;
-    filterAndRenderRecs();
-  });
-
-  // Price filter
-  document.querySelectorAll('input[name="price_filter"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      appState.selectedPriceFilter = e.target.value;
-      filterAndRenderRecs();
-    });
-  });
-
-  // Hero CTA buttons
-  document.getElementById('btnRefreshRecs')?.addEventListener('click', async () => {
-    await loadRecommendations();
-    showToast('Đã làm mới danh mục đề xuất K/H Team!', 'success');
-  });
-
-  document.getElementById('btnOpenSurvey')?.addEventListener('click', () => {
-    const surveyTab = document.querySelector('.nav-item[data-tab="survey"]');
-    if (surveyTab) surveyTab.click();
-  });
-
-  // Modal close
-  document.getElementById('btnCloseModal')?.addEventListener('click', () => explanationModal.style.display = 'none');
-  document.getElementById('btnModalClose')?.addEventListener('click', () => explanationModal.style.display = 'none');
-
-  // Cold start form
-  document.getElementById('coldStartForm')?.addEventListener('submit', handleColdStartSubmit);
+  searchCategorySelect?.addEventListener('change', executeSearch);
+  searchPurposeSelect?.addEventListener('change', executeSearch);
 }
 
-// --- AUTHENTICATION LOGIC ---
-function setupAuthEvents() {
+// ========================================================
+// AUTHENTICATION & PERSISTENT SESSION
+// ========================================================
+function setupAuth() {
+  const authModal = document.getElementById('authModal');
+  const btnOpenLoginModal = document.getElementById('btnOpenLoginModal');
+  const btnOpenRegisterModal = document.getElementById('btnOpenRegisterModal');
+  const btnCloseAuthModal = document.getElementById('btnCloseAuthModal');
+  const tabLoginBtn = document.getElementById('tabLoginBtn');
+  const tabRegisterBtn = document.getElementById('tabRegisterBtn');
+  const loginPane = document.getElementById('loginPane');
+  const registerPane = document.getElementById('registerPane');
+  const btnLogout = document.getElementById('btnLogout');
+  const userSelect = document.getElementById('userSelect');
+  const btnOpenProfile = document.getElementById('btnOpenProfile');
+
   btnOpenLoginModal?.addEventListener('click', () => openAuthModal('login'));
   btnOpenRegisterModal?.addEventListener('click', () => openAuthModal('register'));
-  btnHeroAuth?.addEventListener('click', () => openAuthModal('login'));
   btnCloseAuthModal?.addEventListener('click', () => authModal.style.display = 'none');
 
-  tabBtnLogin?.addEventListener('click', () => switchAuthTab('login'));
-  tabBtnRegister?.addEventListener('click', () => switchAuthTab('register'));
+  tabLoginBtn?.addEventListener('click', () => {
+    tabLoginBtn.classList.add('active');
+    tabRegisterBtn.classList.remove('active');
+    loginPane.style.display = 'block';
+    registerPane.style.display = 'none';
+  });
 
-  btnLogout?.addEventListener('click', handleLogout);
+  tabRegisterBtn?.addEventListener('click', () => {
+    tabRegisterBtn.classList.add('active');
+    tabLoginBtn.classList.remove('active');
+    registerPane.style.display = 'block';
+    loginPane.style.display = 'none';
+  });
 
-  // Toggle password visibility
+  // Toggle Password
   document.getElementById('btnToggleLoginPwd')?.addEventListener('click', () => {
     const inp = document.getElementById('loginPassword');
     inp.type = inp.type === 'password' ? 'text' : 'password';
   });
-
   document.getElementById('btnToggleRegPwd')?.addEventListener('click', () => {
     const inp = document.getElementById('regPassword');
     inp.type = inp.type === 'password' ? 'text' : 'password';
   });
 
-  // Login Form Submit
-  document.getElementById('formLogin')?.addEventListener('submit', async (e) => {
+  // Login Submit
+  document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value.trim();
@@ -192,25 +172,22 @@ function setupAuthEvents() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showToast(data.message || 'Đăng nhập thành công!', 'success');
         authModal.style.display = 'none';
-        setCurrentUser(data.user);
-        await loadUsers();
-        await loadRecommendations();
+        showToast(data.message || 'Đăng nhập thành công!', 'success');
+        handleLoginSuccess(data.user);
       } else {
-        showToast(data.error || 'Đăng nhập thất bại!', 'error');
+        showToast(data.message || 'Sai tên đăng nhập hoặc mật khẩu!', 'error');
       }
     } catch (err) {
-      showToast('Lỗi kết nối khi đăng nhập!', 'error');
+      showToast('Lỗi kết nối máy chủ!', 'error');
     }
   });
 
-  // Register Form Submit -> Triggers 1-Time Onboarding Survey!
-  document.getElementById('formRegister')?.addEventListener('submit', async (e) => {
+  // Register Submit
+  document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('regName').value.trim();
+    const full_name = document.getElementById('regFullName').value.trim();
     const username = document.getElementById('regUsername').value.trim();
-    const email = document.getElementById('regEmail').value.trim();
     const password = document.getElementById('regPassword').value.trim();
     const role = document.getElementById('regRole').value;
 
@@ -218,633 +195,955 @@ function setupAuthEvents() {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, username, email, password, role })
+        body: JSON.stringify({ full_name, username, password, role })
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showToast('Đăng ký tài khoản thành công! Hãy hoàn tất khảo sát sở thích.', 'success');
         authModal.style.display = 'none';
-        setCurrentUser(data.user);
-        await loadUsers();
-        await loadRecommendations();
-        await loadMetrics();
-
-        // 🌟 AUTOMATICALLY TRIGGER 1-TIME ONBOARDING SURVEY MODAL!
-        openOnboardingSurveyModal(data.user);
+        showToast('Đăng ký thành công! Vui lòng hoàn tất khảo sát khởi đầu.', 'success');
+        handleLoginSuccess(data.user, true); // true = isFirstRegister
       } else {
-        showToast(data.error || 'Đăng ký thất bại!', 'error');
+        showToast(data.message || 'Đăng ký thất bại!', 'error');
       }
     } catch (err) {
-      showToast('Lỗi kết nối khi đăng ký!', 'error');
+      showToast('Lỗi kết nối máy chủ!', 'error');
+    }
+  });
+
+  // Quick switch dropdown
+  userSelect?.addEventListener('change', async (e) => {
+    const uid = e.target.value;
+    const user = appState.users.find(u => u.id === uid);
+    if (user) {
+      handleLoginSuccess(user, false);
+    }
+  });
+
+  btnLogout?.addEventListener('click', () => {
+    localStorage.removeItem('kh_recsys_session');
+    appState.currentUser = null;
+    appState.isGuest = true;
+    updateAuthUI();
+    loadRecommendations();
+    showToast('Đã đăng xuất! Chuyển sang chế độ Khách vãng lai.', 'info');
+  });
+
+  btnOpenProfile?.addEventListener('click', openProfileDrawer);
+  document.getElementById('btnCloseProfileModal')?.addEventListener('click', () => {
+    document.getElementById('profileModal').style.display = 'none';
+  });
+}
+
+function openAuthModal(mode = 'login') {
+  const modal = document.getElementById('authModal');
+  modal.style.display = 'flex';
+  if (mode === 'login') {
+    document.getElementById('tabLoginBtn').click();
+  } else {
+    document.getElementById('tabRegisterBtn').click();
+  }
+}
+
+function handleLoginSuccess(user, isFirstRegister = false) {
+  appState.currentUser = user;
+  appState.selectedUserId = user.id;
+  appState.isGuest = false;
+
+  // Track session count in localStorage
+  let sessionKey = `kh_session_count_${user.id}`;
+  let count = parseInt(localStorage.getItem(sessionKey) || '0', 10) + 1;
+  localStorage.setItem(sessionKey, count.toString());
+  localStorage.setItem('kh_recsys_session', JSON.stringify({ userId: user.id, username: user.username }));
+
+  updateAuthUI();
+  loadRecommendations();
+
+  // Check 1st time vs 2nd+ time
+  if (isFirstRegister || count === 1) {
+    // Show 1-time onboarding survey
+    document.getElementById('onboardingSurveyModal').style.display = 'flex';
+  } else if (count >= 2) {
+    // Show 2nd login wishlist capture
+    document.getElementById('wishlistModal').style.display = 'flex';
+  }
+}
+
+function restoreSessionOrGuest() {
+  const raw = localStorage.getItem('kh_recsys_session');
+  if (raw) {
+    try {
+      const sess = JSON.parse(raw);
+      const user = appState.users.find(u => u.id === sess.userId || u.username === sess.username);
+      if (user) {
+        appState.currentUser = user;
+        appState.selectedUserId = user.id;
+        appState.isGuest = false;
+        updateAuthUI();
+        return;
+      }
+    } catch (e) {}
+  }
+  // Default fallback
+  if (appState.users.length > 0) {
+    appState.currentUser = appState.users[0];
+    appState.selectedUserId = appState.users[0].id;
+    appState.isGuest = false;
+  } else {
+    appState.isGuest = true;
+  }
+  updateAuthUI();
+}
+
+function updateAuthUI() {
+  const authStatusHeader = document.getElementById('authStatusHeader');
+  const guestStatusHeader = document.getElementById('guestStatusHeader');
+  const topGreetingUser = document.getElementById('topGreetingUser');
+  const userSelect = document.getElementById('userSelect');
+  const returningUserBanner = document.getElementById('returningUserBanner');
+  const guestRecNotice = document.getElementById('guestRecNotice');
+
+  if (appState.currentUser && !appState.isGuest) {
+    authStatusHeader.style.display = 'flex';
+    guestStatusHeader.style.display = 'none';
+    topGreetingUser.textContent = appState.currentUser.name || appState.currentUser.full_name || appState.currentUser.username;
+    if (userSelect) userSelect.value = appState.currentUser.id;
+
+    // Update hero card
+    document.getElementById('userName').textContent = appState.currentUser.name || appState.currentUser.full_name;
+    document.getElementById('userRole').textContent = appState.currentUser.role || 'Thành viên K/H Team';
+    if (appState.currentUser.avatar) {
+      document.getElementById('userAvatar').src = appState.currentUser.avatar;
+    }
+
+    // Check wishlist banner
+    if (appState.currentUser.wishlist_need) {
+      returningUserBanner.style.display = 'block';
+      document.getElementById('bannerUserName').textContent = `Chào ${appState.currentUser.name || 'bạn'}! Nhu cầu săn đón: "${appState.currentUser.wishlist_need}"`;
+    } else {
+      returningUserBanner.style.display = 'none';
+    }
+    guestRecNotice.style.display = 'none';
+  } else {
+    authStatusHeader.style.display = 'none';
+    guestStatusHeader.style.display = 'flex';
+    returningUserBanner.style.display = 'none';
+    guestRecNotice.style.display = 'block';
+    document.getElementById('userName').textContent = 'Khách vãng lai (Guest)';
+    document.getElementById('userRole').textContent = 'Gợi ý theo nhóm sở thích tương đồng';
+  }
+}
+
+// ========================================================
+// 2ND-LOGIN WISHLIST CAPTURE
+// ========================================================
+function setupWishlistModal() {
+  const modal = document.getElementById('wishlistModal');
+  const btnClose = document.getElementById('btnCloseWishlistModal');
+  const btnSkip = document.getElementById('btnSkipWishlist');
+  const form = document.getElementById('wishlistForm');
+  const btnOpenQuick = document.getElementById('btnOpenWishlistQuick');
+  const btnHeroWishlist = document.getElementById('btnHeroWishlist');
+  const btnUpdateWishlistBanner = document.getElementById('btnUpdateWishlistBanner');
+
+  const openWishlist = () => {
+    modal.style.display = 'flex';
+    if (appState.currentUser && appState.currentUser.wishlist_need) {
+      document.getElementById('wishlistKeywordInput').value = appState.currentUser.wishlist_need;
+    }
+  };
+
+  btnOpenQuick?.addEventListener('click', openWishlist);
+  btnHeroWishlist?.addEventListener('click', openWishlist);
+  btnUpdateWishlistBanner?.addEventListener('click', openWishlist);
+  btnClose?.addEventListener('click', () => modal.style.display = 'none');
+  btnSkip?.addEventListener('click', () => modal.style.display = 'none');
+
+  // Clickable quick tags
+  document.querySelectorAll('.wish-tag-item').forEach(tag => {
+    tag.addEventListener('click', () => {
+      document.getElementById('wishlistKeywordInput').value = tag.getAttribute('data-val');
+    });
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const keyword = document.getElementById('wishlistKeywordInput').value.trim();
+    const purpose = document.getElementById('wishlistPurposeSelect').value;
+
+    if (!appState.currentUser) {
+      showToast('Vui lòng đăng nhập để lưu sản phẩm mong muốn!', 'warning');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/user/wishlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: appState.currentUser.id,
+          keyword: keyword,
+          purpose: purpose
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        modal.style.display = 'none';
+        appState.currentUser.wishlist_need = keyword;
+        updateAuthUI();
+        showToast(data.message || 'Đã ghi nhận sản phẩm mong muốn vào Đồ thị Tri thức!', 'success');
+        await loadRecommendations();
+      }
+    } catch (err) {
+      showToast('Lỗi lưu nhu cầu mong muốn!', 'error');
     }
   });
 }
 
-function openAuthModal(tab = 'login') {
-  authModal.style.display = 'flex';
-  switchAuthTab(tab);
-}
+// ========================================================
+// PRODUCT REVIEWS & FEEDBACK (Reviewed Edges)
+// ========================================================
+function setupReviewModal() {
+  const modal = document.getElementById('reviewModal');
+  const btnClose = document.getElementById('btnCloseReviewModal');
+  const form = document.getElementById('productReviewForm');
 
-function switchAuthTab(tab) {
-  if (tab === 'login') {
-    tabBtnLogin.classList.add('active');
-    tabBtnRegister.classList.remove('active');
-    authLoginForm.classList.add('active');
-    authRegisterForm.classList.remove('active');
-  } else {
-    tabBtnRegister.classList.add('active');
-    tabBtnLogin.classList.remove('active');
-    authRegisterForm.classList.add('active');
-    authLoginForm.classList.remove('active');
-  }
-}
+  btnClose?.addEventListener('click', () => modal.style.display = 'none');
 
-// --- 1-TIME ONBOARDING SURVEY LOGIC ---
-function setupOnboardingEvents() {
-  btnCloseOnboardingModal?.addEventListener('click', () => {
-    closeOnboardingSurvey();
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const product_id = document.getElementById('reviewProductId').value;
+    const rating = parseInt(document.querySelector('input[name="starRating"]:checked').value, 10);
+    const pros = document.getElementById('reviewPros').value.trim();
+    const cons = document.getElementById('reviewCons').value.trim();
+    const comment = document.getElementById('reviewComment').value.trim();
+
+    const user_id = appState.currentUser ? appState.currentUser.id : 'u1';
+    const user_name = appState.currentUser ? (appState.currentUser.name || appState.currentUser.full_name) : 'Khách vãng lai';
+
+    try {
+      const res = await fetch(`${API_BASE}/products/review`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ product_id, user_id, user_name, rating, pros, cons, comment })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        modal.style.display = 'none';
+        showToast(data.message || 'Cảm ơn bạn đã đóng góp ý kiến!', 'success');
+        form.reset();
+        await loadRecommendations();
+      }
+    } catch (err) {
+      showToast('Lỗi gửi đánh giá!', 'error');
+    }
   });
+}
 
+function openProductReviewModal(productId, productName) {
+  document.getElementById('reviewProductId').value = productId;
+  document.getElementById('reviewProductName').textContent = `Đánh giá: ${productName}`;
+  document.getElementById('reviewModal').style.display = 'flex';
+}
+
+// ========================================================
+// 6-STEP SURVEY & ONBOARDING
+// ========================================================
+function setupOnboardingAndSurvey() {
+  // Onboarding Form (1 time)
+  const onboardForm = document.getElementById('onboardingSurveyForm');
+  const btnSkipOnboarding = document.getElementById('btnSkipOnboarding');
+  const btnCloseOnboarding = document.getElementById('btnCloseOnboardingModal');
+
+  btnCloseOnboarding?.addEventListener('click', () => {
+    document.getElementById('onboardingSurveyModal').style.display = 'none';
+  });
   btnSkipOnboarding?.addEventListener('click', () => {
-    closeOnboardingSurvey();
-    showToast('Bạn có thể làm khảo sát bất kỳ lúc nào tại mục Khảo sát Nhu cầu.', 'info');
+    document.getElementById('onboardingSurveyModal').style.display = 'none';
   });
 
-  document.getElementById('onboardingSurveyForm')?.addEventListener('submit', handleOnboardingSurveySubmit);
+  onboardForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const purposes = Array.from(document.querySelectorAll('input[name="onboard_purpose"]:checked')).map(c => c.value);
+    const brands = Array.from(document.querySelectorAll('input[name="onboard_brand"]:checked')).map(c => c.value);
+    const categories = Array.from(document.querySelectorAll('input[name="onboard_category"]:checked')).map(c => c.value);
+    const budget = document.getElementById('onboardingBudget').value;
+
+    const payload = {
+      user_id: appState.currentUser ? appState.currentUser.id : 'u1',
+      purposes, brands, categories, budget
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/survey`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        document.getElementById('onboardingSurveyModal').style.display = 'none';
+        showToast('Khảo sát thành công! Đồ thị đã cập nhật gợi ý riêng cho bạn.', 'success');
+        await loadRecommendations();
+      }
+    } catch (err) {
+      showToast('Lỗi cập nhật khảo sát!', 'error');
+    }
+  });
+
+  // Detailed Survey Form (Tab 2)
+  const detailedForm = document.getElementById('detailedSurveyForm');
+  detailedForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const purposes = Array.from(document.querySelectorAll('input[name="survey_purpose"]:checked')).map(c => c.value);
+    const brands = Array.from(document.querySelectorAll('input[name="survey_brand"]:checked')).map(c => c.value);
+    const categories = Array.from(document.querySelectorAll('input[name="survey_cat"]:checked')).map(c => c.value);
+    const budget = document.getElementById('surveyBudget').value;
+    const cpu = document.getElementById('surveyCpuPref').value;
+    const gpu = document.getElementById('surveyGpuPref').value;
+    const ram = document.getElementById('surveyRamPref').value;
+    const ssd = document.getElementById('surveySsdPref').value;
+    const specific_wish = document.getElementById('surveySpecificWish').value.trim();
+
+    const payload = {
+      user_id: appState.currentUser ? appState.currentUser.id : 'u1',
+      purposes, brands, categories, budget,
+      hardware_specs: { cpu, gpu, ram, ssd },
+      specific_wish
+    };
+
+    try {
+      const res = await fetch(`${API_BASE}/survey/detailed`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast('Đã áp dụng cấu hình phần cứng chi tiết vào Đồ thị Tri thức!', 'success');
+        // Switch back to shop tab
+        document.querySelector('.nav-item[data-tab="recommendations"]').click();
+        await loadRecommendations();
+      }
+    } catch (err) {
+      showToast('Lỗi gửi khảo sát chi tiết!', 'error');
+    }
+  });
 }
 
-function openOnboardingSurveyModal(user) {
-  const titleEl = document.getElementById('onboardingWelcomeTitle');
-  if (titleEl && user) {
-    titleEl.textContent = `Khảo Sát Nhu Cầu Dành Cho ${user.name}`;
-  }
-  onboardingSurveyModal.style.display = 'flex';
+// ========================================================
+// ADMIN PANEL & VIS.JS 2D GRAPH CANVAS
+// ========================================================
+function setupAdminPanel() {
+  const btnAdminToggle = document.getElementById('btnAdminToggle');
+  const navAdminTab = document.getElementById('navAdminTab');
+
+  btnAdminToggle?.addEventListener('click', () => {
+    appState.isAdmin = !appState.isAdmin;
+    if (appState.isAdmin) {
+      btnAdminToggle.classList.add('active');
+      btnAdminToggle.textContent = '🔓 Đang là Quản Lý';
+      navAdminTab.style.display = 'inline-block';
+      navAdminTab.click();
+      showToast('Đã chuyển sang chế độ Quản trị viên!', 'info');
+    } else {
+      btnAdminToggle.classList.remove('active');
+      btnAdminToggle.textContent = '⚙️ Chế độ Quản lý';
+      navAdminTab.style.display = 'none';
+      document.querySelector('.nav-item[data-tab="recommendations"]').click();
+      showToast('Đã thoát chế độ Quản lý.', 'info');
+    }
+  });
+
+  // Admin sub tabs
+  document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.admin-view-pane').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      const view = btn.getAttribute('data-admin-view');
+      const pane = document.getElementById(`adminView${view.charAt(0).toUpperCase() + view.slice(1)}`);
+      if (pane) pane.classList.add('active');
+    });
+  });
+
+  // Add product modal
+  const adminProductModal = document.getElementById('adminProductModal');
+  const btnOpenAdd = document.getElementById('btnOpenAddProductModal');
+  const btnCloseAdminProd = document.getElementById('btnCloseAdminProdModal');
+  const adminProductForm = document.getElementById('adminProductForm');
+
+  btnOpenAdd?.addEventListener('click', () => {
+    document.getElementById('adminProdModalTitle').textContent = 'Thêm Sản Phẩm Mới Vào Đồ Thị';
+    document.getElementById('adminProdEditId').value = '';
+    adminProductForm.reset();
+    adminProductModal.style.display = 'flex';
+  });
+
+  btnCloseAdminProd?.addEventListener('click', () => adminProductModal.style.display = 'none');
+
+  adminProductForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const editId = document.getElementById('adminProdEditId').value;
+    const name = document.getElementById('adminProdName').value.trim();
+    const customId = document.getElementById('adminProdId').value.trim();
+    const category = document.getElementById('adminProdCat').value;
+    const brand = document.getElementById('adminProdBrand').value.trim();
+    const price = parseFloat(document.getElementById('adminProdPrice').value);
+    const image = document.getElementById('adminProdImage').value.trim() || 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=400';
+    const specs = document.getElementById('adminProdSpecs').value.split(',').map(s => s.trim()).filter(Boolean);
+    const purposes = Array.from(document.querySelectorAll('input[name="admin_prod_purpose"]:checked')).map(c => c.value);
+    const description = document.getElementById('adminProdDesc').value.trim();
+
+    const payload = { name, category, brand, price, image, specs, purposes, description };
+    if (customId) payload.id = customId;
+
+    try {
+      const url = editId ? `${API_BASE}/admin/products/${editId}` : `${API_BASE}/admin/products`;
+      const method = editId ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        adminProductModal.style.display = 'none';
+        showToast(data.message || 'Lưu sản phẩm vào Đồ thị thành công!', 'success');
+        loadAdminProducts();
+        loadRecommendations();
+        initAdminGraph();
+      }
+    } catch (err) {
+      showToast('Lỗi thao tác sản phẩm!', 'error');
+    }
+  });
+
+  document.getElementById('btnResetCanvasZoom')?.addEventListener('click', () => {
+    if (appState.adminVisNetwork) appState.adminVisNetwork.fit();
+  });
+
+  document.getElementById('btnRefreshAdminGraph')?.addEventListener('click', () => {
+    initAdminGraph();
+  });
 }
 
-function closeOnboardingSurvey() {
-  onboardingSurveyModal.style.display = 'none';
-  if (appState.currentUser) {
-    localStorage.setItem('survey_done_' + appState.currentUser.id, 'true');
-  }
-}
-
-async function handleOnboardingSurveySubmit(e) {
-  e.preventDefault();
-  const purposes = Array.from(document.querySelectorAll('input[name="onboard_purpose"]:checked')).map(cb => cb.value);
-  const brands = Array.from(document.querySelectorAll('input[name="onboard_brand"]:checked')).map(cb => cb.value);
-  const categories = Array.from(document.querySelectorAll('input[name="onboard_cat"]:checked')).map(cb => cb.value);
-  const budget = document.getElementById('onboardingBudget')?.value || 'all';
+async function initAdminGraph() {
+  const container = document.getElementById('visNetworkGraph');
+  if (!container || typeof vis === 'undefined') return;
 
   try {
-    const res = await fetch(`${API_BASE}/survey`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: appState.selectedUserId,
-        categories,
-        brands,
-        tags: purposes,
-        feedback: { rating: 5, comment: 'Hoàn thành khảo sát chào mừng thành viên mới!', explainability: 'Rất trực quan, dễ hiểu' }
-      })
+    const res = await fetch(`${API_BASE}/admin/graph-canvas`);
+    const graphData = await res.json();
+    appState.adminGraphData = graphData;
+
+    // Color map by node type
+    const colorMap = {
+      'User': '#3b82f6',
+      'Product': '#10b981',
+      'Category': '#f59e0b',
+      'Brand': '#8b5cf6',
+      'Purpose': '#ec4899',
+      'Spec': '#64748b'
+    };
+
+    const nodes = new vis.DataSet(graphData.nodes.map(n => ({
+      id: n.id,
+      label: n.name || n.label || n.id,
+      title: `${n.type}: ${n.name || n.id}`,
+      color: {
+        background: colorMap[n.type] || '#94a3b8',
+        border: '#ffffff',
+        highlight: { background: '#ef4444', border: '#1e293b' }
+      },
+      font: { color: '#1e293b', size: 12, face: 'Inter' },
+      shape: n.type === 'Product' ? 'box' : (n.type === 'User' ? 'circle' : 'ellipse'),
+      raw: n
+    })));
+
+    const edges = new vis.DataSet(graphData.links.map(l => ({
+      from: l.source,
+      to: l.target,
+      label: l.relation || '',
+      arrows: 'to',
+      font: { size: 9, color: '#64748b', align: 'middle' },
+      color: { color: '#cbd5e1', highlight: '#3b82f6' }
+    })));
+
+    const options = {
+      nodes: { borderWidth: 2, shadow: true },
+      edges: { smooth: { type: 'continuous' } },
+      physics: {
+        stabilization: true,
+        barnesHut: { gravitationalConstant: -2500, springLength: 120 }
+      },
+      interaction: { hover: true, tooltipDelay: 200 }
+    };
+
+    appState.adminVisNetwork = new vis.Network(container, { nodes, edges }, options);
+
+    appState.adminVisNetwork.on('selectNode', (params) => {
+      if (params.nodes.length > 0) {
+        const nodeId = params.nodes[0];
+        const nodeObj = graphData.nodes.find(n => n.id === nodeId);
+        renderNodeDetailsPanel(nodeObj, graphData.links.filter(l => l.source === nodeId || l.target === nodeId));
+      }
     });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      showToast('🎉 Đã thiết lập hồ sơ sở thích thành công! Đang tối ưu hóa gợi ý...', 'success');
-      closeOnboardingSurvey();
-      await loadUsers();
-      await loadRecommendations();
-      await loadMetrics();
-      await loadSurveyStats();
-    } else {
-      showToast(data.error || 'Lỗi khi lưu khảo sát!', 'error');
+
+    // Populate focus select
+    const focusSelect = document.getElementById('canvasFocusNodeSelect');
+    if (focusSelect) {
+      focusSelect.innerHTML = '<option value="">-- Xem toàn bộ đồ thị --</option>' +
+        graphData.nodes.map(n => `<option value="${n.id}">[${n.type}] ${n.name || n.id}</option>`).join('');
+      focusSelect.onchange = (e) => {
+        if (e.target.value && appState.adminVisNetwork) {
+          appState.adminVisNetwork.focus(e.target.value, { scale: 1.2, animation: true });
+        }
+      };
     }
   } catch (err) {
-    showToast('Lỗi kết nối khi gửi khảo sát!', 'error');
+    console.error('Error loading admin graph canvas:', err);
   }
 }
 
-async function loadDemoAccounts() {
-  try {
-    const res = await fetch(`${API_BASE}/auth/demo-accounts`);
-    const data = await res.json();
-    if (data.success) {
-      appState.demoAccounts = data.accounts;
-      renderDemoUsers(data.accounts);
-    }
-  } catch (err) { console.error('Error loading demo accounts:', err); }
+function renderNodeDetailsPanel(node, connectedLinks) {
+  const panel = document.getElementById('visNodeDetailContent');
+  if (!panel || !node) return;
+
+  panel.innerHTML = `
+    <div style="background:#f8fafc; padding:10px; border-radius:4px; border:1px solid #e2e8f0; margin-bottom:10px;">
+      <strong style="color:#0f172a; font-size:14px;">${node.name || node.label || node.id}</strong><br>
+      <span style="font-size:11px; background:#e0e7ff; color:#3730a3; padding:2px 6px; border-radius:4px;">Loại: ${node.type}</span>
+      <p style="font-size:12px; margin-top:6px; color:#475569;">${node.description || 'Không có mô tả bổ sung.'}</p>
+    </div>
+    <h5 style="font-size:12px; font-weight:700; margin-bottom:6px;">Liên kết Tri thức (${connectedLinks.length}):</h5>
+    <ul style="font-size:11px; color:#334155; padding-left:16px;">
+      ${connectedLinks.map(l => `<li><code>${l.relation}</code> ➔ ${l.source === node.id ? l.target : l.source}</li>`).join('')}
+    </ul>
+  `;
 }
 
-function renderDemoUsers(accounts) {
-  const container = document.getElementById('demoUsersContainer');
+async function loadAdminProducts() {
+  const tbody = document.getElementById('adminProductsTableBody');
+  const badge = document.getElementById('adminProductCountBadge');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/products`);
+    const products = await res.json();
+    if (badge) badge.textContent = `${products.length} sản phẩm`;
+
+    tbody.innerHTML = products.map(p => `
+      <tr>
+        <td><code>${p.id}</code></td>
+        <td><img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;" /></td>
+        <td><strong>${p.name}</strong></td>
+        <td>${p.category}</td>
+        <td><span class="brand-tag">${p.brand}</span></td>
+        <td style="color:#dc2626; font-weight:700;">${formatPrice(p.price)}</td>
+        <td>⭐ ${p.rating || 4.8}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteAdminProduct('${p.id}')">🗑️ Xóa</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+window.deleteAdminProduct = async function(productId) {
+  if (!confirm(`Bạn có chắc muốn xóa sản phẩm ${productId} khỏi Đồ thị Tri thức?`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/admin/products/${productId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message || 'Đã xóa sản phẩm khỏi đồ thị!', 'success');
+      loadAdminProducts();
+      loadRecommendations();
+      initAdminGraph();
+    }
+  } catch (e) {
+    showToast('Lỗi khi xóa sản phẩm!', 'error');
+  }
+};
+
+async function loadAdminUsers() {
+  const container = document.getElementById('adminUsersList');
   if (!container) return;
-  container.innerHTML = accounts.map(acc => `
-    <div class="demo-user-card" onclick="loginWithDemo('${acc.username}', '${acc.password}')" title="Bấm để đăng nhập ngay tài khoản ${acc.name}">
-      <img src="${acc.avatar}" alt="${acc.name}" class="demo-avatar" />
-      <div class="demo-info">
-        <span class="demo-name">${acc.name}</span>
-        <span class="demo-role">${acc.role}</span>
+
+  try {
+    const res = await fetch(`${API_BASE}/users`);
+    const users = await res.json();
+
+    container.innerHTML = users.map(u => `
+      <div class="user-card" style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <img src="${u.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;" />
+          <div>
+            <h4 style="margin:0; font-size:14px;">${u.name || u.full_name} (<code>${u.id}</code>)</h4>
+            <span style="font-size:11px; color:#64748b;">${u.role || 'Người dùng'}</span>
+          </div>
+        </div>
+        <p style="font-size:12px; margin-top:8px; color:#334155;">
+          🎯 <b>Nhu cầu hiện tại:</b> ${u.wishlist_need || 'Chưa ghi nhận'}<br>
+          🛒 <b>Lịch sử mua:</b> ${(u.history && u.history.length) || 0} sản phẩm
+        </p>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ========================================================
+// RECOMMENDATIONS & 4-DIMENSIONAL XAI EXPLANATIONS
+// ========================================================
+async function loadRecommendations() {
+  const grid = document.getElementById('productsGrid');
+  const countLabel = document.getElementById('productCountLabel');
+  if (!grid) return;
+
+  grid.innerHTML = '<div class="loading-box"><div class="spinner"></div><p>Đang duyệt Đồ thị Tri thức để tối ưu hóa gợi ý...</p></div>';
+
+  try {
+    let url = '';
+    if (appState.isGuest) {
+      url = `${API_BASE}/recommendations/guest?purpose=${appState.selectedPurpose}&algorithm=${appState.selectedAlgorithm}`;
+    } else {
+      const uid = appState.currentUser ? appState.currentUser.id : appState.selectedUserId;
+      url = `${API_BASE}/recommendations?user_id=${uid}&algorithm=${appState.selectedAlgorithm}&top_k=24`;
+    }
+
+    const res = await fetch(url);
+    const recs = await res.json();
+    appState.recommendations = recs;
+
+    filterAndRenderProducts();
+  } catch (err) {
+    grid.innerHTML = '<div class="loading-box"><p>Không thể kết nối đến máy chủ Đồ thị Tri thức.</p></div>';
+  }
+}
+
+function filterAndRenderProducts() {
+  const grid = document.getElementById('productsGrid');
+  const countLabel = document.getElementById('productCountLabel');
+  if (!grid) return;
+
+  let list = [...appState.recommendations];
+
+  // 1. Keyword filter
+  if (appState.searchQuery) {
+    const q = appState.searchQuery.toLowerCase();
+    list = list.filter(p => p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)));
+  }
+
+  // 2. Category filter
+  if (appState.selectedCategory && appState.selectedCategory !== 'all') {
+    list = list.filter(p => p.category === appState.selectedCategory);
+  }
+
+  // 3. Price filter
+  if (appState.priceMin !== null && !isNaN(appState.priceMin)) {
+    list = list.filter(p => p.price >= appState.priceMin);
+  }
+  if (appState.priceMax !== null && !isNaN(appState.priceMax)) {
+    list = list.filter(p => p.price <= appState.priceMax);
+  }
+
+  // 4. Sort
+  if (appState.sortBy === 'price_asc') list.sort((a, b) => a.price - b.price);
+  else if (appState.sortBy === 'price_desc') list.sort((a, b) => b.price - a.price);
+  else if (appState.sortBy === 'rating') list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+  else list.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+  countLabel.textContent = `Hiển thị ${list.length} sản phẩm được tối ưu từ Đồ thị Tri thức`;
+
+  if (list.length === 0) {
+    grid.innerHTML = '<div class="loading-box"><p>Không tìm thấy sản phẩm phù hợp với bộ lọc.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = list.map(prod => `
+    <div class="product-card ebay-card">
+      <div class="card-img-wrap">
+        <img src="${prod.image}" alt="${prod.name}" loading="lazy" />
+        <span class="match-score-badge">Độ khớp KG: ${Math.round((prod.score || 0.85) * 100)}%</span>
+      </div>
+      <div class="card-body">
+        <h4 class="prod-title" title="${prod.name}">${prod.name}</h4>
+        <div class="prod-price-row">
+          <span class="price-current">${formatPrice(prod.price)}</span>
+          <span class="prod-brand">${prod.brand}</span>
+        </div>
+        <p class="prod-specs-mini">${prod.specs ? prod.specs.slice(0, 3).join(' • ') : ''}</p>
+        
+        <!-- Short reason summary -->
+        <div class="prod-reason-snippet">
+          <span class="sparkle">💡</span> ${prod.explanation ? prod.explanation.summary : 'Được đề xuất dựa trên Đồ thị Tri thức.'}
+        </div>
+
+        <div class="card-actions">
+          <button class="btn btn-sm btn-ebay-outline" onclick="openExplanationModal('${prod.id}')">
+            🔍 Xem Lý Do & Key Đồ Thị
+          </button>
+          <button class="btn btn-sm btn-review-star" onclick="openProductReviewModal('${prod.id}', '${escapeHtml(prod.name)}')">
+            ⭐ Góp ý
+          </button>
+        </div>
       </div>
     </div>
   `).join('');
 }
 
-async function loginWithDemo(username, password) {
-  document.getElementById('loginUsername').value = username;
-  document.getElementById('loginPassword').value = password;
+// ========================================================
+// DETAILED EXPLANATION MODAL & KG KEYS TABLE
+// ========================================================
+window.openExplanationModal = function(productId) {
+  const prod = appState.recommendations.find(p => p.id === productId);
+  if (!prod) return;
+
+  const modal = document.getElementById('explanationModal');
+  document.getElementById('modalProductName').textContent = prod.name;
+  
+  const exp = prod.explanation || {};
+  document.getElementById('modalExplanationText').textContent = exp.summary || 'Sản phẩm có độ tương thích cao trên Đồ thị Tri thức.';
+  document.getElementById('modalPurposeDetails').textContent = exp.purpose_fit || 'Đáp ứng hoàn hảo nhu cầu làm việc và giải trí.';
+  document.getElementById('modalCompatibilityDetails').textContent = exp.compatibility || 'Tương thích phần cứng và hệ sinh thái tối đa.';
+
+  // Render KG Keys Table
+  const tbody = document.getElementById('modalKgKeysTableBody');
+  if (tbody) {
+    const keys = exp.kg_keys || [
+      { relation: 'belongs_to', entity: prod.category, weight: 1.5, contribution: '30%' },
+      { relation: 'produced_by', entity: prod.brand, weight: 2.0, contribution: '40%' },
+      { relation: 'suitable_for', entity: 'Mục đích sử dụng', weight: 2.5, contribution: '30%' }
+    ];
+    tbody.innerHTML = keys.map(k => `
+      <tr>
+        <td><span class="key-relation-tag">${k.relation}</span></td>
+        <td><strong>${k.entity || k.target}</strong></td>
+        <td><code>${k.weight}</code></td>
+        <td>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span>${k.contribution || '25%'}</span>
+            <div class="impact-bar-wrap"><div class="impact-bar-fill" style="width:${k.contribution || '25%'}"></div></div>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  // Render Reasoning Chain
+  const chainWrap = document.getElementById('modalReasoningChain');
+  if (chainWrap) {
+    const paths = exp.reasoning_paths || [`Người dùng ➔ ${prod.brand} ➔ ${prod.name}`];
+    chainWrap.innerHTML = paths.map(path => {
+      const parts = path.split('➔').map(s => s.trim());
+      return parts.map((p, idx) => `<span class="chain-node ${idx === parts.length - 1 ? 'highlight' : ''}">${p}</span>`).join(' <span class="chain-arrow">➔</span> ');
+    }).join('<br>');
+  }
+
+  // Product reviews summary
+  loadProductReviewsInModal(productId);
+
+  modal.style.display = 'flex';
+};
+
+async function loadProductReviewsInModal(productId) {
+  const container = document.getElementById('modalProductReviewsList');
+  if (!container) return;
+
   try {
-    const res = await fetch(`${API_BASE}/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
-    });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      showToast(`Đăng nhập thành công: ${data.user.name}!`, 'success');
-      authModal.style.display = 'none';
-      setCurrentUser(data.user);
-      await loadRecommendations();
-    } else {
-      showToast(data.error || 'Lỗi đăng nhập demo!', 'error');
+    const res = await fetch(`${API_BASE}/products/${productId}/reviews`);
+    const reviews = await res.json();
+
+    if (reviews.length === 0) {
+      container.innerHTML = '<p style="color:#64748b; font-size:12px;">Chưa có góp ý nào cho sản phẩm này. Hãy là người đầu tiên đóng góp!</p>';
+      return;
     }
+
+    container.innerHTML = reviews.map(r => `
+      <div class="review-item-card">
+        <div class="review-item-header">
+          <strong>👤 ${r.user_name || 'Khách'}</strong>
+          <span>${'⭐'.repeat(r.rating || 5)}</span>
+        </div>
+        <p style="margin:2px 0;">${r.comment || ''}</p>
+        ${r.pros ? `<div class="review-pros-cons"><span class="pro-badge">+ Ưu:</span> ${r.pros}</div>` : ''}
+        ${r.cons ? `<div class="review-pros-cons"><span class="con-badge">- Nhược:</span> ${r.cons}</div>` : ''}
+      </div>
+    `).join('');
   } catch (err) {
-    showToast('Lỗi kết nối máy chủ!', 'error');
+    container.innerHTML = '';
   }
 }
 
-function setCurrentUser(user) {
-  appState.currentUser = user;
-  appState.selectedUserId = user.id;
-  userSelect.value = user.id;
-  localStorage.setItem('kg_auth_user', JSON.stringify(user));
-  updateUserProfile();
-  updateHeaderAuthUI();
+// ========================================================
+// PROFILE DRAWER & INTERACTIONS
+// ========================================================
+function openProfileDrawer() {
+  if (!appState.currentUser) return;
+  const modal = document.getElementById('profileModal');
+  document.getElementById('profileModalUserName').textContent = appState.currentUser.name || appState.currentUser.full_name;
+  
+  const summary = document.getElementById('profileInfoSummary');
+  summary.innerHTML = `
+    <p><b>Mã tài khoản:</b> <code>${appState.currentUser.id}</code></p>
+    <p><b>Vai trò / Sở thích:</b> ${appState.currentUser.role || 'Người dùng công nghệ'}</p>
+    <p><b>Trạng thái phiên:</b> Đã lưu tự động (Persistent Session)</p>
+  `;
+
+  const wishBox = document.getElementById('profileWishlistDisplay');
+  wishBox.innerHTML = appState.currentUser.wishlist_need 
+    ? `🎯 <b>Sản phẩm săn đón:</b> "${appState.currentUser.wishlist_need}" (Đã kết nối cạnh KG trọng số 4.0)`
+    : 'Chưa đặt sản phẩm mong muốn cụ thể.';
+
+  modal.style.display = 'flex';
 }
 
-function restoreAuthSession() {
-  const saved = localStorage.getItem('kg_auth_user');
-  if (saved) {
-    try {
-      const user = JSON.parse(saved);
-      const exists = appState.users.find(u => u.id === user.id);
-      if (exists) {
-        setCurrentUser(exists);
-        return;
-      }
-    } catch (e) {}
-  }
-  // Default to first user (Alice)
-  if (appState.users.length > 0) {
-    setCurrentUser(appState.users[0]);
-  }
-}
-
-function handleLogout() {
-  localStorage.removeItem('kg_auth_user');
-  showToast('Đã đăng xuất tài khoản.', 'success');
-  if (appState.users.length > 0) {
-    setCurrentUser(appState.users[0]);
-  }
-  loadRecommendations();
-}
-
-function updateHeaderAuthUI() {
-  const authWrap = document.getElementById('authStatusHeader');
-  const guestWrap = document.getElementById('guestStatusHeader');
-  const topGreeting = document.getElementById('topGreetingUser');
-
-  if (appState.currentUser) {
-    if (authWrap) authWrap.style.display = 'flex';
-    if (guestWrap) guestWrap.style.display = 'none';
-    if (topGreeting) topGreeting.textContent = appState.currentUser.name;
-  } else {
-    if (authWrap) authWrap.style.display = 'none';
-    if (guestWrap) guestWrap.style.display = 'flex';
-  }
-}
-
-function handleSearch() {
-  appState.searchQuery = searchInput.value.trim().toLowerCase();
-  filterAndRenderRecs();
-}
-
-function setupSurveyEvents() {
-  const stars = document.querySelectorAll('#starRating .star');
-  const ratingText = document.getElementById('ratingText');
-  const ratingLabels = { 1: '1/5 – Chưa hài lòng', 2: '2/5 – Tạm được', 3: '3/5 – Khá ổn', 4: '4/5 – Hài lòng', 5: '5/5 – Rất hài lòng' };
-
-  stars.forEach(star => {
-    star.addEventListener('click', () => {
-      userSelectedRating = parseInt(star.getAttribute('data-val'));
-      stars.forEach(s => {
-        s.classList.toggle('active', parseInt(s.getAttribute('data-val')) <= userSelectedRating);
-      });
-      if (ratingText) ratingText.textContent = ratingLabels[userSelectedRating] || `${userSelectedRating}/5`;
-    });
-  });
-
-  document.getElementById('surveyForm')?.addEventListener('submit', handleSurveySubmit);
-}
-
-// Load Metadata
+// ========================================================
+// METADATA & UTILS
+// ========================================================
 async function loadMetadata() {
   try {
     const res = await fetch(`${API_BASE}/metadata`);
-    const data = await res.json();
-    if (data.success) {
-      appState.metadata = data;
-      renderSidebarCategories(data.categories);
-      renderSidebarBrands(data.brands);
-      renderSearchCategoryDropdown(data.categories);
-      renderColdStartOptions(data);
-      renderSurveyOptions(data);
-      renderOnboardingOptions(data);
-    }
-  } catch (err) { console.error('Error loading metadata:', err); }
-}
-
-function renderOnboardingOptions(data) {
-  const brandWrap = document.getElementById('onboardingBrandList');
-  const catWrap = document.getElementById('onboardingCategoryList');
-  if (brandWrap) {
-    brandWrap.innerHTML = data.brands.map(b => `
-      <label class="cb-item-ebay">
-        <input type="checkbox" name="onboard_brand" value="${b.id}">
-        <span>${b.name}</span>
-      </label>`).join('');
-  }
-  if (catWrap) {
-    catWrap.innerHTML = data.categories.map(c => `
-      <label class="cb-item-ebay">
-        <input type="checkbox" name="onboard_cat" value="${c.id}">
-        <span>${c.icon || ''} ${c.name}</span>
-      </label>`).join('');
-  }
-}
-
-function renderSearchCategoryDropdown(categories) {
-  if (!searchCatSelect) return;
-  searchCatSelect.innerHTML = '<option value="all">Tất cả danh mục</option>' +
-    categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-}
-
-function renderSidebarCategories(categories) {
-  const list = document.getElementById('categoryFilterList');
-  if (!list) return;
-  list.innerHTML = '<li class="cat-filter-item active" data-cat="all">Tất cả sản phẩm</li>' +
-    categories.map(c => `<li class="cat-filter-item" data-cat="${c.name}">${c.icon || ''} ${c.name}</li>`).join('');
-
-  list.querySelectorAll('.cat-filter-item').forEach(item => {
-    item.addEventListener('click', () => {
-      list.querySelectorAll('.cat-filter-item').forEach(i => i.classList.remove('active'));
-      item.classList.add('active');
-      const cat = item.getAttribute('data-cat');
-      appState.selectedCategory = cat;
-      if (searchCatSelect) searchCatSelect.value = cat;
-      filterAndRenderRecs();
-    });
-  });
-}
-
-function updateSidebarCategoryUI(cat) {
-  const items = document.querySelectorAll('.cat-filter-item');
-  items.forEach(i => {
-    i.classList.toggle('active', i.getAttribute('data-cat') === cat);
-  });
-}
-
-function renderSidebarBrands(brands) {
-  const wrap = document.getElementById('sidebarBrandList');
-  if (!wrap) return;
-  wrap.innerHTML = '<label class="filter-checkbox"><input type="radio" name="brand_filter" value="all" checked><span>Tất cả thương hiệu</span></label>' +
-    brands.map(b => `<label class="filter-checkbox"><input type="radio" name="brand_filter" value="${b.name}"><span>${b.name}</span></label>`).join('');
-
-  wrap.querySelectorAll('input[name="brand_filter"]').forEach(radio => {
-    radio.addEventListener('change', (e) => {
-      appState.selectedBrand = e.target.value;
-      filterAndRenderRecs();
-    });
-  });
-}
-
-function renderSurveyOptions(data) {
-  const brandWrap = document.getElementById('surveyBrands');
-  const catWrap = document.getElementById('surveyCategories');
-  if (brandWrap) {
-    brandWrap.innerHTML = data.brands.map(b => `
-      <label class="cb-item-ebay">
-        <input type="checkbox" name="survey_brand" value="${b.id}">
-        <span><b>${b.name}</b> (${b.country})</span>
-      </label>`).join('');
-  }
-  if (catWrap) {
-    catWrap.innerHTML = data.categories.map(c => `
-      <label class="cb-item-ebay">
-        <input type="checkbox" name="survey_cat" value="${c.id}">
-        <span>${c.icon || ''} ${c.name}</span>
-      </label>`).join('');
-  }
-}
-
-function renderColdStartOptions(data) {
-  const catWrap = document.getElementById('coldStartCategories');
-  const brandWrap = document.getElementById('coldStartBrands');
-  const tagWrap = document.getElementById('coldStartTags');
-  if (catWrap) catWrap.innerHTML = data.categories.map(c => `<label class="cb-item-ebay"><input type="checkbox" name="cold_cat" value="${c.id}"><span>${c.icon || ''} ${c.name}</span></label>`).join('');
-  if (brandWrap) brandWrap.innerHTML = data.brands.map(b => `<label class="cb-item-ebay"><input type="checkbox" name="cold_brand" value="${b.id}"><span>${b.name} (${b.country})</span></label>`).join('');
-  if (tagWrap) tagWrap.innerHTML = data.tags.map(t => `<label class="cb-item-ebay"><input type="checkbox" name="cold_tag" value="${t.id}"><span>#${t.name}</span></label>`).join('');
+    appState.metadata = await res.json();
+    populateMetadataUI();
+  } catch (err) {}
 }
 
 async function loadUsers() {
   try {
     const res = await fetch(`${API_BASE}/users`);
-    const data = await res.json();
-    if (data.success) {
-      appState.users = data.users;
-      userSelect.innerHTML = data.users.map(u => `<option value="${u.id}" ${u.id === appState.selectedUserId ? 'selected' : ''}>${u.name} (${u.role || u.id})</option>`).join('');
-      if (appState.currentUser) {
-        userSelect.value = appState.currentUser.id;
-      }
-      updateUserProfile();
+    appState.users = await res.json();
+    const select = document.getElementById('userSelect');
+    if (select) {
+      select.innerHTML = appState.users.map(u => `<option value="${u.id}">${u.name || u.full_name} (${u.role || 'User'})</option>`).join('');
     }
-  } catch (err) { console.error(err); }
+  } catch (err) {}
 }
 
-function updateUserProfile() {
-  const user = appState.currentUser || appState.users.find(u => u.id === appState.selectedUserId);
-  if (!user) return;
-  const topGreeting = document.getElementById('topGreetingUser');
-  if (topGreeting) topGreeting.textContent = user.name;
-  
-  const userNameEl = document.getElementById('userName');
-  if (userNameEl) userNameEl.textContent = user.name;
-
-  const roleEl = document.getElementById('userRole');
-  if (roleEl) roleEl.textContent = user.role || 'Thành viên K/H Team';
-
-  const avatar = document.getElementById('userAvatar');
-  if (user.avatar && avatar) avatar.src = user.avatar;
-
-  const wrap = document.getElementById('userInteractions');
-  if (wrap) wrap.innerHTML = `Đã liên kết <b>${user.interactions_count || 0}</b> mối quan hệ trong Đồ thị Tri thức`;
-}
-
-async function loadRecommendations() {
-  recsGrid.innerHTML = `<div class="loading-box"><div class="spinner"></div><p>Đang suy luận từ Đồ thị Tri thức với thuật toán [${appState.selectedAlgorithm.toUpperCase()}]...</p></div>`;
-  try {
-    const res = await fetch(`${API_BASE}/recommendations?user_id=${appState.selectedUserId}&algorithm=${appState.selectedAlgorithm}`);
-    const data = await res.json();
-    if (data.success) {
-      appState.recommendations = data.recommendations || [];
-      filterAndRenderRecs();
-    } else {
-      recsGrid.innerHTML = `<p style="color:red;padding:20px;">Lỗi: ${data.error}</p>`;
-    }
-  } catch (err) {
-    recsGrid.innerHTML = `<p style="color:red;padding:20px;">Không thể kết nối với Backend API.</p>`;
-  }
-}
-
-// Filter, Sort & Render Grid
-function filterAndRenderRecs() {
-  let list = [...appState.recommendations];
-
-  // Category filter
-  if (appState.selectedCategory !== 'all') {
-    list = list.filter(r => r.product.categories && r.product.categories.includes(appState.selectedCategory));
-  }
-
-  // Brand filter
-  if (appState.selectedBrand !== 'all') {
-    list = list.filter(r => r.product.brands && r.product.brands.includes(appState.selectedBrand));
-  }
-
-  // Price filter
-  if (appState.selectedPriceFilter === 'under_5m') {
-    list = list.filter(r => r.product.price < 5000000);
-  } else if (appState.selectedPriceFilter === '5m_15m') {
-    list = list.filter(r => r.product.price >= 5000000 && r.product.price <= 15000000);
-  } else if (appState.selectedPriceFilter === '15m_30m') {
-    list = list.filter(r => r.product.price > 15000000 && r.product.price <= 30000000);
-  } else if (appState.selectedPriceFilter === 'above_30m') {
-    list = list.filter(r => r.product.price > 30000000);
-  }
-
-  // Keyword search
-  if (appState.searchQuery) {
-    list = list.filter(r => {
-      const name = r.product.name.toLowerCase();
-      const desc = (r.product.description || '').toLowerCase();
-      const brand = ((r.product.brands && r.product.brands[0]) || '').toLowerCase();
-      return name.includes(appState.searchQuery) || desc.includes(appState.searchQuery) || brand.includes(appState.searchQuery);
-    });
-  }
-
-  // Sorting
-  if (appState.sortBy === 'price_asc') {
-    list.sort((a, b) => a.product.price - b.product.price);
-  } else if (appState.sortBy === 'price_desc') {
-    list.sort((a, b) => b.product.price - a.product.price);
-  } else if (appState.sortBy === 'rating_desc') {
-    list.sort((a, b) => (b.product.rating || 0) - (a.product.rating || 0));
-  } else {
-    list.sort((a, b) => b.score - a.score);
-  }
-
-  // Count info
-  const countEl = document.getElementById('resultsCount');
-  if (countEl) countEl.textContent = `Tìm thấy ${list.length} kết quả phù hợp trên Đồ thị Tri thức`;
-
-  if (list.length === 0) {
-    recsGrid.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:60px 20px;background:#fff;border:1px solid var(--border-light);border-radius:var(--radius-md);">
-        <p style="font-size:16px;font-weight:700;color:#111827;margin-bottom:6px;">Không tìm thấy sản phẩm phù hợp</p>
-        <p style="font-size:13px;color:var(--text-muted);">Hãy thử điều chỉnh lại bộ lọc giá hoặc danh mục ở thanh bên trái.</p>
-      </div>`;
-    return;
-  }
-
-  recsGrid.innerHTML = list.map(item => {
-    const p = item.product;
-    const formattedPrice = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p.price);
-    const brandName = (p.brands && p.brands[0]) || '';
-    const catName = (p.categories && p.categories[0]) || '';
-
-    return `
-      <div class="ebay-card-item">
-        <div class="card-top-image">
-          <img src="${p.image}" alt="${p.name}" class="product-img" loading="lazy" />
-          <span class="badge-match-score">${item.match_percent}% MATCH</span>
-          <div class="heart-watchlist" title="Thêm vào yêu thích (Like)" onclick="handleInteraction('${p.id}', 'likes')">♡</div>
-        </div>
-        <div class="card-item-body">
-          <div class="item-meta-top">
-            <span>🏷️ ${brandName}</span>
-            <span>${catName}</span>
-          </div>
-          <h4 class="item-title" title="${p.name}">${p.name}</h4>
-          <div class="item-seller-rating">
-            <span class="stars-gold">★★★★★</span> <b>${p.rating || 4.8}</b> · (1.2K+ đã bán)
-          </div>
-          <div class="item-price-wrap">
-            <div class="item-price">${formattedPrice}</div>
-          </div>
-          <div class="item-shipping">Miễn phí vận chuyển · Đổi trả 30 ngày</div>
-          <div class="item-kg-reason">
-            💡 <b>${item.reason_badge}:</b> ${item.explanation}
-          </div>
-          <div class="card-action-buttons">
-            <button class="btn-card btn-buy-now" onclick="handleInteraction('${p.id}', 'purchased')">🛒 Mua Ngay</button>
-            <button class="btn-card btn-explain-info" onclick="openExplanationModal('${p.id}')">🔍 Lý Do Gợi Ý</button>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
-}
-
-async function handleInteraction(productId, type) {
-  try {
-    const res = await fetch(`${API_BASE}/interact`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: appState.selectedUserId, product_id: productId, type })
-    });
-    const data = await res.json();
-    if (data.success) {
-      showToast(`Đã thêm quan hệ [${type.toUpperCase()}] vào Đồ thị Tri thức!`, 'success');
-      await loadUsers(); await loadRecommendations(); await loadMetrics();
-    }
-  } catch (err) { showToast('Lỗi khi tương tác!', 'error'); }
-}
-
-function openExplanationModal(productId) {
-  const item = appState.recommendations.find(r => r.product.id === productId);
-  if (!item) return;
-  const p = item.product;
-  modalBadge.textContent = item.reason_badge;
-  modalProductName.textContent = p.name;
-  modalExplanationText.textContent = item.explanation;
-  const path = item.path || [];
-  const labels = item.path_labels || path;
-  modalReasoningChain.innerHTML = labels.map((label, idx) => `
-    <span class="chain-node ${idx === 0 || idx === labels.length - 1 ? 'highlight' : ''}">${label}</span>
-    ${idx < labels.length - 1 ? '<span class="chain-arrow">➔</span>' : ''}`).join('');
-  explanationModal.style.display = 'flex';
-}
-
-// Survey Logic
-async function handleSurveySubmit(e) {
-  e.preventDefault();
-  const purposes = Array.from(document.querySelectorAll('input[name="survey_purpose"]:checked')).map(cb => cb.value);
-  const brands = Array.from(document.querySelectorAll('input[name="survey_brand"]:checked')).map(cb => cb.value);
-  const categories = Array.from(document.querySelectorAll('input[name="survey_cat"]:checked')).map(cb => cb.value);
-  const priorityTag = document.getElementById('surveyPriorityTag')?.value;
-  if (priorityTag && !purposes.includes(priorityTag)) purposes.push(priorityTag);
-  const explainability = document.querySelector('input[name="survey_explain"]:checked')?.value || 'Rất trực quan, dễ hiểu';
-  const comment = document.getElementById('surveyComment')?.value.trim() || '';
-
-  try {
-    const res = await fetch(`${API_BASE}/survey`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        user_id: appState.selectedUserId,
-        categories, brands, tags: purposes,
-        feedback: { rating: userSelectedRating, comment, explainability }
-      })
-    });
-    let data;
-    try {
-      data = await res.json();
-    } catch (jsonErr) {
-      showToast(`Máy chủ phản hồi mã ${res.status}. Vui lòng thử lại.`, 'error');
-      return;
-    }
-    if (res.ok && data.success) {
-      showToast('Đã lưu kết quả khảo sát! Đồ thị tri thức đang tối ưu hóa gợi ý...', 'success');
-      await loadUsers(); await loadRecommendations(); await loadMetrics(); await loadSurveyStats();
-      setTimeout(() => {
-        const recTab = document.querySelector('.nav-item[data-tab="recommendations"]');
-        if (recTab) recTab.click();
-      }, 700);
-    } else {
-      showToast(`Lỗi: ${data.error || 'Không thể lưu khảo sát'}`, 'error');
-    }
-  } catch (err) {
-    showToast('Lỗi kết nối khi gửi khảo sát!', 'error');
-  }
-}
-
-async function loadSurveyStats() {
-  try {
-    const res = await fetch(`${API_BASE}/survey/stats`);
-    const data = await res.json();
-    if (data.success) {
-      const s = data.stats;
-      const wrap = document.getElementById('surveyStatsContent');
-      if (!wrap) return;
-      const topBrands = Object.entries(s.pref_brands).slice(0, 3).map(([k, v]) => `${k} (${v})`).join(', ') || 'Apple, ASUS, Dell';
-      const topCats = Object.entries(s.pref_categories).slice(0, 2).map(([k, v]) => `${k} (${v})`).join(', ') || 'Laptop, Linh kiện PC';
-      wrap.innerHTML = `
-        <div class="metric-card-ebay"><div class="metric-num" style="color:var(--ebay-yellow);">${s.average_rating} ⭐</div><div class="metric-desc">Độ hài lòng người dùng (CSAT)</div></div>
-        <div class="metric-card-ebay"><div class="metric-num">${s.total_surveys}</div><div class="metric-desc">Lượt khảo sát hoàn thành</div></div>
-        <div class="metric-card-ebay"><div style="font-size:14px;font-weight:700;color:var(--ebay-green);margin-bottom:4px;">${topBrands}</div><div class="metric-desc">Thương hiệu được ưu tiên cao nhất</div></div>
-        <div class="metric-card-ebay"><div style="font-size:14px;font-weight:700;color:var(--ebay-blue);margin-bottom:4px;">${topCats}</div><div class="metric-desc">Ngành hàng được quan tâm nhiều nhất</div></div>`;
-    }
-  } catch (err) { console.error(err); }
-}
-
-// Cold Start Logic
-async function handleColdStartSubmit(e) {
-  e.preventDefault();
-  const name = document.getElementById('newUserName').value.trim();
-  const role = document.getElementById('newUserRole').value.trim() || 'Thành viên mới K/H Team';
-  const cats = Array.from(document.querySelectorAll('input[name="cold_cat"]:checked')).map(cb => cb.value);
-  const brands = Array.from(document.querySelectorAll('input[name="cold_brand"]:checked')).map(cb => cb.value);
-  const tags = Array.from(document.querySelectorAll('input[name="cold_tag"]:checked')).map(cb => cb.value);
-  const userId = 'u_' + Date.now().toString().slice(-4);
-  try {
-    const res = await fetch(`${API_BASE}/users`, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user_id: userId, name, role, categories: cats, brands, tags })
-    });
-    const data = await res.json();
-    if (data.success) {
-      showToast(`Chào mừng ${name}! Đang tải danh mục gợi ý khởi động lạnh...`, 'success');
-      await loadUsers();
-      appState.selectedUserId = userId;
-      userSelect.value = userId;
-      updateUserProfile();
-      document.querySelector('.nav-item[data-tab="recommendations"]').click();
-      await loadRecommendations(); await loadMetrics();
-    }
-  } catch (err) { showToast('Lỗi khi tạo tài khoản Cold-Start!', 'error'); }
-}
-
-// Analytics Metrics
 async function loadMetrics() {
   try {
     const res = await fetch(`${API_BASE}/metrics`);
-    const data = await res.json();
-    if (data.success) {
-      const m = data.metrics;
-      const headerM = document.getElementById('headerMetricsBadge');
-      if (headerM) headerM.textContent = `Đồ thị: ${m.total_nodes} nút • ${m.total_edges} cạnh (Mật độ: ${m.density})`;
-
-      const grid = document.getElementById('metricsGrid');
-      if (grid) grid.innerHTML = `
-        <div class="metric-card-ebay"><div class="metric-num">${m.total_nodes}</div><div class="metric-desc">Tổng số Nút (Entities)</div></div>
-        <div class="metric-card-ebay"><div class="metric-num">${m.total_edges}</div><div class="metric-desc">Tổng số Cạnh (Quan hệ)</div></div>
-        <div class="metric-card-ebay"><div class="metric-num">${m.nodes_by_type.Product || 0}</div><div class="metric-desc">Thiết bị điện tử & Linh kiện</div></div>
-        <div class="metric-card-ebay"><div class="metric-num">${m.nodes_by_type.User || 0}</div><div class="metric-desc">Hồ sơ người dùng</div></div>`;
+    const m = await res.json();
+    const badge = document.getElementById('headerMetricsBadge');
+    if (badge && m.graph) {
+      badge.textContent = `Đồ thị: ${m.graph.nodes || 48} nút • ${m.graph.edges || 115} cạnh`;
     }
-  } catch (err) { console.error(err); }
+  } catch (err) {}
 }
 
-// Toast helper
-function showToast(msg, type = 'success') {
+function populateMetadataUI() {
+  const catSelect = document.getElementById('searchCategorySelect');
+  const catFilterList = document.getElementById('categoryFilterList');
+  const brandList = document.getElementById('sidebarBrandList');
+  const onboardBrandList = document.getElementById('onboardingBrandList');
+  const onboardCatList = document.getElementById('onboardingCategoryList');
+  const surveyBrandChips = document.getElementById('surveyBrandChips');
+  const surveyCatChips = document.getElementById('surveyCatChips');
+
+  if (appState.metadata.categories && catSelect) {
+    catSelect.innerHTML = '<option value="all">Tất cả danh mục</option>' +
+      appState.metadata.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+  }
+
+  if (appState.metadata.categories && catFilterList) {
+    catFilterList.innerHTML = '<li class="cat-filter-item active" data-cat="all">Tất cả sản phẩm</li>' +
+      appState.metadata.categories.map(c => `<li class="cat-filter-item" data-cat="${c}">${c}</li>`).join('');
+    
+    catFilterList.querySelectorAll('.cat-filter-item').forEach(item => {
+      item.addEventListener('click', () => {
+        catFilterList.querySelectorAll('.cat-filter-item').forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        appState.selectedCategory = item.getAttribute('data-cat');
+        if (catSelect) catSelect.value = appState.selectedCategory;
+        filterAndRenderProducts();
+      });
+    });
+  }
+
+  if (appState.metadata.brands && brandList) {
+    brandList.innerHTML = appState.metadata.brands.map(b => `
+      <label class="sidebar-check-item">
+        <input type="checkbox" name="sidebar_brand" value="${b}" /> ${b}
+      </label>
+    `).join('');
+  }
+
+  if (appState.metadata.brands && onboardBrandList) {
+    onboardBrandList.innerHTML = appState.metadata.brands.map(b => `
+      <label class="ebay-chip"><input type="checkbox" name="onboard_brand" value="${b}"><span>${b}</span></label>
+    `).join('');
+  }
+
+  if (appState.metadata.categories && onboardCatList) {
+    onboardCatList.innerHTML = appState.metadata.categories.map(c => `
+      <label class="ebay-chip"><input type="checkbox" name="onboard_category" value="${c}"><span>${c}</span></label>
+    `).join('');
+  }
+
+  if (appState.metadata.brands && surveyBrandChips) {
+    surveyBrandChips.innerHTML = appState.metadata.brands.map(b => `
+      <label class="ebay-chip"><input type="checkbox" name="survey_brand" value="${b}"><span>${b}</span></label>
+    `).join('');
+  }
+
+  if (appState.metadata.categories && surveyCatChips) {
+    surveyCatChips.innerHTML = appState.metadata.categories.map(c => `
+      <label class="ebay-chip"><input type="checkbox" name="survey_cat" value="${c}"><span>${c}</span></label>
+    `).join('');
+  }
+}
+
+function updateSidebarCategoryUI(cat) {
+  const catFilterList = document.getElementById('categoryFilterList');
+  if (!catFilterList) return;
+  catFilterList.querySelectorAll('.cat-filter-item').forEach(item => {
+    if (item.getAttribute('data-cat') === cat) item.classList.add('active');
+    else item.classList.remove('active');
+  });
+}
+
+function setupFiltersAndSort() {
+  document.getElementById('btnApplyPriceFilter')?.addEventListener('click', () => {
+    const min = parseFloat(document.getElementById('priceMin').value);
+    const max = parseFloat(document.getElementById('priceMax').value);
+    appState.priceMin = isNaN(min) ? null : min;
+    appState.priceMax = isNaN(max) ? null : max;
+    filterAndRenderProducts();
+  });
+
+  document.getElementById('sortBySelect')?.addEventListener('change', (e) => {
+    appState.sortBy = e.target.value;
+    filterAndRenderProducts();
+  });
+
+  document.getElementById('algoSelect')?.addEventListener('change', async (e) => {
+    appState.selectedAlgorithm = e.target.value;
+    await loadRecommendations();
+  });
+
+  document.getElementById('btnRefreshRecs')?.addEventListener('click', async () => {
+    await loadRecommendations();
+    showToast('Đã làm mới đề xuất từ Đồ thị Tri thức!', 'success');
+  });
+}
+
+function formatPrice(num) {
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num || 0);
+}
+
+function escapeHtml(str) {
+  return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+function showToast(msg, type = 'info') {
   const container = document.getElementById('toastContainer');
+  if (!container) return;
   const toast = document.createElement('div');
-  toast.className = 'toast';
-  if (type === 'error') toast.style.borderLeftColor = 'var(--ebay-red)';
+  toast.className = `toast toast-${type}`;
   toast.textContent = msg;
   container.appendChild(toast);
-  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3500);
+  setTimeout(() => toast.remove(), 4000);
 }

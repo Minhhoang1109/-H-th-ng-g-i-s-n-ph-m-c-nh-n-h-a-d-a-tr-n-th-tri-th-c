@@ -421,6 +421,34 @@
       "password_hash": "6e659deaa85842cdabb5c6305fcc40033ba43772ec00d45c2a3c921741a5e377",
       "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=user_1790264284",
       "color": "#3b82f6"
+    },
+    {
+      "id": "u_hoangdt579485@gmail.com",
+      "type": "User",
+      "name": "Hoàng Trần",
+      "username": "hoangdt579485@gmail.com",
+      "email": "hoangdt579485@gmail.com",
+      "role": "Lập trình viên & IT",
+      "password_hash": "ccf05956e04148077c0f6f120d6ee72a940b9aad1cdce22eae5de6c829d16215",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=hoangdt579485@gmail.com",
+      "color": "#3b82f6",
+      "last_survey_rating": 5,
+      "last_survey_comment": "Hoàn thành khảo sát chào mừng thành viên mới!",
+      "last_survey_explainability": "Rất trực quan, dễ hiểu"
+    },
+    {
+      "id": "u_minh hoàng",
+      "type": "User",
+      "name": "Trần Minh Hoàng",
+      "username": "minh hoàng",
+      "email": "hoang123@gmail.com",
+      "role": "Hardcore Gamer & PC Builder",
+      "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=minh hoàng",
+      "color": "#3b82f6",
+      "last_survey_rating": 5,
+      "last_survey_comment": "Hoàn thành khảo sát chào mừng thành viên mới!",
+      "last_survey_explainability": "Rất trực quan, dễ hiểu"
     }
   ],
   "edges": [
@@ -1309,30 +1337,184 @@
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_user_1790264284",
       "target": "c_laptop"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_user_1790264284",
       "target": "c_accessory"
     },
     {
       "type": "prefers_brand",
       "weight": 3.0,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_user_1790264284",
       "target": "b_apple"
     },
     {
       "type": "prefers_brand",
       "weight": 3.0,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_user_1790264284",
       "target": "b_logitech"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "prefers_category",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "c_laptop"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "prefers_category",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "c_component"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "prefers_category",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "c_accessory"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "b_samsung"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "b_asus"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "b_dell"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "b_nvidia"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "b_intel"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "b_corsair"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "b_logitech"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "prefers_brand",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "b_sony"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "prefers_tag",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "prefers_tag",
+      "source": "u_hoangdt579485@gmail.com",
+      "target": "t_gaming"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_minh hoàng",
+      "target": "c_phone"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_minh hoàng",
+      "target": "c_laptop"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_minh hoàng",
+      "target": "c_audio"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_minh hoàng",
+      "target": "b_samsung"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_minh hoàng",
+      "target": "b_asus"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_minh hoàng",
+      "target": "b_dell"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_minh hoàng",
+      "target": "b_nvidia"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_minh hoàng",
+      "target": "b_intel"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "quan tâm đặc tính",
+      "source": "u_minh hoàng",
+      "target": "t_gaming"
     }
   ]
 }

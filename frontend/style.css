@@ -1447,3 +1447,445 @@ body {
   padding: 60px 0;
   color: var(--text-muted);
 }
+
+/* ========================================================
+   3-FACET SEARCH BAR (Keyword + Category + Purpose)
+   ======================================================== */
+.ebay-search-bar-3facets {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: #ffffff;
+  border: 2px solid var(--ebay-blue);
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(54,101,243,0.12);
+  transition: all 0.2s ease;
+}
+
+.ebay-search-bar-3facets:focus-within {
+  box-shadow: 0 4px 14px rgba(54,101,243,0.22);
+}
+
+.ebay-search-bar-3facets .search-input-wrap {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+}
+
+.ebay-search-bar-3facets .search-input-wrap input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--text-main);
+  padding: 10px 0;
+  background: transparent;
+}
+
+.ebay-search-bar-3facets .search-cat-dropdown,
+.ebay-search-bar-3facets .search-purpose-dropdown {
+  border-left: 1px solid var(--border-light);
+  padding: 0 8px;
+  background: #f8fafc;
+  display: flex;
+  align-items: center;
+}
+
+.ebay-search-bar-3facets select {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-main);
+  padding: 10px 4px;
+  cursor: pointer;
+}
+
+.ebay-search-bar-3facets .btn-ebay-search {
+  background: var(--ebay-blue);
+  color: #fff;
+  border: none;
+  padding: 0 24px;
+  height: 42px;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ebay-search-bar-3facets .btn-ebay-search:hover {
+  background: var(--ebay-blue-hover);
+}
+
+/* ========================================================
+   ADMIN MODE & VIS.JS 2D GRAPH CANVAS
+   ======================================================== */
+.btn-admin-badge {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-sm);
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-admin-badge:hover, .btn-admin-badge.active {
+  background: #f59e0b;
+  color: #ffffff;
+  border-color: #d97706;
+}
+
+.admin-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.admin-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 14px;
+}
+
+.admin-header-row h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.admin-header-row p {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.admin-tabs-nav {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.admin-tab-btn {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-sub);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.admin-tab-btn.active {
+  background: var(--ebay-blue);
+  color: #ffffff;
+  border-color: var(--ebay-blue);
+}
+
+.admin-view-pane {
+  display: none;
+}
+
+.admin-view-pane.active {
+  display: block;
+}
+
+/* Graph Canvas Box */
+.graph-canvas-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: #ffffff;
+  padding: 12px 18px;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  flex-wrap: wrap;
+}
+
+.canvas-filter-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.graph-canvas-container {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  border: 1px solid var(--border-light);
+  border-top: none;
+  background: #ffffff;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  height: 650px;
+  overflow: hidden;
+}
+
+.vis-network-box {
+  width: 100%;
+  height: 100%;
+  background: #f8fafc;
+}
+
+.vis-node-detail-panel {
+  background: #ffffff;
+  border-left: 1px solid var(--border-light);
+  padding: 18px;
+  overflow-y: auto;
+  font-size: 13px;
+}
+
+.vis-node-detail-panel h4 {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.vis-node-detail-panel .hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+/* Admin Tables */
+.admin-table-card {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.styled-table th {
+  background: #f1f5f9;
+  text-align: left;
+  padding: 10px 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  border-bottom: 2px solid var(--border-light);
+}
+
+.styled-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+
+.styled-table tr:hover {
+  background: #f8fafc;
+}
+
+/* ========================================================
+   RETURNING USER & GUEST BANNERS
+   ======================================================== */
+.returning-banner {
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius-sm);
+  padding: 12px 18px;
+  margin-bottom: 16px;
+}
+
+.returning-banner-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.returning-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.returning-icon {
+  font-size: 24px;
+}
+
+.returning-info strong {
+  font-size: 14px;
+  color: #1e3a8a;
+}
+
+.returning-info p {
+  font-size: 12px;
+  color: #3b82f6;
+  margin-top: 2px;
+}
+
+.guest-banner {
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: var(--radius-sm);
+  padding: 10px 16px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: #92400e;
+}
+
+.guest-banner-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ========================================================
+   XAI 4-DIMENSIONAL BREAKDOWN & KG KEYS TABLE
+   ======================================================== */
+.xai-dimensions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.xai-dim-card {
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+}
+
+.xai-dim-card h5 {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 6px;
+}
+
+.xai-dim-card .dim-text {
+  font-size: 12px;
+  color: var(--text-sub);
+  line-height: 1.4;
+}
+
+.kg-keys-table {
+  font-size: 12px;
+}
+
+.kg-keys-table th {
+  padding: 6px 10px;
+}
+
+.kg-keys-table td {
+  padding: 6px 10px;
+}
+
+.key-relation-tag {
+  background: #e0f2fe;
+  color: #0369a1;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.impact-bar-wrap {
+  width: 100%;
+  background: #e2e8f0;
+  height: 6px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 3px;
+}
+
+.impact-bar-fill {
+  background: var(--ebay-blue);
+  height: 100%;
+}
+
+/* Quick Wishlist Tags */
+.quick-wish-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.wish-tag-item {
+  background: #f1f5f9;
+  border: 1px solid var(--border-light);
+  padding: 4px 10px;
+  border-radius: 14px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.wish-tag-item:hover {
+  background: #e2e8f0;
+  color: var(--ebay-blue);
+  border-color: #cbd5e1;
+}
+
+/* Product Reviews In Modal */
+.modal-reviews-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.review-item-card {
+  background: #f8fafc;
+  border: 1px solid var(--border-light);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.review-item-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.review-pros-cons {
+  margin-top: 4px;
+  font-size: 11px;
+}
+
+.pro-badge { color: #16a34a; font-weight: 600; }
+.con-badge { color: #dc2626; font-weight: 600; }
+
+.star-rating-select {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.active-purpose-tag {
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  margin-left: 8px;
+}

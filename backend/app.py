@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from backend.graph_service import GraphService
-from backend.recommender import get_recommendations
+from backend.recommender import get_recommendations, get_guest_recommendations
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 CORS(app)
@@ -27,9 +27,6 @@ def auth_register():
     name = (data.get('name') or '').strip()
     role = (data.get('role') or 'Khách hàng mới').strip()
     email = (data.get('email') or '').strip()
-    categories = data.get('categories', [])
-    brands = data.get('brands', [])
-    tags = data.get('tags', [])
 
     if not username or not password or not name:
         return jsonify({'success': False, 'error': 'Vui lòng điền đầy đủ Tên đăng nhập, Mật khẩu và Họ tên!'}), 400
@@ -40,10 +37,7 @@ def auth_register():
             password=password,
             name=name,
             role=role,
-            email=email,
-            categories=categories,
-            brands=brands,
-            tags=tags
+            email=email
         )
         return jsonify({
             'success': True,
@@ -71,7 +65,8 @@ def auth_login():
     return jsonify({
         'success': True,
         'message': f'Đăng nhập thành công! Xin chào {user.get("name")}.',
-        'user': user
+        'user': user,
+        'is_second_login': user.get('is_second_login', False)
     })
 
 @app.route('/api/auth/demo-accounts', methods=['GET'])
@@ -85,45 +80,28 @@ def get_demo_accounts():
     ]
     return jsonify({'success': True, 'accounts': accounts})
 
-# --- DATA ROUTES ---
-@app.route('/api/users', methods=['GET'])
-def get_users():
-    users = graph_service.get_users()
-    return jsonify({'success': True, 'users': users})
-
-@app.route('/api/users', methods=['POST'])
-def create_user():
+# --- USER WISHLIST & TARGET NEED (2ND LOGIN) ---
+@app.route('/api/user/wishlist', methods=['POST'])
+def save_user_wishlist():
     data = request.json or {}
     user_id = data.get('user_id')
-    name = data.get('name')
-    role = data.get('role', 'Khách hàng mới')
-    if not user_id or not name:
-        return jsonify({'success': False, 'error': 'user_id và name là bắt buộc'}), 400
+    target_query = (data.get('query') or '').strip()
+    target_items = data.get('items', [])
 
-    user = graph_service.add_user(
-        user_id=user_id,
-        name=name,
-        role=role,
-        initial_categories=data.get('categories', []),
-        initial_brands=data.get('brands', []),
-        initial_tags=data.get('tags', [])
-    )
-    return jsonify({'success': True, 'user': user})
+    if not user_id or not target_query:
+        return jsonify({'success': False, 'error': 'user_id và query là bắt buộc'}), 400
 
-@app.route('/api/products', methods=['GET'])
-def get_products():
-    products = graph_service.get_products()
-    return jsonify({'success': True, 'products': products})
+    try:
+        wishlist = graph_service.set_user_wishlist(user_id, target_query, target_items)
+        return jsonify({
+            'success': True,
+            'message': f'Đã ghi nhận mong muốn "{target_query}" vào Đồ thị Tri thức!',
+            'wishlist': wishlist
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
 
-@app.route('/api/metadata', methods=['GET'])
-def get_metadata():
-    return jsonify({
-        'success': True,
-        'categories': graph_service.get_categories(),
-        'brands': graph_service.get_brands(),
-        'tags': graph_service.get_tags()
-    })
-
+# --- RECOMMENDATIONS (USER & GUEST) ---
 @app.route('/api/recommendations', methods=['GET'])
 def recommendations():
     user_id = request.args.get('user_id')
@@ -138,6 +116,123 @@ def recommendations():
         'user': user,
         'algorithm': algorithm,
         'recommendations': recs
+    })
+
+@app.route('/api/recommendations/guest', methods=['GET'])
+def guest_recommendations():
+    purpose = request.args.get('purpose', 't_laptrinh')
+    category = request.args.get('category', 'all')
+    recs = get_guest_recommendations(graph_service, purpose=purpose, category=category)
+    return jsonify({
+        'success': True,
+        'is_guest': True,
+        'matched_purpose': purpose,
+        'recommendations': recs
+    })
+
+# --- PRODUCT REVIEWS & FEEDBACK ---
+@app.route('/api/products/review', methods=['POST'])
+def add_product_review():
+    data = request.json or {}
+    user_id = data.get('user_id', 'guest')
+    product_id = data.get('product_id')
+    rating = data.get('rating', 5)
+    comment = data.get('comment', '')
+    pros = data.get('pros', '')
+    cons = data.get('cons', '')
+
+    if not product_id or not comment:
+        return jsonify({'success': False, 'error': 'product_id và nội dung góp ý là bắt buộc'}), 400
+
+    try:
+        review = graph_service.add_product_review(user_id, product_id, rating, comment, pros, cons)
+        return jsonify({
+            'success': True,
+            'message': 'Đã gửi đánh giá & góp ý sản phẩm thành công!',
+            'review': review
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/products/reviews', methods=['GET'])
+def get_product_reviews():
+    product_id = request.args.get('product_id')
+    if not product_id:
+        return jsonify({'success': False, 'error': 'Missing product_id'}), 400
+    reviews = graph_service.get_product_reviews(product_id)
+    return jsonify({'success': True, 'reviews': reviews})
+
+# --- ADMIN PRODUCT MANAGEMENT (CRUD) ---
+@app.route('/api/admin/products', methods=['POST'])
+def admin_add_product():
+    data = request.json or {}
+    try:
+        prod = graph_service.add_product(
+            prod_id=data.get('id'),
+            name=data.get('name'),
+            price=data.get('price'),
+            rating=data.get('rating', 4.8),
+            image=data.get('image'),
+            description=data.get('description'),
+            category_id=data.get('category_id'),
+            brand_id=data.get('brand_id'),
+            tag_ids=data.get('tag_ids', []),
+            compatible_ids=data.get('compatible_ids', [])
+        )
+        return jsonify({'success': True, 'message': f'Đã thêm sản phẩm {prod["name"]} vào Đồ thị Tri thức!', 'product': prod})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/admin/products/<prod_id>', methods=['PUT'])
+def admin_update_product(prod_id):
+    data = request.json or {}
+    try:
+        prod = graph_service.update_product(
+            prod_id=prod_id,
+            name=data.get('name'),
+            price=data.get('price'),
+            rating=data.get('rating'),
+            image=data.get('image'),
+            description=data.get('description')
+        )
+        return jsonify({'success': True, 'message': 'Đã cập nhật sản phẩm thành công!', 'product': prod})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/admin/products/<prod_id>', methods=['DELETE'])
+def admin_delete_product(prod_id):
+    try:
+        graph_service.delete_product(prod_id)
+        return jsonify({'success': True, 'message': f'Đã xóa sản phẩm {prod_id} khỏi Đồ thị Tri thức!'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+# --- ADMIN VISUAL KNOWLEDGE GRAPH CANVAS ---
+@app.route('/api/admin/graph-canvas', methods=['GET'])
+def get_admin_graph_canvas():
+    filter_type = request.args.get('filter_type', 'all')
+    entity_id = request.args.get('entity_id')
+    graph_data = graph_service.get_admin_graph_data(filter_type=filter_type, entity_id=entity_id)
+    return jsonify({'success': True, 'graph': graph_data})
+
+# --- DATA & SURVEY ROUTES ---
+@app.route('/api/users', methods=['GET'])
+def get_users():
+    users = graph_service.get_users()
+    return jsonify({'success': True, 'users': users})
+
+@app.route('/api/products', methods=['GET'])
+def get_products():
+    products = graph_service.get_products()
+    return jsonify({'success': True, 'products': products})
+
+@app.route('/api/metadata', methods=['GET'])
+def get_metadata():
+    return jsonify({
+        'success': True,
+        'categories': graph_service.get_categories(),
+        'brands': graph_service.get_brands(),
+        'tags': graph_service.get_tags()
     })
 
 @app.route('/api/interact', methods=['POST'])
@@ -166,22 +261,11 @@ def submit_survey():
     if not user_id:
         return jsonify({'success': False, 'error': 'user_id là bắt buộc'}), 400
 
-    categories = data.get('categories', [])
-    brands = data.get('brands', [])
-    tags = data.get('tags', [])
-    feedback = data.get('feedback', {})
-
     try:
-        graph_service.apply_survey(
-            user_id=user_id,
-            categories=categories,
-            brands=brands,
-            tags=tags,
-            feedback=feedback
-        )
+        graph_service.apply_detailed_survey(user_id=user_id, survey_data=data)
         return jsonify({
             'success': True,
-            'message': 'Đã lưu kết quả khảo sát và cập nhật Đồ thị tri thức thành công!'
+            'message': 'Đã lưu kết quả khảo sát chi tiết và cập nhật Đồ thị tri thức thành công!'
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
@@ -190,20 +274,6 @@ def submit_survey():
 def get_survey_stats():
     stats = graph_service.get_survey_stats()
     return jsonify({'success': True, 'stats': stats})
-
-@app.route('/api/graph', methods=['GET'])
-def get_graph():
-    center_id = request.args.get('center_id')
-    highlight_str = request.args.get('highlight_path')
-    highlight_path = highlight_str.split(',') if highlight_str else None
-
-    subgraph = graph_service.get_subgraph(
-        center_id=center_id,
-        depth=2,
-        max_nodes=60,
-        highlight_path=highlight_path
-    )
-    return jsonify({'success': True, 'graph': subgraph})
 
 @app.route('/api/metrics', methods=['GET'])
 def get_metrics():
