@@ -8,8 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Vis.js Network for Admin Graph Canvas -->
-  <script type="text/javascript" src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -37,7 +35,8 @@
           <select id="userSelect" class="header-user-select"></select>
         </div>
         <span class="divider">|</span>
-        <button id="btnAdminToggle" class="btn-admin-badge" title="Chuyển đổi giao diện quản lý">⚙️ Chế độ Quản lý</button>
+        <!-- Dedicated Link to Separate Admin Page -->
+        <a href="/admin" class="btn-admin-badge" style="text-decoration:none;" title="Truy cập Trang Quản Trị Hệ Thống">🛠️ Trang Quản Trị</a>
       </div>
       <div class="top-util-right">
         <span class="util-link" id="btnOpenWishlistQuick">🎯 Nhu cầu mong muốn</span>
@@ -59,7 +58,7 @@
   <header class="ebay-main-header">
     <div class="ebay-header-inner">
       <!-- K/H Team Logo -->
-      <a href="#" class="ebay-logo kh-logo" onclick="window.location.reload(); return false;">
+      <a href="/" class="ebay-logo kh-logo" onclick="window.location.reload(); return false;">
         <span class="logo-k">K</span><span class="logo-slash">/</span><span class="logo-h">H</span>
         <span class="logo-team">Team</span>
         <span class="logo-tag">KG-RecSys</span>
@@ -98,7 +97,7 @@
 
       <!-- Metrics Pill -->
       <div class="header-advanced-link">
-        <span id="headerMetricsBadge" class="metrics-pill">Đồ thị: 48 nút • 115 cạnh</span>
+        <span id="headerMetricsBadge" class="metrics-pill">Đồ thị: Đang tải...</span>
       </div>
     </div>
   </header>
@@ -111,7 +110,6 @@
         <li class="nav-item" data-tab="survey"><span>📋 Khảo sát Nhu cầu Chi tiết</span></li>
         <li class="nav-item" data-tab="cold-start"><span>❄️ Thử nghiệm Khởi động lạnh</span></li>
         <li class="nav-item" data-tab="analytics"><span>📊 Thống kê Đồ thị & Thuật toán</span></li>
-        <li class="nav-item admin-only-tab" id="navAdminTab" data-tab="admin" style="display:none;"><span>🛠️ Quản Trị Viên & Đồ Thị KG</span></li>
       </ul>
     </div>
   </nav>
@@ -406,93 +404,6 @@
       </div>
     </section>
 
-    <!-- TAB 5: ADMIN & KNOWLEDGE GRAPH CANVAS (ADMIN ONLY) -->
-    <section id="tab-admin" class="tab-content">
-      <div class="admin-wrapper">
-        <div class="admin-header-row">
-          <div>
-            <h2>🛠️ Bảng Điều Khiển Quản Trị Viên & Khám Phá Đồ Thị Tri Thức</h2>
-            <p>Quản lý danh mục sản phẩm (CRUD), kiểm tra người dùng và tương tác trực quan với Đồ thị Tri thức thời gian thực trên Canvas 2D.</p>
-          </div>
-          <button class="btn btn-ebay-primary" id="btnOpenAddProductModal">➕ Thêm Sản Phẩm Mới</button>
-        </div>
-
-        <!-- Admin Sub-navigation / Tabs -->
-        <div class="admin-tabs-nav">
-          <button class="admin-tab-btn active" data-admin-view="canvas">🌐 Khám Phá Đồ Thị 2D (Vis.js Canvas)</button>
-          <button class="admin-tab-btn" data-admin-view="products">📦 Quản Lý Sản Phẩm (CRUD)</button>
-          <button class="admin-tab-btn" data-admin-view="users">👥 Quản Lý Người Dùng & Hồ Sơ KG</button>
-        </div>
-
-        <!-- ADMIN VIEW 1: VIS.JS GRAPH CANVAS -->
-        <div id="adminViewCanvas" class="admin-view-pane active">
-          <div class="graph-canvas-controls">
-            <div class="canvas-filter-group">
-              <label>Lọc loại nút:</label>
-              <select id="canvasNodeTypeFilter" class="styled-select">
-                <option value="all">Tất cả các loại nút</option>
-                <option value="User">👤 Người dùng (User)</option>
-                <option value="Product">📦 Sản phẩm (Product)</option>
-                <option value="Category">🏷️ Danh mục (Category)</option>
-                <option value="Brand">🏢 Thương hiệu (Brand)</option>
-                <option value="Purpose">🎯 Mục đích (Purpose)</option>
-                <option value="Spec">⚙️ Thông số/Chip (Spec)</option>
-              </select>
-            </div>
-            <div class="canvas-filter-group">
-              <label>Điểm neo (Focus Node):</label>
-              <select id="canvasFocusNodeSelect" class="styled-select">
-                <option value="">-- Xem toàn bộ đồ thị --</option>
-              </select>
-            </div>
-            <button class="btn btn-ebay-outline btn-sm" id="btnResetCanvasZoom">🔍 Reset Tầm Nhìn</button>
-            <button class="btn btn-ebay-outline btn-sm" id="btnRefreshAdminGraph">🔄 Cập nhật Đồ thị</button>
-          </div>
-
-          <div class="graph-canvas-container">
-            <div id="visNetworkGraph" class="vis-network-box"></div>
-            <div id="visNodeInfoPanel" class="vis-node-detail-panel">
-              <h4>Chi Tiết Nút Được Chọn</h4>
-              <p class="hint">Nhấp vào bất kỳ nút nào trên đồ thị để xem thuộc tính và các liên kết tri thức.</p>
-              <div id="visNodeDetailContent"></div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ADMIN VIEW 2: PRODUCT CRUD -->
-        <div id="adminViewProducts" class="admin-view-pane" style="display:none;">
-          <div class="admin-table-card">
-            <div class="table-toolbar">
-              <input type="text" id="adminProductSearch" class="styled-input" placeholder="Lọc theo tên hoặc mã SP..." />
-              <span id="adminProductCountBadge" class="badge">Đang tải...</span>
-            </div>
-            <div class="table-responsive">
-              <table class="styled-table" id="adminProductsTable">
-                <thead>
-                  <tr>
-                    <th>Mã</th>
-                    <th>Hình ảnh</th>
-                    <th>Tên Sản Phẩm</th>
-                    <th>Danh mục</th>
-                    <th>Thương hiệu</th>
-                    <th>Giá bán</th>
-                    <th>Đánh giá</th>
-                    <th>Hành động</th>
-                  </tr>
-                </thead>
-                <tbody id="adminProductsTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- ADMIN VIEW 3: USER PROFILES -->
-        <div id="adminViewUsers" class="admin-view-pane" style="display:none;">
-          <div class="admin-users-grid" id="adminUsersList"></div>
-        </div>
-      </div>
-    </section>
-
   </main>
 
   <!-- ==================== MODALS ==================== -->
@@ -763,80 +674,7 @@
     </div>
   </div>
 
-  <!-- 6. ADMIN ADD/EDIT PRODUCT MODAL -->
-  <div class="modal-backdrop" id="adminProductModal" style="display:none;">
-    <div class="modal-dialog ebay-modal admin-prod-dialog">
-      <button class="modal-close-btn" id="btnCloseAdminProdModal">×</button>
-      <div class="modal-header">
-        <span class="modal-badge-ebay" id="adminProdModalBadge">QUẢN LÝ SẢN PHẨM</span>
-        <h3 id="adminProdModalTitle">Thêm Sản Phẩm Mới</h3>
-      </div>
-      <div class="modal-body">
-        <form id="adminProductForm">
-          <input type="hidden" id="adminProdEditId" value="" />
-          <div class="form-row-2col">
-            <div class="form-col">
-              <label class="form-label">Tên sản phẩm (*):</label>
-              <input type="text" id="adminProdName" class="styled-input w-100" placeholder="Ví dụ: Laptop Dell XPS 15" required />
-            </div>
-            <div class="form-col">
-              <label class="form-label">Mã ID (VD: p21):</label>
-              <input type="text" id="adminProdId" class="styled-input w-100" placeholder="Tự động nếu để trống" />
-            </div>
-          </div>
-          <div class="form-row-3col" style="margin-top:10px;">
-            <div class="form-col">
-              <label class="form-label">Danh mục (*):</label>
-              <select id="adminProdCat" class="styled-select w-100" required>
-                <option value="Laptop">Laptop</option>
-                <option value="PC & Linh kiện">PC & Linh kiện</option>
-                <option value="Màn hình">Màn hình</option>
-                <option value="Tai nghe & Âm thanh">Tai nghe & Âm thanh</option>
-                <option value="Bàn phím & Chuột">Bàn phím & Chuột</option>
-                <option value="Phụ kiện">Phụ kiện</option>
-              </select>
-            </div>
-            <div class="form-col">
-              <label class="form-label">Thương hiệu (*):</label>
-              <input type="text" id="adminProdBrand" class="styled-input w-100" placeholder="Apple, ASUS, Sony..." required />
-            </div>
-            <div class="form-col">
-              <label class="form-label">Giá bán (VND) (*):</label>
-              <input type="number" id="adminProdPrice" class="styled-input w-100" placeholder="35000000" required />
-            </div>
-          </div>
-          <div class="form-group" style="margin-top:10px;">
-            <label class="form-label">Link Hình ảnh (URL):</label>
-            <input type="url" id="adminProdImage" class="styled-input w-100" placeholder="https://images.unsplash.com/..." />
-          </div>
-          <div class="form-group" style="margin-top:10px;">
-            <label class="form-label">Thông số kỹ thuật chính (Specs, cách nhau bởi dấu phẩy):</label>
-            <input type="text" id="adminProdSpecs" class="styled-input w-100" placeholder="M3 Max, 36GB RAM, 1TB SSD, 16-inch Liquid Retina XDR" />
-          </div>
-          <div class="form-group" style="margin-top:10px;">
-            <label class="form-label">Mục đích sử dụng (Chọn nhiều):</label>
-            <div class="chips-grid">
-              <label class="ebay-chip"><input type="checkbox" name="admin_prod_purpose" value="t_laptrinh" checked><span>💻 Lập trình</span></label>
-              <label class="ebay-chip"><input type="checkbox" name="admin_prod_purpose" value="t_gaming"><span>🎮 Gaming</span></label>
-              <label class="ebay-chip"><input type="checkbox" name="admin_prod_purpose" value="t_dohoa"><span>🎨 Đồ họa 3D</span></label>
-              <label class="ebay-chip"><input type="checkbox" name="admin_prod_purpose" value="t_vanphong"><span>💼 Văn phòng</span></label>
-              <label class="ebay-chip"><input type="checkbox" name="admin_prod_purpose" value="t_chongon"><span>🎧 Chống ồn</span></label>
-              <label class="ebay-chip"><input type="checkbox" name="admin_prod_purpose" value="t_caocap"><span>✨ Cao cấp</span></label>
-            </div>
-          </div>
-          <div class="form-group" style="margin-top:10px;">
-            <label class="form-label">Mô tả sản phẩm:</label>
-            <textarea id="adminProdDesc" class="styled-textarea w-100" rows="2" placeholder="Mô tả tóm tắt tính năng và đối tượng sử dụng..."></textarea>
-          </div>
-          <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:16px;">
-            💾 Lưu Sản Phẩm Vào Đồ Thị Tri Thức
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <!-- 7. USER PROFILE DRAWER / MODAL -->
+  <!-- 6. USER PROFILE DRAWER / MODAL -->
   <div class="modal-backdrop" id="profileModal" style="display:none;">
     <div class="modal-dialog ebay-modal">
       <button class="modal-close-btn" id="btnCloseProfileModal">×</button>
@@ -884,7 +722,7 @@
           <li>Thuật toán: Personalized PageRank & Meta-Path</li>
           <li>Cơ sở tri thức: Electronics & PC Components</li>
           <li>Explainable AI (XAI) & KG Keys Explorer</li>
-          <li>Thời gian phản hồi thời gian thực</li>
+          <li><a href="/admin" style="color:var(--ebay-blue); font-weight:600;">🛠️ Dành cho Quản Trị Viên (Admin)</a></li>
         </ul>
       </div>
     </div>

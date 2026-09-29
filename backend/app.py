@@ -18,6 +18,11 @@ graph_service = GraphService()
 def serve_index():
     return send_from_directory(app.static_folder, 'index.html')
 
+@app.route('/admin')
+@app.route('/admin.html')
+def serve_admin():
+    return send_from_directory(app.static_folder, 'admin.html')
+
 # --- AUTHENTICATION ROUTES ---
 @app.route('/api/auth/register', methods=['POST'])
 def auth_register():

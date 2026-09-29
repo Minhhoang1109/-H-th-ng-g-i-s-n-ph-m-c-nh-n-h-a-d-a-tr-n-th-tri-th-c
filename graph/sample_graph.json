@@ -53,6 +53,11 @@
           "query": "MacBook Pro M3",
           "timestamp": "98fda6f2",
           "items": "t_laptrinh"
+        },
+        {
+          "query": "MacBook Pro M3",
+          "timestamp": "7b921cd5",
+          "items": "t_laptrinh"
         }
       ],
       "last_target_need": "MacBook Pro M3"
@@ -332,6 +337,15 @@
           "pros": "Hieu nang manh",
           "cons": "Gia hoi cao",
           "date": "Vừa xong"
+        },
+        {
+          "user_id": "u1",
+          "user_name": "Alice Nguyễn",
+          "rating": 5,
+          "comment": "Rat nhanh va muot",
+          "pros": "Hieu nang manh",
+          "cons": "Gia hoi cao",
+          "date": "Vừa xong"
         }
       ]
     },
@@ -565,6 +579,13 @@
     {
       "type": "wants",
       "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
       "label": "mong muốn",
       "source": "u1",
       "target": "p_iphone15"
@@ -573,6 +594,13 @@
       "type": "likes",
       "weight": 2.5,
       "label": "likes",
+      "source": "u1",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
       "source": "u1",
       "target": "p_airpodspro"
     },
@@ -663,6 +691,20 @@
     {
       "type": "wants",
       "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "reviewed",
+      "weight": 2.0,
+      "label": "reviewed",
+      "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
       "label": "mong muốn",
       "source": "u1",
       "target": "p_macbookm3"
@@ -705,6 +747,13 @@
     {
       "type": "wants",
       "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_rogphone8"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
       "label": "mong muốn",
       "source": "u1",
       "target": "p_rogphone8"
@@ -740,6 +789,13 @@
     {
       "type": "wants",
       "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookair"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
       "label": "mong muốn",
       "source": "u1",
       "target": "p_macbookair"
@@ -775,9 +831,23 @@
     {
       "type": "wants",
       "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
       "label": "mong muốn",
       "source": "u1",
       "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ankercharger"
     },
     {
       "type": "wants",

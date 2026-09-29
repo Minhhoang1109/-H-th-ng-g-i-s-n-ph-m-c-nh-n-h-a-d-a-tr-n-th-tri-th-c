@@ -1,11 +1,10 @@
-// K/H Team Electronics - KG-RecSys Full Application Logic
+// K/H Team Electronics - User Portal Logic
 const API_BASE = '/api';
 
 let appState = {
   users: [],
   currentUser: null,
   isGuest: false,
-  isAdmin: false,
   selectedUserId: 'u1',
   selectedAlgorithm: 'hybrid',
   selectedCategory: 'all',
@@ -16,10 +15,7 @@ let appState = {
   searchQuery: '',
   sortBy: 'kg_score',
   recommendations: [],
-  products: [],
-  metadata: { categories: [], brands: [], purposes: [] },
-  adminVisNetwork: null,
-  adminGraphData: null
+  metadata: { categories: [], brands: [], purposes: [] }
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -29,7 +25,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupWishlistModal();
   setupReviewModal();
   setupOnboardingAndSurvey();
-  setupAdminPanel();
   setupFiltersAndSort();
 
   await loadMetadata();
@@ -37,6 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   restoreSessionOrGuest();
   await loadRecommendations();
   await loadMetrics();
+  await loadAnalyticsDashboard();
 });
 
 // ========================================================
@@ -48,23 +44,13 @@ function setupNavigation() {
 
   navItems.forEach(item => {
     item.addEventListener('click', () => {
-      const target = item.getAttribute('data-tab');
-      if (target === 'admin' && !appState.isAdmin) {
-        showToast('Chế độ Quản trị viên chưa được kích hoạt! Nhấp nút "⚙️ Chế độ Quản lý" ở góc trên.', 'warning');
-        return;
-      }
       navItems.forEach(i => i.classList.remove('active'));
       tabContents.forEach(c => c.classList.remove('active'));
 
       item.classList.add('active');
+      const target = item.getAttribute('data-tab');
       const content = document.getElementById(`tab-${target}`);
       if (content) content.classList.add('active');
-
-      if (target === 'admin') {
-        initAdminGraph();
-        loadAdminProducts();
-        loadAdminUsers();
-      }
     });
   });
 
@@ -176,7 +162,7 @@ function setupAuth() {
         showToast(data.message || 'Đăng nhập thành công!', 'success');
         handleLoginSuccess(data.user);
       } else {
-        showToast(data.message || 'Sai tên đăng nhập hoặc mật khẩu!', 'error');
+        showToast(data.error || 'Sai tên đăng nhập hoặc mật khẩu!', 'error');
       }
     } catch (err) {
       showToast('Lỗi kết nối máy chủ!', 'error');
@@ -186,7 +172,7 @@ function setupAuth() {
   // Register Submit
   document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const full_name = document.getElementById('regFullName').value.trim();
+    const name = document.getElementById('regFullName').value.trim();
     const username = document.getElementById('regUsername').value.trim();
     const password = document.getElementById('regPassword').value.trim();
     const role = document.getElementById('regRole').value;
@@ -195,15 +181,15 @@ function setupAuth() {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name, username, password, role })
+        body: JSON.stringify({ name, username, password, role })
       });
       const data = await res.json();
       if (res.ok && data.success) {
         authModal.style.display = 'none';
         showToast('Đăng ký thành công! Vui lòng hoàn tất khảo sát khởi đầu.', 'success');
-        handleLoginSuccess(data.user, true); // true = isFirstRegister
+        handleLoginSuccess(data.user, true);
       } else {
-        showToast(data.message || 'Đăng ký thất bại!', 'error');
+        showToast(data.error || 'Đăng ký thất bại!', 'error');
       }
     } catch (err) {
       showToast('Lỗi kết nối máy chủ!', 'error');
@@ -232,6 +218,9 @@ function setupAuth() {
   document.getElementById('btnCloseProfileModal')?.addEventListener('click', () => {
     document.getElementById('profileModal').style.display = 'none';
   });
+
+  document.getElementById('btnGuestOpenLogin')?.addEventListener('click', () => openAuthModal('login'));
+  document.getElementById('btnHeroAuth')?.addEventListener('click', () => openAuthModal('login'));
 }
 
 function openAuthModal(mode = 'login') {
@@ -249,7 +238,6 @@ function handleLoginSuccess(user, isFirstRegister = false) {
   appState.selectedUserId = user.id;
   appState.isGuest = false;
 
-  // Track session count in localStorage
   let sessionKey = `kh_session_count_${user.id}`;
   let count = parseInt(localStorage.getItem(sessionKey) || '0', 10) + 1;
   localStorage.setItem(sessionKey, count.toString());
@@ -258,12 +246,9 @@ function handleLoginSuccess(user, isFirstRegister = false) {
   updateAuthUI();
   loadRecommendations();
 
-  // Check 1st time vs 2nd+ time
   if (isFirstRegister || count === 1) {
-    // Show 1-time onboarding survey
     document.getElementById('onboardingSurveyModal').style.display = 'flex';
   } else if (count >= 2) {
-    // Show 2nd login wishlist capture
     document.getElementById('wishlistModal').style.display = 'flex';
   }
 }
@@ -283,7 +268,6 @@ function restoreSessionOrGuest() {
       }
     } catch (e) {}
   }
-  // Default fallback
   if (appState.users.length > 0) {
     appState.currentUser = appState.users[0];
     appState.selectedUserId = appState.users[0].id;
@@ -308,14 +292,12 @@ function updateAuthUI() {
     topGreetingUser.textContent = appState.currentUser.name || appState.currentUser.full_name || appState.currentUser.username;
     if (userSelect) userSelect.value = appState.currentUser.id;
 
-    // Update hero card
     document.getElementById('userName').textContent = appState.currentUser.name || appState.currentUser.full_name;
     document.getElementById('userRole').textContent = appState.currentUser.role || 'Thành viên K/H Team';
     if (appState.currentUser.avatar) {
       document.getElementById('userAvatar').src = appState.currentUser.avatar;
     }
 
-    // Check wishlist banner
     if (appState.currentUser.wishlist_need) {
       returningUserBanner.style.display = 'block';
       document.getElementById('bannerUserName').textContent = `Chào ${appState.currentUser.name || 'bạn'}! Nhu cầu săn đón: "${appState.currentUser.wishlist_need}"`;
@@ -358,7 +340,6 @@ function setupWishlistModal() {
   btnClose?.addEventListener('click', () => modal.style.display = 'none');
   btnSkip?.addEventListener('click', () => modal.style.display = 'none');
 
-  // Clickable quick tags
   document.querySelectorAll('.wish-tag-item').forEach(tag => {
     tag.addEventListener('click', () => {
       document.getElementById('wishlistKeywordInput').value = tag.getAttribute('data-val');
@@ -400,7 +381,7 @@ function setupWishlistModal() {
 }
 
 // ========================================================
-// PRODUCT REVIEWS & FEEDBACK (Reviewed Edges)
+// PRODUCT REVIEWS & FEEDBACK
 // ========================================================
 function setupReviewModal() {
   const modal = document.getElementById('reviewModal');
@@ -449,7 +430,6 @@ function openProductReviewModal(productId, productName) {
 // 6-STEP SURVEY & ONBOARDING
 // ========================================================
 function setupOnboardingAndSurvey() {
-  // Onboarding Form (1 time)
   const onboardForm = document.getElementById('onboardingSurveyForm');
   const btnSkipOnboarding = document.getElementById('btnSkipOnboarding');
   const btnCloseOnboarding = document.getElementById('btnCloseOnboardingModal');
@@ -490,7 +470,6 @@ function setupOnboardingAndSurvey() {
     }
   });
 
-  // Detailed Survey Form (Tab 2)
   const detailedForm = document.getElementById('detailedSurveyForm');
   detailedForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -520,7 +499,6 @@ function setupOnboardingAndSurvey() {
       const data = await res.json();
       if (res.ok && data.success) {
         showToast('Đã áp dụng cấu hình phần cứng chi tiết vào Đồ thị Tri thức!', 'success');
-        // Switch back to shop tab
         document.querySelector('.nav-item[data-tab="recommendations"]').click();
         await loadRecommendations();
       }
@@ -528,275 +506,56 @@ function setupOnboardingAndSurvey() {
       showToast('Lỗi gửi khảo sát chi tiết!', 'error');
     }
   });
+
+  // Cold start runner
+  document.getElementById('btnRunColdStart')?.addEventListener('click', handleColdStartRun);
 }
 
-// ========================================================
-// ADMIN PANEL & VIS.JS 2D GRAPH CANVAS
-// ========================================================
-function setupAdminPanel() {
-  const btnAdminToggle = document.getElementById('btnAdminToggle');
-  const navAdminTab = document.getElementById('navAdminTab');
+async function handleColdStartRun() {
+  const persona = document.getElementById('coldStartPersonaSelect').value;
+  const budget = document.getElementById('coldStartBudgetSelect').value;
+  const resultsWrap = document.getElementById('coldStartResults');
+  const grid = document.getElementById('coldStartGrid');
 
-  btnAdminToggle?.addEventListener('click', () => {
-    appState.isAdmin = !appState.isAdmin;
-    if (appState.isAdmin) {
-      btnAdminToggle.classList.add('active');
-      btnAdminToggle.textContent = '🔓 Đang là Quản Lý';
-      navAdminTab.style.display = 'inline-block';
-      navAdminTab.click();
-      showToast('Đã chuyển sang chế độ Quản trị viên!', 'info');
-    } else {
-      btnAdminToggle.classList.remove('active');
-      btnAdminToggle.textContent = '⚙️ Chế độ Quản lý';
-      navAdminTab.style.display = 'none';
-      document.querySelector('.nav-item[data-tab="recommendations"]').click();
-      showToast('Đã thoát chế độ Quản lý.', 'info');
-    }
-  });
+  const personaMap = {
+    'gamer': 't_gaming',
+    'developer': 't_laptrinh',
+    'designer': 't_dohoa',
+    'office': 't_vanphong'
+  };
 
-  // Admin sub tabs
-  document.querySelectorAll('.admin-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.admin-view-pane').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      const view = btn.getAttribute('data-admin-view');
-      const pane = document.getElementById(`adminView${view.charAt(0).toUpperCase() + view.slice(1)}`);
-      if (pane) pane.classList.add('active');
-    });
-  });
-
-  // Add product modal
-  const adminProductModal = document.getElementById('adminProductModal');
-  const btnOpenAdd = document.getElementById('btnOpenAddProductModal');
-  const btnCloseAdminProd = document.getElementById('btnCloseAdminProdModal');
-  const adminProductForm = document.getElementById('adminProductForm');
-
-  btnOpenAdd?.addEventListener('click', () => {
-    document.getElementById('adminProdModalTitle').textContent = 'Thêm Sản Phẩm Mới Vào Đồ Thị';
-    document.getElementById('adminProdEditId').value = '';
-    adminProductForm.reset();
-    adminProductModal.style.display = 'flex';
-  });
-
-  btnCloseAdminProd?.addEventListener('click', () => adminProductModal.style.display = 'none');
-
-  adminProductForm?.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const editId = document.getElementById('adminProdEditId').value;
-    const name = document.getElementById('adminProdName').value.trim();
-    const customId = document.getElementById('adminProdId').value.trim();
-    const category = document.getElementById('adminProdCat').value;
-    const brand = document.getElementById('adminProdBrand').value.trim();
-    const price = parseFloat(document.getElementById('adminProdPrice').value);
-    const image = document.getElementById('adminProdImage').value.trim() || 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=400';
-    const specs = document.getElementById('adminProdSpecs').value.split(',').map(s => s.trim()).filter(Boolean);
-    const purposes = Array.from(document.querySelectorAll('input[name="admin_prod_purpose"]:checked')).map(c => c.value);
-    const description = document.getElementById('adminProdDesc').value.trim();
-
-    const payload = { name, category, brand, price, image, specs, purposes, description };
-    if (customId) payload.id = customId;
-
-    try {
-      const url = editId ? `${API_BASE}/admin/products/${editId}` : `${API_BASE}/admin/products`;
-      const method = editId ? 'PUT' : 'POST';
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      if (res.ok && data.success) {
-        adminProductModal.style.display = 'none';
-        showToast(data.message || 'Lưu sản phẩm vào Đồ thị thành công!', 'success');
-        loadAdminProducts();
-        loadRecommendations();
-        initAdminGraph();
-      }
-    } catch (err) {
-      showToast('Lỗi thao tác sản phẩm!', 'error');
-    }
-  });
-
-  document.getElementById('btnResetCanvasZoom')?.addEventListener('click', () => {
-    if (appState.adminVisNetwork) appState.adminVisNetwork.fit();
-  });
-
-  document.getElementById('btnRefreshAdminGraph')?.addEventListener('click', () => {
-    initAdminGraph();
-  });
-}
-
-async function initAdminGraph() {
-  const container = document.getElementById('visNetworkGraph');
-  if (!container || typeof vis === 'undefined') return;
+  const purpose = personaMap[persona] || 't_laptrinh';
 
   try {
-    const res = await fetch(`${API_BASE}/admin/graph-canvas`);
-    const graphData = await res.json();
-    appState.adminGraphData = graphData;
+    const res = await fetch(`${API_BASE}/recommendations/guest?purpose=${purpose}&algorithm=hybrid`);
+    const recs = await res.json();
+    resultsWrap.style.display = 'block';
 
-    // Color map by node type
-    const colorMap = {
-      'User': '#3b82f6',
-      'Product': '#10b981',
-      'Category': '#f59e0b',
-      'Brand': '#8b5cf6',
-      'Purpose': '#ec4899',
-      'Spec': '#64748b'
-    };
-
-    const nodes = new vis.DataSet(graphData.nodes.map(n => ({
-      id: n.id,
-      label: n.name || n.label || n.id,
-      title: `${n.type}: ${n.name || n.id}`,
-      color: {
-        background: colorMap[n.type] || '#94a3b8',
-        border: '#ffffff',
-        highlight: { background: '#ef4444', border: '#1e293b' }
-      },
-      font: { color: '#1e293b', size: 12, face: 'Inter' },
-      shape: n.type === 'Product' ? 'box' : (n.type === 'User' ? 'circle' : 'ellipse'),
-      raw: n
-    })));
-
-    const edges = new vis.DataSet(graphData.links.map(l => ({
-      from: l.source,
-      to: l.target,
-      label: l.relation || '',
-      arrows: 'to',
-      font: { size: 9, color: '#64748b', align: 'middle' },
-      color: { color: '#cbd5e1', highlight: '#3b82f6' }
-    })));
-
-    const options = {
-      nodes: { borderWidth: 2, shadow: true },
-      edges: { smooth: { type: 'continuous' } },
-      physics: {
-        stabilization: true,
-        barnesHut: { gravitationalConstant: -2500, springLength: 120 }
-      },
-      interaction: { hover: true, tooltipDelay: 200 }
-    };
-
-    appState.adminVisNetwork = new vis.Network(container, { nodes, edges }, options);
-
-    appState.adminVisNetwork.on('selectNode', (params) => {
-      if (params.nodes.length > 0) {
-        const nodeId = params.nodes[0];
-        const nodeObj = graphData.nodes.find(n => n.id === nodeId);
-        renderNodeDetailsPanel(nodeObj, graphData.links.filter(l => l.source === nodeId || l.target === nodeId));
-      }
-    });
-
-    // Populate focus select
-    const focusSelect = document.getElementById('canvasFocusNodeSelect');
-    if (focusSelect) {
-      focusSelect.innerHTML = '<option value="">-- Xem toàn bộ đồ thị --</option>' +
-        graphData.nodes.map(n => `<option value="${n.id}">[${n.type}] ${n.name || n.id}</option>`).join('');
-      focusSelect.onchange = (e) => {
-        if (e.target.value && appState.adminVisNetwork) {
-          appState.adminVisNetwork.focus(e.target.value, { scale: 1.2, animation: true });
-        }
-      };
-    }
-  } catch (err) {
-    console.error('Error loading admin graph canvas:', err);
-  }
-}
-
-function renderNodeDetailsPanel(node, connectedLinks) {
-  const panel = document.getElementById('visNodeDetailContent');
-  if (!panel || !node) return;
-
-  panel.innerHTML = `
-    <div style="background:#f8fafc; padding:10px; border-radius:4px; border:1px solid #e2e8f0; margin-bottom:10px;">
-      <strong style="color:#0f172a; font-size:14px;">${node.name || node.label || node.id}</strong><br>
-      <span style="font-size:11px; background:#e0e7ff; color:#3730a3; padding:2px 6px; border-radius:4px;">Loại: ${node.type}</span>
-      <p style="font-size:12px; margin-top:6px; color:#475569;">${node.description || 'Không có mô tả bổ sung.'}</p>
-    </div>
-    <h5 style="font-size:12px; font-weight:700; margin-bottom:6px;">Liên kết Tri thức (${connectedLinks.length}):</h5>
-    <ul style="font-size:11px; color:#334155; padding-left:16px;">
-      ${connectedLinks.map(l => `<li><code>${l.relation}</code> ➔ ${l.source === node.id ? l.target : l.source}</li>`).join('')}
-    </ul>
-  `;
-}
-
-async function loadAdminProducts() {
-  const tbody = document.getElementById('adminProductsTableBody');
-  const badge = document.getElementById('adminProductCountBadge');
-  if (!tbody) return;
-
-  try {
-    const res = await fetch(`${API_BASE}/products`);
-    const products = await res.json();
-    if (badge) badge.textContent = `${products.length} sản phẩm`;
-
-    tbody.innerHTML = products.map(p => `
-      <tr>
-        <td><code>${p.id}</code></td>
-        <td><img src="${p.image}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;" /></td>
-        <td><strong>${p.name}</strong></td>
-        <td>${p.category}</td>
-        <td><span class="brand-tag">${p.brand}</span></td>
-        <td style="color:#dc2626; font-weight:700;">${formatPrice(p.price)}</td>
-        <td>⭐ ${p.rating || 4.8}</td>
-        <td>
-          <button class="btn btn-sm btn-outline-danger" onclick="deleteAdminProduct('${p.id}')">🗑️ Xóa</button>
-        </td>
-      </tr>
-    `).join('');
-  } catch (err) {
-    console.error(err);
-  }
-}
-
-window.deleteAdminProduct = async function(productId) {
-  if (!confirm(`Bạn có chắc muốn xóa sản phẩm ${productId} khỏi Đồ thị Tri thức?`)) return;
-  try {
-    const res = await fetch(`${API_BASE}/admin/products/${productId}`, { method: 'DELETE' });
-    const data = await res.json();
-    if (res.ok && data.success) {
-      showToast(data.message || 'Đã xóa sản phẩm khỏi đồ thị!', 'success');
-      loadAdminProducts();
-      loadRecommendations();
-      initAdminGraph();
-    }
-  } catch (e) {
-    showToast('Lỗi khi xóa sản phẩm!', 'error');
-  }
-};
-
-async function loadAdminUsers() {
-  const container = document.getElementById('adminUsersList');
-  if (!container) return;
-
-  try {
-    const res = await fetch(`${API_BASE}/users`);
-    const users = await res.json();
-
-    container.innerHTML = users.map(u => `
-      <div class="user-card" style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:14px; margin-bottom:10px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <img src="${u.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}" style="width:48px; height:48px; border-radius:50%; object-fit:cover;" />
-          <div>
-            <h4 style="margin:0; font-size:14px;">${u.name || u.full_name} (<code>${u.id}</code>)</h4>
-            <span style="font-size:11px; color:#64748b;">${u.role || 'Người dùng'}</span>
+    grid.innerHTML = recs.map(prod => `
+      <div class="product-card ebay-card">
+        <div class="card-img-wrap">
+          <img src="${prod.image}" alt="${prod.name}" loading="lazy" />
+          <span class="match-score-badge">Độ khớp Cold-Start: ${Math.round((prod.score || 0.8) * 100)}%</span>
+        </div>
+        <div class="card-body">
+          <h4 class="prod-title">${prod.name}</h4>
+          <div class="prod-price-row">
+            <span class="price-current">${formatPrice(prod.price)}</span>
+            <span class="prod-brand">${prod.brand}</span>
+          </div>
+          <div class="prod-reason-snippet">
+            <span class="sparkle">💡</span> ${prod.explanation ? prod.explanation.summary : 'Gợi ý từ lan truyền đồ thị.'}
           </div>
         </div>
-        <p style="font-size:12px; margin-top:8px; color:#334155;">
-          🎯 <b>Nhu cầu hiện tại:</b> ${u.wishlist_need || 'Chưa ghi nhận'}<br>
-          🛒 <b>Lịch sử mua:</b> ${(u.history && u.history.length) || 0} sản phẩm
-        </p>
       </div>
     `).join('');
-  } catch (err) {
-    console.error(err);
+  } catch (e) {
+    showToast('Lỗi chạy mô phỏng khởi động lạnh!', 'error');
   }
 }
 
 // ========================================================
-// RECOMMENDATIONS & 4-DIMENSIONAL XAI EXPLANATIONS
+// RECOMMENDATIONS & XAI EXPLANATIONS
 // ========================================================
 async function loadRecommendations() {
   const grid = document.getElementById('productsGrid');
@@ -816,7 +575,7 @@ async function loadRecommendations() {
 
     const res = await fetch(url);
     const recs = await res.json();
-    appState.recommendations = recs;
+    appState.recommendations = Array.isArray(recs) ? recs : (recs.recommendations || []);
 
     filterAndRenderProducts();
   } catch (err) {
@@ -831,18 +590,15 @@ function filterAndRenderProducts() {
 
   let list = [...appState.recommendations];
 
-  // 1. Keyword filter
   if (appState.searchQuery) {
     const q = appState.searchQuery.toLowerCase();
     list = list.filter(p => p.name.toLowerCase().includes(q) || (p.description && p.description.toLowerCase().includes(q)));
   }
 
-  // 2. Category filter
   if (appState.selectedCategory && appState.selectedCategory !== 'all') {
     list = list.filter(p => p.category === appState.selectedCategory);
   }
 
-  // 3. Price filter
   if (appState.priceMin !== null && !isNaN(appState.priceMin)) {
     list = list.filter(p => p.price >= appState.priceMin);
   }
@@ -850,7 +606,6 @@ function filterAndRenderProducts() {
     list = list.filter(p => p.price <= appState.priceMax);
   }
 
-  // 4. Sort
   if (appState.sortBy === 'price_asc') list.sort((a, b) => a.price - b.price);
   else if (appState.sortBy === 'price_desc') list.sort((a, b) => b.price - a.price);
   else if (appState.sortBy === 'rating') list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
@@ -877,7 +632,6 @@ function filterAndRenderProducts() {
         </div>
         <p class="prod-specs-mini">${prod.specs ? prod.specs.slice(0, 3).join(' • ') : ''}</p>
         
-        <!-- Short reason summary -->
         <div class="prod-reason-snippet">
           <span class="sparkle">💡</span> ${prod.explanation ? prod.explanation.summary : 'Được đề xuất dựa trên Đồ thị Tri thức.'}
         </div>
@@ -910,7 +664,6 @@ window.openExplanationModal = function(productId) {
   document.getElementById('modalPurposeDetails').textContent = exp.purpose_fit || 'Đáp ứng hoàn hảo nhu cầu làm việc và giải trí.';
   document.getElementById('modalCompatibilityDetails').textContent = exp.compatibility || 'Tương thích phần cứng và hệ sinh thái tối đa.';
 
-  // Render KG Keys Table
   const tbody = document.getElementById('modalKgKeysTableBody');
   if (tbody) {
     const keys = exp.kg_keys || [
@@ -933,7 +686,6 @@ window.openExplanationModal = function(productId) {
     `).join('');
   }
 
-  // Render Reasoning Chain
   const chainWrap = document.getElementById('modalReasoningChain');
   if (chainWrap) {
     const paths = exp.reasoning_paths || [`Người dùng ➔ ${prod.brand} ➔ ${prod.name}`];
@@ -943,9 +695,7 @@ window.openExplanationModal = function(productId) {
     }).join('<br>');
   }
 
-  // Product reviews summary
   loadProductReviewsInModal(productId);
-
   modal.style.display = 'flex';
 };
 
@@ -954,8 +704,9 @@ async function loadProductReviewsInModal(productId) {
   if (!container) return;
 
   try {
-    const res = await fetch(`${API_BASE}/products/${productId}/reviews`);
-    const reviews = await res.json();
+    const res = await fetch(`${API_BASE}/products/reviews?product_id=${productId}`);
+    const data = await res.json();
+    const reviews = data.reviews || [];
 
     if (reviews.length === 0) {
       container.innerHTML = '<p style="color:#64748b; font-size:12px;">Chưa có góp ý nào cho sản phẩm này. Hãy là người đầu tiên đóng góp!</p>';
@@ -1015,10 +766,11 @@ async function loadMetadata() {
 async function loadUsers() {
   try {
     const res = await fetch(`${API_BASE}/users`);
-    appState.users = await res.json();
+    const data = await res.json();
+    appState.users = data.users || data || [];
     const select = document.getElementById('userSelect');
     if (select) {
-      select.innerHTML = appState.users.map(u => `<option value="${u.id}">${u.name || u.full_name} (${u.role || 'User'})</option>`).join('');
+      select.innerHTML = appState.users.map(u => `<option value="${u.id}">${u.name || u.full_name || u.username} (${u.role || 'User'})</option>`).join('');
     }
   } catch (err) {}
 }
@@ -1026,12 +778,39 @@ async function loadUsers() {
 async function loadMetrics() {
   try {
     const res = await fetch(`${API_BASE}/metrics`);
-    const m = await res.json();
+    const data = await res.json();
+    const m = data.metrics || data;
     const badge = document.getElementById('headerMetricsBadge');
-    if (badge && m.graph) {
-      badge.textContent = `Đồ thị: ${m.graph.nodes || 48} nút • ${m.graph.edges || 115} cạnh`;
+    if (badge && m) {
+      badge.textContent = `Đồ thị: ${m.total_nodes || 52} nút • ${m.total_edges || 191} cạnh`;
     }
   } catch (err) {}
+}
+
+async function loadAnalyticsDashboard() {
+  const container = document.getElementById('analyticsDashboard');
+  if (!container) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/metrics`);
+    const data = await res.json();
+    const m = data.metrics || data;
+
+    container.innerHTML = `
+      <div class="metric-card">
+        <h4>Cấu trúc Đồ thị (Graph Topology)</h4>
+        <p><b>Tổng số nút:</b> ${m.total_nodes || 52}</p>
+        <p><b>Tổng số cạnh quan hệ:</b> ${m.total_edges || 191}</p>
+        <p><b>Mật độ liên kết:</b> ${m.density || 0.07}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Thuật toán Gợi ý (Algorithms)</h4>
+        <p><b>PPR:</b> Personalized PageRank (Restart alpha = 0.85)</p>
+        <p><b>Meta-path:</b> U-B-P, U-N-P, U-P-U-P</p>
+        <p><b>Hybrid:</b> 0.55 Meta-path + 0.45 PPR + Rating Weight</p>
+      </div>
+    `;
+  } catch (e) {}
 }
 
 function populateMetadataUI() {
@@ -1043,14 +822,17 @@ function populateMetadataUI() {
   const surveyBrandChips = document.getElementById('surveyBrandChips');
   const surveyCatChips = document.getElementById('surveyCatChips');
 
-  if (appState.metadata.categories && catSelect) {
+  const categories = (appState.metadata.categories || []).map(c => typeof c === 'object' ? c.name : c);
+  const brands = (appState.metadata.brands || []).map(b => typeof b === 'object' ? b.name : b);
+
+  if (categories.length && catSelect) {
     catSelect.innerHTML = '<option value="all">Tất cả danh mục</option>' +
-      appState.metadata.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+      categories.map(c => `<option value="${c}">${c}</option>`).join('');
   }
 
-  if (appState.metadata.categories && catFilterList) {
+  if (categories.length && catFilterList) {
     catFilterList.innerHTML = '<li class="cat-filter-item active" data-cat="all">Tất cả sản phẩm</li>' +
-      appState.metadata.categories.map(c => `<li class="cat-filter-item" data-cat="${c}">${c}</li>`).join('');
+      categories.map(c => `<li class="cat-filter-item" data-cat="${c}">${c}</li>`).join('');
     
     catFilterList.querySelectorAll('.cat-filter-item').forEach(item => {
       item.addEventListener('click', () => {
@@ -1063,34 +845,34 @@ function populateMetadataUI() {
     });
   }
 
-  if (appState.metadata.brands && brandList) {
-    brandList.innerHTML = appState.metadata.brands.map(b => `
+  if (brands.length && brandList) {
+    brandList.innerHTML = brands.map(b => `
       <label class="sidebar-check-item">
         <input type="checkbox" name="sidebar_brand" value="${b}" /> ${b}
       </label>
     `).join('');
   }
 
-  if (appState.metadata.brands && onboardBrandList) {
-    onboardBrandList.innerHTML = appState.metadata.brands.map(b => `
+  if (brands.length && onboardBrandList) {
+    onboardBrandList.innerHTML = brands.map(b => `
       <label class="ebay-chip"><input type="checkbox" name="onboard_brand" value="${b}"><span>${b}</span></label>
     `).join('');
   }
 
-  if (appState.metadata.categories && onboardCatList) {
-    onboardCatList.innerHTML = appState.metadata.categories.map(c => `
+  if (categories.length && onboardCatList) {
+    onboardCatList.innerHTML = categories.map(c => `
       <label class="ebay-chip"><input type="checkbox" name="onboard_category" value="${c}"><span>${c}</span></label>
     `).join('');
   }
 
-  if (appState.metadata.brands && surveyBrandChips) {
-    surveyBrandChips.innerHTML = appState.metadata.brands.map(b => `
+  if (brands.length && surveyBrandChips) {
+    surveyBrandChips.innerHTML = brands.map(b => `
       <label class="ebay-chip"><input type="checkbox" name="survey_brand" value="${b}"><span>${b}</span></label>
     `).join('');
   }
 
-  if (appState.metadata.categories && surveyCatChips) {
-    surveyCatChips.innerHTML = appState.metadata.categories.map(c => `
+  if (categories.length && surveyCatChips) {
+    surveyCatChips.innerHTML = categories.map(c => `
       <label class="ebay-chip"><input type="checkbox" name="survey_cat" value="${c}"><span>${c}</span></label>
     `).join('');
   }
@@ -1127,6 +909,13 @@ function setupFiltersAndSort() {
   document.getElementById('btnRefreshRecs')?.addEventListener('click', async () => {
     await loadRecommendations();
     showToast('Đã làm mới đề xuất từ Đồ thị Tri thức!', 'success');
+  });
+
+  document.getElementById('btnCloseModal')?.addEventListener('click', () => {
+    document.getElementById('explanationModal').style.display = 'none';
+  });
+  document.getElementById('btnModalClose')?.addEventListener('click', () => {
+    document.getElementById('explanationModal').style.display = 'none';
   });
 }
 
