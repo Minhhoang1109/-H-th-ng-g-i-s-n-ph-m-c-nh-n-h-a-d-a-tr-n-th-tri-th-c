@@ -241,7 +241,16 @@ function handleLoginSuccess(user, isFirstRegister = false) {
   let sessionKey = `kh_session_count_${user.id}`;
   let count = parseInt(localStorage.getItem(sessionKey) || '0', 10) + 1;
   localStorage.setItem(sessionKey, count.toString());
-  localStorage.setItem('kh_recsys_session', JSON.stringify({ userId: user.id, username: user.username }));
+  localStorage.setItem('kh_recsys_session', JSON.stringify({ userId: user.id, username: user.username, is_admin: !!(user.is_admin || user.username === 'admin' || user.id === 'admin') }));
+
+  // Nếu là tài khoản Quản trị viên (admin), chuyển hướng ngay đến trang Quản trị
+  if (user.is_admin || user.username === 'admin' || user.id === 'admin') {
+    showToast('Đăng nhập Quản trị viên thành công! Đang chuyển đến Trang Quản Trị...', 'success');
+    setTimeout(() => {
+      window.location.href = '/admin';
+    }, 600);
+    return;
+  }
 
   updateAuthUI();
   loadRecommendations();
@@ -269,8 +278,10 @@ function restoreSessionOrGuest() {
     } catch (e) {}
   }
   if (appState.users.length > 0) {
-    appState.currentUser = appState.users[0];
-    appState.selectedUserId = appState.users[0].id;
+    // Default to first regular user if guest
+    const defaultUser = appState.users.find(u => !u.is_admin && u.username !== 'admin') || appState.users[0];
+    appState.currentUser = defaultUser;
+    appState.selectedUserId = defaultUser.id;
     appState.isGuest = false;
   } else {
     appState.isGuest = true;
@@ -285,6 +296,12 @@ function updateAuthUI() {
   const userSelect = document.getElementById('userSelect');
   const returningUserBanner = document.getElementById('returningUserBanner');
   const guestRecNotice = document.getElementById('guestRecNotice');
+  const headerAdminLink = document.getElementById('headerAdminLink');
+
+  const isAdmin = !!(appState.currentUser && (appState.currentUser.is_admin || appState.currentUser.username === 'admin' || appState.currentUser.id === 'admin'));
+  if (headerAdminLink) {
+    headerAdminLink.style.display = isAdmin ? 'inline-flex' : 'none';
+  }
 
   if (appState.currentUser && !appState.isGuest) {
     authStatusHeader.style.display = 'flex';

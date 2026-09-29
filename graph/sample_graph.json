@@ -60,7 +60,8 @@
           "items": "t_laptrinh"
         }
       ],
-      "last_target_need": "MacBook Pro M3"
+      "last_target_need": "MacBook Pro M3",
+      "login_count": 5
     },
     {
       "id": "u2",
@@ -538,6 +539,21 @@
       "last_survey_rating": 5,
       "last_survey_comment": "Hoàn thành khảo sát chào mừng thành viên mới!",
       "last_survey_explainability": "Rất trực quan, dễ hiểu"
+    },
+    {
+      "id": "admin",
+      "type": "User",
+      "name": "Quản Trị Viên Hệ Thống",
+      "username": "admin",
+      "email": "admin@khteam.vn",
+      "role": "Administrator",
+      "is_admin": true,
+      "password_hash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
+      "color": "#e53238",
+      "login_count": 3,
+      "survey_completed": true,
+      "wishlist": []
     }
   ],
   "edges": [
@@ -586,7 +602,7 @@
     {
       "type": "wants",
       "weight": 4.0,
-      "label": "mong muốn",
+      "label": "wants",
       "source": "u1",
       "target": "p_iphone15"
     },
@@ -635,7 +651,7 @@
     {
       "type": "wants",
       "weight": 4.0,
-      "label": "mong muốn",
+      "label": "wants",
       "source": "u1",
       "target": "p_airpodspro"
     },
@@ -705,14 +721,14 @@
     {
       "type": "wants",
       "weight": 4.0,
-      "label": "mong muốn",
+      "label": "wants",
       "source": "u1",
       "target": "p_macbookm3"
     },
     {
       "type": "reviewed",
       "weight": 2.0,
-      "label": "đã đánh giá",
+      "label": "reviewed",
       "source": "u1",
       "target": "p_macbookm3"
     },
@@ -754,7 +770,7 @@
     {
       "type": "wants",
       "weight": 4.0,
-      "label": "mong muốn",
+      "label": "wants",
       "source": "u1",
       "target": "p_rogphone8"
     },
@@ -796,7 +812,7 @@
     {
       "type": "wants",
       "weight": 4.0,
-      "label": "mong muốn",
+      "label": "wants",
       "source": "u1",
       "target": "p_macbookair"
     },
@@ -838,7 +854,7 @@
     {
       "type": "wants",
       "weight": 4.0,
-      "label": "mong muốn",
+      "label": "wants",
       "source": "u1",
       "target": "p_ssdsamsung"
     },
@@ -880,28 +896,28 @@
     {
       "type": "wants",
       "weight": 4.0,
-      "label": "mong muốn",
+      "label": "wants",
       "source": "u1",
       "target": "p_ankercharger"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u1",
       "target": "c_laptop"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u1",
       "target": "b_apple"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u1",
       "target": "b_sony"
     },

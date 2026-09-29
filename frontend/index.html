@@ -35,8 +35,8 @@
           <select id="userSelect" class="header-user-select"></select>
         </div>
         <span class="divider">|</span>
-        <!-- Dedicated Link to Separate Admin Page -->
-        <a href="/admin" class="btn-admin-badge" style="text-decoration:none;" title="Truy cập Trang Quản Trị Hệ Thống">🛠️ Trang Quản Trị</a>
+        <!-- Dedicated Link to Separate Admin Page (Only visible to Admin) -->
+        <a href="/admin" id="headerAdminLink" class="btn-admin-badge" style="display:none; text-decoration:none;" title="Truy cập Trang Quản Trị Hệ Thống">🛠️ Trang Quản Trị</a>
       </div>
       <div class="top-util-right">
         <span class="util-link" id="btnOpenWishlistQuick">🎯 Nhu cầu mong muốn</span>
@@ -432,7 +432,12 @@
                 <button type="button" class="btn-toggle-pwd" id="btnToggleLoginPwd">👁️</button>
               </div>
             </div>
-            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:18px;">
+            <div style="margin-top:8px; font-size:12px; color:var(--text-muted); background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px dashed #cbd5e1;">
+              💡 <b>Gợi ý tài khoản:</b><br/>
+              • Quản trị viên: <code>admin</code> / <code>admin</code> (đưa thẳng vào trang Quản trị)<br/>
+              • Người dùng mẫu: <code>alice</code> / <code>123456</code> hoặc <code>bob</code> / <code>123456</code>
+            </div>
+            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:14px;">
               Đăng Nhập Ngay 🚀
             </button>
           </form>

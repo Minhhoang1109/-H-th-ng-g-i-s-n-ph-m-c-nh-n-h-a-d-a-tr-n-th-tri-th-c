@@ -12,6 +12,12 @@ let adminState = {
 document.addEventListener('DOMContentLoaded', async () => {
   setupAdminTabs();
   setupProductForm();
+  
+  document.getElementById('btnAdminLogout')?.addEventListener('click', () => {
+    localStorage.removeItem('kh_recsys_session');
+    window.location.href = '/';
+  });
+
   await loadMetrics();
   await loadAdminProducts();
   await loadAdminUsers();
