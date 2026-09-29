@@ -572,6 +572,7 @@ async function loadUsers() {
 function updateUserProfile() {
   const user = appState.currentUser || appState.users.find(u => u.id === appState.selectedUserId);
   if (!user) return;
+<<<<<<< HEAD
   const topGreeting = document.getElementById('topGreetingUser');
   if (topGreeting) topGreeting.textContent = user.name;
   
@@ -581,11 +582,28 @@ function updateUserProfile() {
   const roleEl = document.getElementById('userRole');
   if (roleEl) roleEl.textContent = user.role || 'Thành viên K/H Team';
 
+=======
+  updateSurveyVisibility(user);
+  document.getElementById('topGreetingUser').textContent = user.name;
+  document.getElementById('userName').textContent = user.name;
+  document.getElementById('userRole').textContent = user.role || 'Thành viên eBay';
+>>>>>>> d227962 (Cập nhật)
   const avatar = document.getElementById('userAvatar');
   if (user.avatar && avatar) avatar.src = user.avatar;
 
   const wrap = document.getElementById('userInteractions');
   if (wrap) wrap.innerHTML = `Đã liên kết <b>${user.interactions_count || 0}</b> mối quan hệ trong Đồ thị Tri thức`;
+}
+
+function updateSurveyVisibility(user) {
+  const surveyCompleted = Boolean(user.survey_completed);
+  document.querySelectorAll('.nav-item[data-tab="survey"], .nav-shortcut[data-target="survey"], #btnOpenSurvey').forEach(element => {
+    element.style.display = surveyCompleted ? 'none' : '';
+  });
+
+  if (surveyCompleted && document.getElementById('tab-survey')?.classList.contains('active')) {
+    document.querySelector('.nav-item[data-tab="recommendations"]')?.click();
+  }
 }
 
 async function loadRecommendations() {
@@ -812,7 +830,7 @@ async function handleColdStartSubmit(e) {
       appState.selectedUserId = userId;
       userSelect.value = userId;
       updateUserProfile();
-      document.querySelector('.nav-item[data-tab="recommendations"]').click();
+      document.querySelector('.nav-item[data-tab="survey"]').click();
       await loadRecommendations(); await loadMetrics();
     }
   } catch (err) { showToast('Lỗi khi tạo tài khoản Cold-Start!', 'error'); }

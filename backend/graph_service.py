@@ -82,6 +82,7 @@ class GraphService:
                 out_degree = self.graph.out_degree(node_id)
                 u = dict(attrs)
                 u["interactions_count"] = out_degree
+                u["survey_completed"] = u.get("survey_completed", "last_survey_rating" in u)
                 u.pop("password_hash", None)
                 users.append(u)
         return sorted(users, key=lambda x: x.get("id"))
@@ -90,6 +91,7 @@ class GraphService:
         if user_id in self.graph and self.graph.nodes[user_id].get("type") == "User":
             u = dict(self.graph.nodes[user_id])
             u["interactions_count"] = self.graph.out_degree(user_id)
+            u["survey_completed"] = u.get("survey_completed", "last_survey_rating" in u)
             u.pop("password_hash", None)
             return u
         return None
@@ -280,6 +282,11 @@ class GraphService:
         if user_id not in self.graph:
             raise ValueError(f"User {user_id} not found")
 
+        user_node = self.graph.nodes[user_id]
+        if user_node.get("survey_completed", "last_survey_rating" in user_node):
+            raise ValueError("Tài khoản này đã hoàn tất khảo sát nhu cầu")
+
+        # Remove prior preference edges to update with new survey choices
         edges_to_remove = []
         for _, v, k, d in self.graph.out_edges(user_id, keys=True, data=True):
             if d.get("type") in ["prefers_category", "prefers_brand", "prefers_tag"]:
@@ -301,7 +308,6 @@ class GraphService:
                     self.graph.add_edge(user_id, tag_id, type="prefers_tag", weight=2.5, label="quan tâm đặc tính")
 
         if feedback:
-            user_node = self.graph.nodes[user_id]
             if "rating" in feedback:
                 user_node["last_survey_rating"] = feedback["rating"]
             if "comment" in feedback:
@@ -309,6 +315,7 @@ class GraphService:
             if "explainability" in feedback:
                 user_node["last_survey_explainability"] = feedback["explainability"]
 
+        user_node["survey_completed"] = True
         self.save_graph()
         return True
 
