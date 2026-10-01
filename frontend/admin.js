@@ -28,14 +28,32 @@ function setupAdminTabs() {
   document.querySelectorAll('.admin-tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.admin-view-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.admin-view-pane').forEach(p => {
+        p.classList.remove('active');
+        p.style.display = 'none';
+      });
       btn.classList.add('active');
       const view = btn.getAttribute('data-admin-view');
       const pane = document.getElementById(`adminView${view.charAt(0).toUpperCase() + view.slice(1)}`);
-      if (pane) pane.classList.add('active');
+      if (pane) {
+        pane.classList.add('active');
+        pane.style.display = 'block';
+      }
 
       if (view === 'canvas' && adminState.visNetwork) {
         setTimeout(() => adminState.visNetwork.fit(), 200);
+      } else if (view === 'products') {
+        if (!adminState.products || adminState.products.length === 0) {
+          loadAdminProducts();
+        } else {
+          renderProductsTable(adminState.products);
+        }
+      } else if (view === 'users') {
+        if (!adminState.users || adminState.users.length === 0) {
+          loadAdminUsers();
+        } else {
+          renderAdminUsers(adminState.users);
+        }
       }
     });
   });
@@ -51,8 +69,25 @@ function setupAdminTabs() {
   // Search in products table
   document.getElementById('adminProductSearch')?.addEventListener('input', (e) => {
     const q = e.target.value.toLowerCase().trim();
-    renderProductsTable(adminState.products.filter(p => 
-      p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q) || (p.brand && p.brand.toLowerCase().includes(q))
+    renderProductsTable(adminState.products.filter(p => {
+      const cat = (p.categories && p.categories.join(' ')) || p.category || '';
+      const brand = (p.brands && p.brands.join(' ')) || p.brand || '';
+      return p.name.toLowerCase().includes(q) || 
+             p.id.toLowerCase().includes(q) || 
+             brand.toLowerCase().includes(q) ||
+             cat.toLowerCase().includes(q);
+    }));
+  });
+
+  // Search in users list
+  document.getElementById('adminUserSearch')?.addEventListener('input', (e) => {
+    const q = e.target.value.toLowerCase().trim();
+    renderAdminUsers(adminState.users.filter(u => 
+      (u.name && u.name.toLowerCase().includes(q)) || 
+      (u.username && u.username.toLowerCase().includes(q)) || 
+      (u.id && u.id.toLowerCase().includes(q)) ||
+      (u.email && u.email.toLowerCase().includes(q)) ||
+      (u.role && u.role.toLowerCase().includes(q))
     ));
   });
 }
@@ -135,6 +170,17 @@ async function initAdminGraph() {
 
     adminState.visNetwork = new vis.Network(container, { nodes, edges }, options);
 
+    adminState.visNetwork.once('stabilizationIterationsDone', () => {
+      adminState.visNetwork.fit({ animation: { duration: 400 } });
+    });
+
+    // Fallback fit after 300ms
+    setTimeout(() => {
+      if (adminState.visNetwork) {
+        adminState.visNetwork.fit();
+      }
+    }, 300);
+
     adminState.visNetwork.on('selectNode', (params) => {
       if (params.nodes.length > 0) {
         const nodeId = params.nodes[0];
@@ -147,26 +193,66 @@ async function initAdminGraph() {
     });
 
     const focusSelect = document.getElementById('canvasFocusNodeSelect');
+    const typeFilter = document.getElementById('canvasNodeTypeFilter');
+
+    function applyAdminGraphFilters() {
+      const selectedFocusId = focusSelect ? focusSelect.value : '';
+      const selectedType = typeFilter ? typeFilter.value : 'all';
+
+      let filteredNodes = nodesList;
+      let filteredEdges = edgesList;
+
+      // 1. If a Focus Node (Điểm neo) is chosen, only keep the focus node + direct neighbors + connections between them
+      if (selectedFocusId) {
+        const neighborNodeIds = new Set([selectedFocusId]);
+        const activeEdges = [];
+
+        edgesList.forEach(e => {
+          if (e.from === selectedFocusId || e.to === selectedFocusId) {
+            neighborNodeIds.add(e.from);
+            neighborNodeIds.add(e.to);
+            activeEdges.push(e);
+          }
+        });
+
+        filteredNodes = nodesList.filter(n => neighborNodeIds.has(n.id));
+        filteredEdges = activeEdges;
+
+        // Auto display details panel for this focus node
+        const nodeObj = (graphData.nodes || []).find(n => n.id === selectedFocusId);
+        const connectedLinks = (graphData.edges || graphData.links || []).filter(l => 
+          (l.from || l.source) === selectedFocusId || (l.to || l.target) === selectedFocusId
+        );
+        if (nodeObj) renderNodeDetailsPanel(nodeObj, connectedLinks);
+      }
+
+      // 2. If node type filter is active
+      if (selectedType !== 'all') {
+        filteredNodes = filteredNodes.filter(n => n.raw.type === selectedType || n.id === selectedFocusId);
+        const validNodeIds = new Set(filteredNodes.map(n => n.id));
+        filteredEdges = filteredEdges.filter(e => validNodeIds.has(e.from) && validNodeIds.has(e.to));
+      }
+
+      nodes.clear();
+      nodes.add(filteredNodes);
+
+      edges.clear();
+      edges.add(filteredEdges);
+
+      setTimeout(() => {
+        if (adminState.visNetwork) {
+          adminState.visNetwork.fit({ animation: { duration: 300 } });
+        }
+      }, 100);
+    }
+
     if (focusSelect) {
       focusSelect.innerHTML = '<option value="">-- Xem toàn bộ đồ thị --</option>' +
         (graphData.nodes || []).map(n => `<option value="${n.id}">[${n.type}] ${n.label || n.name || n.id}</option>`).join('');
-      focusSelect.onchange = (e) => {
-        if (e.target.value && adminState.visNetwork) {
-          adminState.visNetwork.focus(e.target.value, { scale: 1.2, animation: true });
-        }
-      };
+      focusSelect.onchange = applyAdminGraphFilters;
     }
 
-    document.getElementById('canvasNodeTypeFilter')?.addEventListener('change', (e) => {
-      const type = e.target.value;
-      if (type === 'all') {
-        nodes.clear();
-        nodes.add(nodesList);
-      } else {
-        nodes.clear();
-        nodes.add(nodesList.filter(n => n.raw.type === type));
-      }
-    });
+    typeFilter?.addEventListener('change', applyAdminGraphFilters);
 
   } catch (err) {
     console.error('Error loading admin graph:', err);
@@ -217,24 +303,49 @@ function renderProductsTable(products) {
   if (badge) badge.textContent = `${products.length} sản phẩm`;
 
   if (products.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:24px;">Không tìm thấy sản phẩm nào.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:#94a3b8; padding:32px;">Không tìm thấy sản phẩm nào.</td></tr>';
     return;
   }
 
-  tbody.innerHTML = products.map(p => `
-    <tr>
-      <td><code>${p.id}</code></td>
-      <td><img src="${p.image || 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=400'}" style="width:40px; height:40px; object-fit:cover; border-radius:4px;" /></td>
-      <td><strong>${p.name}</strong></td>
-      <td>${p.category || 'Thiết bị'}</td>
-      <td><span class="brand-tag" style="background:#e0f2fe; color:#0369a1; padding:2px 6px; border-radius:4px; font-size:11px;">${p.brand || 'Khác'}</span></td>
-      <td style="color:#dc2626; font-weight:700;">${formatPrice(p.price)}</td>
-      <td>⭐ ${p.rating || 4.8}</td>
-      <td>
-        <button class="btn btn-sm btn-outline-danger" onclick="deleteAdminProduct('${p.id}')">🗑️ Xóa</button>
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = products.map(p => {
+    const categoryName = (p.categories && p.categories.length > 0) ? p.categories.join(', ') : (p.category || 'Thiết bị');
+    const brandName = (p.brands && p.brands.join(', ')) ? p.brands.join(', ') : (p.brand || 'Khác');
+    const displayImg = p.image || 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=400';
+
+    return `
+      <tr>
+        <td><code>${p.id}</code></td>
+        <td><img src="${displayImg}" style="width:42px; height:42px; object-fit:cover; border-radius:6px; border:1px solid #e2e8f0;" onerror="this.src='https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=400'" /></td>
+        <td>
+          <strong style="color:#0f172a;">${p.name}</strong>
+          ${p.description ? `<p style="font-size:11px; color:#64748b; margin:2px 0 0; max-width:280px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${p.description}</p>` : ''}
+        </td>
+        <td><span style="font-size:12px; color:#334155; font-weight:500;">${categoryName}</span></td>
+        <td><span class="brand-tag" style="background:#e0f2fe; color:#0369a1; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">${brandName}</span></td>
+        <td style="color:#dc2626; font-weight:700; white-space:nowrap;">${formatPrice(p.price)}</td>
+        <td style="white-space:nowrap;">⭐ ${p.rating || 4.8}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteAdminProduct('${p.id}')" style="cursor:pointer; padding:4px 8px; font-size:12px;">🗑️ Xóa</button>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function loadCategoriesIntoForm() {
+  const select = document.getElementById('adminProdCat');
+  if (!select) return;
+  try {
+    const res = await fetch(`${API_BASE}/metadata`);
+    const data = await res.json();
+    if (data.categories && data.categories.length > 0) {
+      select.innerHTML = data.categories.map(c => 
+        `<option value="${c.id}">${c.name || c.id}</option>`
+      ).join('');
+    }
+  } catch (e) {
+    console.warn('Could not load categories for modal:', e);
+  }
 }
 
 function setupProductForm() {
@@ -243,10 +354,11 @@ function setupProductForm() {
   const btnClose = document.getElementById('btnCloseAdminProdModal');
   const form = document.getElementById('adminProductForm');
 
-  btnOpenAdd?.addEventListener('click', () => {
+  btnOpenAdd?.addEventListener('click', async () => {
     document.getElementById('adminProdModalTitle').textContent = 'Thêm Sản Phẩm Mới Vào Đồ Thị';
     document.getElementById('adminProdEditId').value = '';
     form.reset();
+    await loadCategoriesIntoForm();
     modal.style.display = 'flex';
   });
 
@@ -318,35 +430,61 @@ window.deleteAdminProduct = async function(productId) {
 // ========================================================
 // USER PROFILES
 // ========================================================
-async function loadAdminUsers() {
+function renderAdminUsers(users) {
   const container = document.getElementById('adminUsersList');
+  const badge = document.getElementById('adminUserCountBadge');
   if (!container) return;
 
-  try {
-    const res = await fetch(`${API_BASE}/users`);
-    const data = await res.json();
-    const users = data.users || data || [];
-    adminState.users = users;
+  if (badge) badge.textContent = `${users.length} người dùng`;
 
-    container.innerHTML = users.map(u => `
-      <div class="user-card" style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <img src="${u.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}" style="width:52px; height:52px; border-radius:50%; object-fit:cover; border:2px solid #e2e8f0;" />
+  if (users.length === 0) {
+    container.innerHTML = '<div style="text-align:center; color:#94a3b8; padding:32px; background:#fff; border-radius:8px;">Không tìm thấy người dùng nào phù hợp.</div>';
+    return;
+  }
+
+  container.innerHTML = users.map(u => {
+    let targetNeed = u.wishlist_need || u.last_target_need;
+    if (!targetNeed && u.wishlist && u.wishlist.length > 0) {
+      const lastItem = u.wishlist[u.wishlist.length - 1];
+      targetNeed = typeof lastItem === 'object' ? (lastItem.query || lastItem.name) : lastItem;
+    }
+    if (!targetNeed) targetNeed = 'Chưa ghi nhận';
+
+    return `
+      <div class="user-card" style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:center; gap:16px;">
+          <img src="${u.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; border:2px solid #e2e8f0; flex-shrink:0;" />
           <div>
-            <h4 style="margin:0; font-size:15px; color:#0f172a;">${u.name || u.full_name || u.username} <code style="font-size:11px; color:#64748b;">(${u.id})</code></h4>
-            <span style="font-size:12px; color:#475569;">${u.role || 'Người dùng'} • ${u.email || ''}</span>
-            <div style="font-size:12px; color:#334155; margin-top:4px;">
-              🎯 <b>Nhu cầu hiện tại:</b> ${u.wishlist_need || (u.wishlist && u.wishlist.length ? u.wishlist[0].query : 'Chưa ghi nhận')}
+            <h4 style="margin:0; font-size:15px; color:#0f172a; font-weight:700;">${u.name || u.full_name || u.username} <code style="font-size:11px; color:#64748b; font-weight:normal;">(${u.id})</code></h4>
+            <span style="font-size:12px; color:#475569;">${u.role || 'Người dùng'} ${u.email ? '• ' + u.email : ''}</span>
+            <div style="font-size:12px; color:#334155; margin-top:5px;">
+              🎯 <b>Nhu cầu / Tìm kiếm:</b> <span style="color:#0284c7; font-weight:600;">${targetNeed}</span>
+            </div>
+            <div style="font-size:11px; color:#64748b; margin-top:3px;">
+              Đăng nhập: <b>${u.login_count || 1}</b> lần • Tương tác đồ thị: <b>${u.interactions_count || 0}</b> liên kết
             </div>
           </div>
         </div>
-        <div style="text-align:right;">
-          <span class="badge" style="background:#dcfce7; color:#166534; font-size:11px; padding:3px 8px; border-radius:12px;">Đã kích hoạt KG</span>
+        <div style="text-align:right; flex-shrink:0;">
+          <span class="badge" style="background:#dcfce7; color:#166534; font-size:12px; padding:5px 12px; border-radius:12px; font-weight:600;">Đã kích hoạt KG</span>
         </div>
       </div>
-    `).join('');
+    `;
+  }).join('');
+}
+
+async function loadAdminUsers() {
+  const container = document.getElementById('adminUsersList');
+  try {
+    const res = await fetch(`${API_BASE}/users`);
+    const data = await res.json();
+    adminState.users = data.users || data || [];
+    renderAdminUsers(adminState.users);
   } catch (err) {
     console.error('Error loading users:', err);
+    if (container) {
+      container.innerHTML = `<div style="color:#dc2626; padding:16px;">Lỗi tải danh sách người dùng: ${err.message}</div>`;
+    }
   }
 }
 

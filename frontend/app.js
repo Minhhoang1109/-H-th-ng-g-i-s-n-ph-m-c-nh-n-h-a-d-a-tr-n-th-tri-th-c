@@ -15,7 +15,9 @@ let appState = {
   searchQuery: '',
   sortBy: 'kg_score',
   recommendations: [],
-  metadata: { categories: [], brands: [], purposes: [] }
+  metadata: { categories: [], brands: [], purposes: [] },
+  favorites: [],
+  cart: []
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -26,10 +28,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupReviewModal();
   setupOnboardingAndSurvey();
   setupFiltersAndSort();
+  setupUserGraphExplorer();
+  setupCartAndFavorites();
 
   await loadMetadata();
   await loadUsers();
   restoreSessionOrGuest();
+  loadCartAndFavoritesFromStorage();
   await loadRecommendations();
   await loadMetrics();
   await loadAnalyticsDashboard();
@@ -51,6 +56,10 @@ function setupNavigation() {
       const target = item.getAttribute('data-tab');
       const content = document.getElementById(`tab-${target}`);
       if (content) content.classList.add('active');
+
+      if (target === 'graph-explorer') {
+        initUserGraphCanvas();
+      }
     });
   });
 
@@ -238,9 +247,6 @@ function handleLoginSuccess(user, isFirstRegister = false) {
   appState.selectedUserId = user.id;
   appState.isGuest = false;
 
-  let sessionKey = `kh_session_count_${user.id}`;
-  let count = parseInt(localStorage.getItem(sessionKey) || '0', 10) + 1;
-  localStorage.setItem(sessionKey, count.toString());
   localStorage.setItem('kh_recsys_session', JSON.stringify({ userId: user.id, username: user.username, is_admin: !!(user.is_admin || user.username === 'admin' || user.id === 'admin') }));
 
   // Nếu là tài khoản Quản trị viên (admin), chuyển hướng ngay đến trang Quản trị
@@ -255,10 +261,9 @@ function handleLoginSuccess(user, isFirstRegister = false) {
   updateAuthUI();
   loadRecommendations();
 
-  if (isFirstRegister || count === 1) {
+  // Khảo sát chỉ xuất hiện DUY NHẤT 1 lần ngay sau khi vừa Đăng ký tài khoản
+  if (isFirstRegister) {
     document.getElementById('onboardingSurveyModal').style.display = 'flex';
-  } else if (count >= 2) {
-    document.getElementById('wishlistModal').style.display = 'flex';
   }
 }
 
@@ -464,14 +469,19 @@ function setupOnboardingAndSurvey() {
     const brands = Array.from(document.querySelectorAll('input[name="onboard_brand"]:checked')).map(c => c.value);
     const categories = Array.from(document.querySelectorAll('input[name="onboard_category"]:checked')).map(c => c.value);
     const budget = document.getElementById('onboardingBudget').value;
+    const cpu = document.getElementById('onboardingCpu')?.value || 'any';
+    const gpu = document.getElementById('onboardingGpu')?.value || 'any';
+    const ram = document.getElementById('onboardingRam')?.value || 'any';
+    const ssd = document.getElementById('onboardingSsd')?.value || 'any';
 
     const payload = {
       user_id: appState.currentUser ? appState.currentUser.id : 'u1',
-      purposes, brands, categories, budget
+      purposes, brands, categories, budget,
+      hardware_specs: { cpu, gpu, ram, ssd }
     };
 
     try {
-      const res = await fetch(`${API_BASE}/survey`, {
+      const res = await fetch(`${API_BASE}/survey/detailed`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -479,11 +489,13 @@ function setupOnboardingAndSurvey() {
       const data = await res.json();
       if (res.ok && data.success) {
         document.getElementById('onboardingSurveyModal').style.display = 'none';
-        showToast('Khảo sát thành công! Đồ thị đã cập nhật gợi ý riêng cho bạn.', 'success');
+        showToast('Khảo sát hoàn tất! Đồ thị đã phân tích và thiết lập gợi ý chuẩn xác cho bạn.', 'success');
         await loadRecommendations();
+      } else {
+        showToast(data.error || 'Lỗi cập nhật khảo sát!', 'error');
       }
     } catch (err) {
-      showToast('Lỗi cập nhật khảo sát!', 'error');
+      showToast('Lỗi kết nối máy chủ khi lưu khảo sát!', 'error');
     }
   });
 
@@ -635,17 +647,24 @@ function filterAndRenderProducts() {
     return;
   }
 
-  grid.innerHTML = list.map(prod => `
-    <div class="product-card ebay-card">
+  grid.innerHTML = list.map(prod => {
+    const isFav = appState.favorites.includes(prod.id);
+    const inCart = appState.cart.some(item => item.id === prod.id);
+
+    return `
+    <div class="product-card ebay-card" id="prod-card-${prod.id}">
       <div class="card-img-wrap">
         <img src="${prod.image}" alt="${prod.name}" loading="lazy" />
+        <button class="card-btn-favorite ${isFav ? 'active' : ''}" onclick="toggleFavoriteProduct('${prod.id}', event)" title="${isFav ? 'Bỏ yêu thích' : 'Yêu thích sản phẩm'}">
+          ${isFav ? '❤️' : '🤍'}
+        </button>
         <span class="match-score-badge">Độ khớp KG: ${Math.round((prod.score || 0.85) * 100)}%</span>
       </div>
       <div class="card-body">
         <h4 class="prod-title" title="${prod.name}">${prod.name}</h4>
         <div class="prod-price-row">
           <span class="price-current">${formatPrice(prod.price)}</span>
-          <span class="prod-brand">${prod.brand}</span>
+          <span class="prod-brand">${prod.brand || 'Chính hãng'}</span>
         </div>
         <p class="prod-specs-mini">${prod.specs ? prod.specs.slice(0, 3).join(' • ') : ''}</p>
         
@@ -653,9 +672,18 @@ function filterAndRenderProducts() {
           <span class="sparkle">💡</span> ${prod.explanation ? prod.explanation.summary : 'Được đề xuất dựa trên Đồ thị Tri thức.'}
         </div>
 
-        <div class="card-actions">
+        <div class="card-primary-actions" style="margin-top:10px; display:flex; gap:6px;">
+          <button class="btn btn-sm btn-add-cart ${inCart ? 'in-cart' : ''}" onclick="toggleCartProduct('${prod.id}', event)">
+            ${inCart ? '✓ Đã trong giỏ' : '🛒 Thêm vào giỏ'}
+          </button>
+          <button class="btn btn-sm btn-favorite-toggle ${isFav ? 'active' : ''}" onclick="toggleFavoriteProduct('${prod.id}', event)">
+            ${isFav ? '❤️ Đã thích' : '🤍 Yêu thích'}
+          </button>
+        </div>
+
+        <div class="card-actions" style="margin-top:8px;">
           <button class="btn btn-sm btn-ebay-outline" onclick="openExplanationModal('${prod.id}')">
-            🔍 Xem Lý Do & Key Đồ Thị
+            🔍 Lý Do & Key KG
           </button>
           <button class="btn btn-sm btn-review-star" onclick="openProductReviewModal('${prod.id}', '${escapeHtml(prod.name)}')">
             ⭐ Góp ý
@@ -663,7 +691,8 @@ function filterAndRenderProducts() {
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 // ========================================================
@@ -952,4 +981,421 @@ function showToast(msg, type = 'info') {
   toast.textContent = msg;
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 4000);
+}
+
+// ========================================================
+// USER KNOWLEDGE GRAPH 2D EXPLORER (VIS.JS)
+// ========================================================
+let userGraphState = {
+  visNetwork: null,
+  graphData: null,
+  nodesDataSet: null
+};
+
+function setupUserGraphExplorer() {
+  document.getElementById('btnUserResetCanvasZoom')?.addEventListener('click', () => {
+    if (userGraphState.visNetwork) userGraphState.visNetwork.fit();
+  });
+
+  document.getElementById('btnUserRefreshGraph')?.addEventListener('click', () => {
+    initUserGraphCanvas(true);
+  });
+}
+
+async function initUserGraphCanvas(forceReload = false) {
+  const container = document.getElementById('userVisNetworkGraph');
+  if (!container) return;
+
+  if (userGraphState.visNetwork && !forceReload) {
+    setTimeout(() => userGraphState.visNetwork.fit(), 200);
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/graph-canvas?filter_type=all`);
+    const data = await res.json();
+    if (!data.success || !data.graph) return;
+
+    userGraphState.graphData = data.graph;
+    const graphData = data.graph;
+
+    const colorMap = {
+      'User': '#3b82f6',
+      'Product': '#10b981',
+      'Category': '#f59e0b',
+      'Brand': '#8b5cf6',
+      'Purpose': '#ec4899',
+      'Tag': '#ec4899',
+      'Spec': '#64748b'
+    };
+
+    const currentUserId = appState.currentUser ? appState.currentUser.id : 'u1';
+
+    const nodesList = (graphData.nodes || []).map(n => {
+      const isCurrent = (n.id === currentUserId);
+      return {
+        id: n.id,
+        label: isCurrent ? `⭐ ${n.label || n.name} (Bạn)` : (n.label || n.name || n.id),
+        title: `${n.type}: ${n.name || n.label || n.id}`,
+        color: {
+          background: isCurrent ? '#e53238' : (colorMap[n.type] || '#94a3b8'),
+          border: isCurrent ? '#fbbf24' : '#ffffff',
+          highlight: { background: '#ef4444', border: '#1e293b' }
+        },
+        font: { color: isCurrent ? '#b91c1c' : '#1e293b', size: isCurrent ? 14 : 12, face: 'Inter', bold: isCurrent },
+        shape: n.type === 'Product' ? 'box' : (n.type === 'User' ? 'circle' : 'ellipse'),
+        size: isCurrent ? 28 : (n.type === 'Product' ? 20 : 16),
+        raw: n
+      };
+    });
+
+    const edgesList = (graphData.edges || graphData.links || []).map(l => ({
+      from: l.from || l.source,
+      to: l.to || l.target,
+      label: l.label || l.type || l.relation || '',
+      arrows: 'to',
+      font: { size: 9, color: '#64748b', align: 'middle' },
+      color: { color: '#cbd5e1', highlight: '#3b82f6' }
+    }));
+
+    userGraphState.nodesDataSet = new vis.DataSet(nodesList);
+    const edges = new vis.DataSet(edgesList);
+
+    const options = {
+      nodes: { borderWidth: 2, shadow: true },
+      edges: { smooth: { type: 'continuous' } },
+      physics: {
+        stabilization: true,
+        barnesHut: { gravitationalConstant: -2500, springLength: 120 }
+      },
+      interaction: { hover: true, tooltipDelay: 200 }
+    };
+
+    userGraphState.visNetwork = new vis.Network(container, { nodes: userGraphState.nodesDataSet, edges }, options);
+
+    userGraphState.visNetwork.on('selectNode', (params) => {
+      if (params.nodes.length > 0) {
+        const nodeId = params.nodes[0];
+        const nodeObj = (graphData.nodes || []).find(n => n.id === nodeId);
+        const connectedLinks = (graphData.edges || graphData.links || []).filter(l => 
+          (l.from || l.source) === nodeId || (l.to || l.target) === nodeId
+        );
+        renderUserNodeDetailsPanel(nodeObj, connectedLinks);
+      }
+    });
+
+    const focusSelect = document.getElementById('userCanvasFocusNodeSelect');
+    const typeFilter = document.getElementById('userCanvasNodeTypeFilter');
+
+    function applyUserGraphFilters() {
+      const selectedFocusId = focusSelect ? focusSelect.value : '';
+      const selectedType = typeFilter ? typeFilter.value : 'all';
+
+      let filteredNodes = nodesList;
+      let filteredEdges = edgesList;
+
+      // 1. If Focus Node selected, isolate its 1-hop neighborhood (Ego Network)
+      if (selectedFocusId) {
+        const neighborNodeIds = new Set([selectedFocusId]);
+        const activeEdges = [];
+
+        edgesList.forEach(e => {
+          if (e.from === selectedFocusId || e.to === selectedFocusId) {
+            neighborNodeIds.add(e.from);
+            neighborNodeIds.add(e.to);
+            activeEdges.push(e);
+          }
+        });
+
+        filteredNodes = nodesList.filter(n => neighborNodeIds.has(n.id));
+        filteredEdges = activeEdges;
+
+        const nodeObj = (graphData.nodes || []).find(n => n.id === selectedFocusId);
+        const connectedLinks = (graphData.edges || graphData.links || []).filter(l => 
+          (l.from || l.source) === selectedFocusId || (l.to || l.target) === selectedFocusId
+        );
+        if (nodeObj) renderUserNodeDetailsPanel(nodeObj, connectedLinks);
+      }
+
+      if (selectedType !== 'all') {
+        filteredNodes = filteredNodes.filter(n => n.raw.type === selectedType || n.id === selectedFocusId);
+        const validNodeIds = new Set(filteredNodes.map(n => n.id));
+        filteredEdges = filteredEdges.filter(e => validNodeIds.has(e.from) && validNodeIds.has(e.to));
+      }
+
+      userGraphState.nodesDataSet.clear();
+      userGraphState.nodesDataSet.add(filteredNodes);
+
+      edges.clear();
+      edges.add(filteredEdges);
+
+      setTimeout(() => {
+        if (userGraphState.visNetwork) {
+          userGraphState.visNetwork.fit({ animation: { duration: 300 } });
+        }
+      }, 100);
+    }
+
+    if (focusSelect) {
+      focusSelect.innerHTML = '<option value="">-- Toàn bộ đồ thị --</option>' +
+        (graphData.nodes || []).map(n => `<option value="${n.id}">[${n.type}] ${n.label || n.name || n.id}</option>`).join('');
+      focusSelect.onchange = applyUserGraphFilters;
+    }
+
+    typeFilter?.addEventListener('change', applyUserGraphFilters);
+
+    // Initial fit
+    setTimeout(() => {
+      if (userGraphState.visNetwork) {
+        userGraphState.visNetwork.fit({ animation: { duration: 400 } });
+      }
+    }, 300);
+
+  } catch (err) {
+    console.error('Error initializing user graph:', err);
+  }
+}
+
+function renderUserNodeDetailsPanel(node, connectedLinks) {
+  const panel = document.getElementById('userVisNodeDetailContent');
+  if (!panel || !node) return;
+
+  panel.innerHTML = `
+    <div style="background:#f8fafc; padding:12px; border-radius:6px; border:1px solid #e2e8f0; margin-bottom:12px;">
+      <strong style="color:#0f172a; font-size:15px;">${node.label || node.name || node.id}</strong><br>
+      <span style="font-size:11px; background:#e0e7ff; color:#3730a3; padding:2px 8px; border-radius:4px; font-weight:700;">Loại: ${node.type}</span>
+      <p style="font-size:12px; margin-top:8px; color:#475569;">${node.description || (node.price ? `Giá: ${formatPrice(node.price)}` : 'Thực thể trong Mạng lưới Đồ thị Tri thức')}</p>
+    </div>
+    <h5 style="font-size:13px; font-weight:700; margin-bottom:8px; color:var(--text-main);">Các Cạnh Kết Nối (${connectedLinks.length}):</h5>
+    <ul style="font-size:12px; color:#334155; padding-left:18px; line-height:1.6;">
+      ${connectedLinks.map(l => {
+        const from = l.from || l.source;
+        const to = l.to || l.target;
+        const label = l.label || l.type || l.relation || 'liên kết';
+        return `<li><code>${label}</code> ➔ <strong>${from === node.id ? to : from}</strong></li>`;
+      }).join('')}
+    </ul>
+  `;
+}
+
+// ========================================================
+// FAVORITES & SHOPPING CART LOGIC
+// ========================================================
+function setupCartAndFavorites() {
+  document.getElementById('btnOpenFavoritesModal')?.addEventListener('click', openFavoritesModal);
+  document.getElementById('btnCloseFavoritesModal')?.addEventListener('click', () => {
+    document.getElementById('favoritesModal').style.display = 'none';
+  });
+
+  document.getElementById('btnOpenCartModal')?.addEventListener('click', openCartModal);
+  document.getElementById('btnCloseCartModal')?.addEventListener('click', () => {
+    document.getElementById('cartModal').style.display = 'none';
+  });
+
+  document.getElementById('btnCheckoutDemo')?.addEventListener('click', async () => {
+    if (appState.cart.length === 0) {
+      showToast('Giỏ hàng của bạn đang trống!', 'warning');
+      return;
+    }
+
+    const uid = appState.currentUser ? appState.currentUser.id : 'u1';
+    for (const item of appState.cart) {
+      try {
+        await fetch(`${API_BASE}/interact`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: uid, product_id: item.id, type: 'purchased' })
+        });
+      } catch (e) {}
+    }
+
+    showToast('Đặt hàng thành công! Đã tạo cạnh "purchased" trên Đồ thị Tri thức.', 'success');
+    appState.cart = [];
+    saveCartAndFavoritesToStorage();
+    updateCartAndFavoritesBadges();
+    document.getElementById('cartModal').style.display = 'none';
+    await loadRecommendations();
+  });
+}
+
+function loadCartAndFavoritesFromStorage() {
+  try {
+    const rawFavs = localStorage.getItem('kh_favorites_list');
+    if (rawFavs) appState.favorites = JSON.parse(rawFavs);
+    const rawCart = localStorage.getItem('kh_cart_list');
+    if (rawCart) appState.cart = JSON.parse(rawCart);
+  } catch (e) {}
+  updateCartAndFavoritesBadges();
+}
+
+function saveCartAndFavoritesToStorage() {
+  localStorage.setItem('kh_favorites_list', JSON.stringify(appState.favorites));
+  localStorage.setItem('kh_cart_list', JSON.stringify(appState.cart));
+}
+
+function updateCartAndFavoritesBadges() {
+  const favBadge = document.getElementById('favoritesCountBadge');
+  if (favBadge) favBadge.textContent = appState.favorites.length;
+  const cartBadge = document.getElementById('cartCountBadge');
+  if (cartBadge) {
+    const totalQty = appState.cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    cartBadge.textContent = totalQty;
+  }
+}
+
+window.toggleFavoriteProduct = async function(productId, event) {
+  if (event) event.stopPropagation();
+  const index = appState.favorites.indexOf(productId);
+  const uid = appState.currentUser ? appState.currentUser.id : 'u1';
+  const prod = appState.recommendations.find(p => p.id === productId);
+  const prodName = prod ? prod.name : productId;
+
+  if (index > -1) {
+    appState.favorites.splice(index, 1);
+    showToast(`Đã bỏ "${prodName}" khỏi danh sách yêu thích.`, 'info');
+  } else {
+    appState.favorites.push(productId);
+    showToast(`Đã thêm "${prodName}" vào Yêu thích ❤️!`, 'success');
+    try {
+      await fetch(`${API_BASE}/interact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: uid, product_id: productId, type: 'likes' })
+      });
+    } catch (e) {}
+  }
+
+  saveCartAndFavoritesToStorage();
+  updateCartAndFavoritesBadges();
+  filterAndRenderProducts();
+};
+
+window.toggleCartProduct = async function(productId, event) {
+  if (event) event.stopPropagation();
+  const prod = appState.recommendations.find(p => p.id === productId);
+  if (!prod) return;
+
+  const existing = appState.cart.find(item => item.id === productId);
+  const uid = appState.currentUser ? appState.currentUser.id : 'u1';
+
+  if (existing) {
+    existing.quantity = (existing.quantity || 1) + 1;
+    showToast(`Đã tăng số lượng "${prod.name}" trong giỏ hàng (x${existing.quantity})! 🛒`, 'success');
+  } else {
+    appState.cart.push({
+      id: prod.id,
+      name: prod.name,
+      price: prod.price,
+      image: prod.image,
+      brand: prod.brand,
+      quantity: 1
+    });
+    showToast(`Đã thêm "${prod.name}" vào Giỏ hàng! 🛒`, 'success');
+    try {
+      await fetch(`${API_BASE}/interact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: uid, product_id: productId, type: 'wants' })
+      });
+    } catch (e) {}
+  }
+
+  saveCartAndFavoritesToStorage();
+  updateCartAndFavoritesBadges();
+  filterAndRenderProducts();
+};
+
+window.removeFromCart = function(productId) {
+  appState.cart = appState.cart.filter(item => item.id !== productId);
+  saveCartAndFavoritesToStorage();
+  updateCartAndFavoritesBadges();
+  renderCartList();
+  filterAndRenderProducts();
+};
+
+window.updateCartQuantity = function(productId, delta) {
+  const item = appState.cart.find(i => i.id === productId);
+  if (item) {
+    item.quantity = (item.quantity || 1) + delta;
+    if (item.quantity <= 0) {
+      removeFromCart(productId);
+      return;
+    }
+  }
+  saveCartAndFavoritesToStorage();
+  updateCartAndFavoritesBadges();
+  renderCartList();
+};
+
+function openFavoritesModal() {
+  const modal = document.getElementById('favoritesModal');
+  const container = document.getElementById('favoritesListContainer');
+  if (!container || !modal) return;
+
+  if (appState.favorites.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:32px 0; color:#94a3b8;"><p style="font-size:32px; margin-bottom:8px;">❤️</p><p>Bạn chưa lưu sản phẩm yêu thích nào.</p></div>';
+  } else {
+    const favProducts = appState.favorites.map(fid => {
+      return appState.recommendations.find(p => p.id === fid) || { id: fid, name: 'Sản phẩm ' + fid, price: 0, image: 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=300' };
+    });
+
+    container.innerHTML = favProducts.map(p => `
+      <div class="cart-item-row" style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid #f1f5f9; gap:12px;">
+        <img src="${p.image}" alt="${p.name}" style="width:50px; height:50px; object-fit:cover; border-radius:6px;" />
+        <div style="flex:1;">
+          <h5 style="margin:0 0 4px; font-size:13px; font-weight:700;">${p.name}</h5>
+          <span style="color:#e53238; font-weight:700; font-size:13px;">${formatPrice(p.price)}</span>
+        </div>
+        <div style="display:flex; gap:6px;">
+          <button class="btn btn-sm btn-ebay-primary" onclick="toggleCartProduct('${p.id}'); document.getElementById('favoritesModal').style.display='none';">🛒 Thêm Giỏ</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="toggleFavoriteProduct('${p.id}'); openFavoritesModal();">🗑️ Xóa</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  modal.style.display = 'flex';
+}
+
+function openCartModal() {
+  const modal = document.getElementById('cartModal');
+  renderCartList();
+  modal.style.display = 'flex';
+}
+
+function renderCartList() {
+  const container = document.getElementById('cartListContainer');
+  const totalPriceEl = document.getElementById('cartTotalPrice');
+  if (!container) return;
+
+  if (appState.cart.length === 0) {
+    container.innerHTML = '<div style="text-align:center; padding:32px 0; color:#94a3b8;"><p style="font-size:32px; margin-bottom:8px;">🛒</p><p>Giỏ hàng của bạn đang trống.</p></div>';
+    if (totalPriceEl) totalPriceEl.textContent = '0 ₫';
+    return;
+  }
+
+  let total = 0;
+  container.innerHTML = appState.cart.map(item => {
+    const qty = item.quantity || 1;
+    const subtotal = (item.price || 0) * qty;
+    total += subtotal;
+
+    return `
+      <div class="cart-item-row" style="display:flex; align-items:center; justify-content:space-between; padding:12px; border-bottom:1px solid #f1f5f9; gap:12px;">
+        <img src="${item.image}" alt="${item.name}" style="width:50px; height:50px; object-fit:cover; border-radius:6px;" />
+        <div style="flex:1;">
+          <h5 style="margin:0 0 4px; font-size:13px; font-weight:700;">${item.name}</h5>
+          <span style="color:#e53238; font-weight:700; font-size:13px;">${formatPrice(item.price)}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <button class="btn-qty" onclick="updateCartQuantity('${item.id}', -1)" style="width:24px; height:24px; border:1px solid #cbd5e1; border-radius:4px; background:#fff; cursor:pointer;">-</button>
+          <span style="font-size:13px; font-weight:700; min-width:20px; text-align:center;">${qty}</span>
+          <button class="btn-qty" onclick="updateCartQuantity('${item.id}', 1)" style="width:24px; height:24px; border:1px solid #cbd5e1; border-radius:4px; background:#fff; cursor:pointer;">+</button>
+          <button class="btn-remove-cart" onclick="removeFromCart('${item.id}')" style="margin-left:8px; border:none; background:transparent; color:#ef4444; cursor:pointer;" title="Xóa khỏi giỏ">🗑️</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (totalPriceEl) totalPriceEl.textContent = formatPrice(total);
 }

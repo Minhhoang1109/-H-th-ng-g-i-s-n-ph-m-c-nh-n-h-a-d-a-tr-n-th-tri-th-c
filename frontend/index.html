@@ -8,6 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Vis.js Network for Interactive Knowledge Graph Canvas (Multi-CDN) -->
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.9/standalone/umd/vis-network.min.js"></script>
+  <script>
+    if (typeof vis === 'undefined') {
+      document.write('<script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"><\\/script>');
+    }
+  </script>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -40,7 +47,7 @@
       </div>
       <div class="top-util-right">
         <span class="util-link" id="btnOpenWishlistQuick">🎯 Nhu cầu mong muốn</span>
-        <span class="util-link">Trợ giúp & Liên hệ</span>
+        <span class="util-link" id="btnOpenFavoritesModal" style="cursor:pointer;">❤️ Yêu thích (<span id="favoritesCountBadge">0</span>)</span>
         <div class="algo-quick-select">
           <label for="algoSelect">⚙️ Thuật toán:</label>
           <select id="algoSelect" class="header-algo-select">
@@ -49,7 +56,7 @@
             <option value="metapath">Meta-path Traversal</option>
           </select>
         </div>
-        <span class="cart-icon">🛒 Giỏ hàng (2)</span>
+        <span class="cart-icon" id="btnOpenCartModal" style="cursor:pointer;">🛒 Giỏ hàng (<span id="cartCountBadge">0</span>)</span>
       </div>
     </div>
   </div>
@@ -107,6 +114,7 @@
     <div class="ebay-nav-inner">
       <ul class="nav-links-list">
         <li class="nav-item active" data-tab="recommendations"><span>✨ Dành riêng cho bạn (Gợi ý)</span></li>
+        <li class="nav-item" data-tab="graph-explorer"><span>🌐 Khám Phá Đồ Thị Tri Thức 2D</span></li>
         <li class="nav-item" data-tab="survey"><span>📋 Khảo sát Nhu cầu Chi tiết</span></li>
         <li class="nav-item" data-tab="cold-start"><span>❄️ Thử nghiệm Khởi động lạnh</span></li>
         <li class="nav-item" data-tab="analytics"><span>📊 Thống kê Đồ thị & Thuật toán</span></li>
@@ -391,6 +399,48 @@
       </div>
     </section>
 
+    <!-- TAB: GRAPH EXPLORER FOR USERS -->
+    <section id="tab-graph-explorer" class="tab-content">
+      <div class="analytics-wrapper">
+        <div class="survey-hero">
+          <h2>🌐 Trực Quan Hóa Đồ Thị Tri Thức & Mạng Lưới Cá Nhân Hóa</h2>
+          <p>Tương tác trực tiếp trên Đồ thị Tri thức 2D để khám phá mối liên kết đa chiều giữa Người dùng, Sản phẩm, Thương hiệu, Danh mục và Đặc tính công nghệ.</p>
+        </div>
+
+        <div class="graph-canvas-controls" style="border-radius:var(--radius-sm) var(--radius-sm) 0 0;">
+          <div class="canvas-filter-group">
+            <label>Lọc loại thực thể:</label>
+            <select id="userCanvasNodeTypeFilter" class="styled-select">
+              <option value="all">Tất cả các loại nút</option>
+              <option value="User">👤 Người dùng (User)</option>
+              <option value="Product">📦 Sản phẩm (Product)</option>
+              <option value="Category">🏷️ Danh mục (Category)</option>
+              <option value="Brand">🏢 Thương hiệu (Brand)</option>
+              <option value="Purpose">🎯 Mục đích (Purpose)</option>
+              <option value="Spec">⚙️ Chip/Thông số (Spec)</option>
+            </select>
+          </div>
+          <div class="canvas-filter-group">
+            <label>Điểm neo trọng tâm:</label>
+            <select id="userCanvasFocusNodeSelect" class="styled-select">
+              <option value="">-- Toàn bộ đồ thị --</option>
+            </select>
+          </div>
+          <button class="btn btn-ebay-outline btn-sm" id="btnUserResetCanvasZoom">🔍 Căn Giữa Đồ Thị</button>
+          <button class="btn btn-ebay-outline btn-sm" id="btnUserRefreshGraph">🔄 Tải Lại Đồ Thị</button>
+        </div>
+
+        <div class="graph-canvas-container" style="border-radius:0 0 var(--radius-sm) var(--radius-sm);">
+          <div id="userVisNetworkGraph" class="vis-network-box"></div>
+          <div id="userVisNodeInfoPanel" class="vis-node-detail-panel">
+            <h4>Chi Tiết Nút Trên Đồ Thị</h4>
+            <p class="hint">Nhấp vào bất kỳ vòng tròn nào trên mạng lưới để xem chi tiết thuộc tính và các liên kết tri thức liên quan.</p>
+            <div id="userVisNodeDetailContent"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- TAB 4: ANALYTICS -->
     <section id="tab-analytics" class="tab-content">
       <div class="analytics-wrapper">
@@ -422,22 +472,17 @@
         <div id="loginPane" class="auth-pane active">
           <form id="loginForm">
             <div class="form-group">
-              <label for="loginUsername" class="form-label">Tên đăng nhập hoặc Mã User:</label>
-              <input type="text" id="loginUsername" class="styled-input w-100" placeholder="alice, u1, bob, ..." required autocomplete="username" />
+              <label for="loginUsername" class="form-label">Tên đăng nhập hoặc Email:</label>
+              <input type="text" id="loginUsername" class="styled-input w-100" placeholder="Nhập tên đăng nhập hoặc email..." required autocomplete="username" />
             </div>
-            <div class="form-group" style="margin-top:12px;">
+            <div class="form-group" style="margin-top:16px;">
               <label for="loginPassword" class="form-label">Mật khẩu:</label>
               <div class="password-input-wrap">
-                <input type="password" id="loginPassword" class="styled-input w-100" placeholder="Nhập mật khẩu" required autocomplete="current-password" />
-                <button type="button" class="btn-toggle-pwd" id="btnToggleLoginPwd">👁️</button>
+                <input type="password" id="loginPassword" class="styled-input w-100" placeholder="Nhập mật khẩu..." required autocomplete="current-password" />
+                <button type="button" class="btn-toggle-pwd" id="btnToggleLoginPwd" title="Hiện/Ẩn mật khẩu">👁️</button>
               </div>
             </div>
-            <div style="margin-top:8px; font-size:12px; color:var(--text-muted); background:#f8fafc; padding:8px 12px; border-radius:6px; border:1px dashed #cbd5e1;">
-              💡 <b>Gợi ý tài khoản:</b><br/>
-              • Quản trị viên: <code>admin</code> / <code>admin</code> (đưa thẳng vào trang Quản trị)<br/>
-              • Người dùng mẫu: <code>alice</code> / <code>123456</code> hoặc <code>bob</code> / <code>123456</code>
-            </div>
-            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:14px;">
+            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:22px;">
               Đăng Nhập Ngay 🚀
             </button>
           </form>
@@ -447,34 +492,34 @@
         <div id="registerPane" class="auth-pane" style="display:none;">
           <form id="registerForm">
             <div class="form-group">
-              <label for="regFullName" class="form-label">Họ và tên của bạn:</label>
+              <label for="regFullName" class="form-label">Họ và tên:</label>
               <input type="text" id="regFullName" class="styled-input w-100" placeholder="Ví dụ: Nguyễn Văn A" required />
             </div>
-            <div class="form-group" style="margin-top:10px;">
-              <label for="regUsername" class="form-label">Tên tài khoản (viết liền không dấu):</label>
-              <input type="text" id="regUsername" class="styled-input w-100" placeholder="Ví dụ: nguyenvana" required autocomplete="username" />
+            <div class="form-group" style="margin-top:14px;">
+              <label for="regUsername" class="form-label">Tên tài khoản:</label>
+              <input type="text" id="regUsername" class="styled-input w-100" placeholder="Nhập tên tài khoản (viết liền)..." required autocomplete="username" />
             </div>
-            <div class="form-row-2col" style="margin-top:10px;">
+            <div class="form-row-2col" style="margin-top:14px;">
               <div class="form-col">
                 <label for="regPassword" class="form-label">Mật khẩu:</label>
                 <div class="password-input-wrap">
                   <input type="password" id="regPassword" class="styled-input w-100" placeholder="Tối thiểu 6 ký tự" required autocomplete="new-password" />
-                  <button type="button" class="btn-toggle-pwd" id="btnToggleRegPwd">👁️</button>
+                  <button type="button" class="btn-toggle-pwd" id="btnToggleRegPwd" title="Hiện/Ẩn mật khẩu">👁️</button>
                 </div>
               </div>
               <div class="form-col">
-                <label for="regRole" class="form-label">Nhu cầu / Vai trò chính:</label>
+                <label for="regRole" class="form-label">Nhu cầu chính:</label>
                 <select id="regRole" class="styled-select w-100">
-                  <option value="Lập trình viên & IT">💻 Lập trình viên & Kỹ sư IT</option>
-                  <option value="Hardcore Gamer & PC Builder">🎮 Game thủ & Tự build PC</option>
-                  <option value="Content Creator & Đồ họa 3D">🎨 Sáng tạo nội dung & Đồ họa</option>
-                  <option value="Văn phòng & Sinh viên">💼 Dân văn phòng & Sinh viên</option>
-                  <option value="Người yêu công nghệ">⚡ Khám phá công nghệ mới</option>
+                  <option value="Lập trình viên & IT">💻 Lập trình & Kỹ thuật</option>
+                  <option value="Hardcore Gamer & PC Builder">🎮 Gaming & PC Gaming</option>
+                  <option value="Content Creator & Đồ họa 3D">🎨 Đồ họa 3D & Sáng tạo</option>
+                  <option value="Văn phòng & Sinh viên">💼 Văn phòng & Học tập</option>
+                  <option value="Người yêu công nghệ">⚡ Người yêu công nghệ</option>
                 </select>
               </div>
             </div>
-            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:18px;">
-              ✨ Hoàn Tất Đăng Ký & Tiếp Tục
+            <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:22px;">
+              ✨ Hoàn Tất Đăng Ký
             </button>
           </form>
         </div>
@@ -601,7 +646,49 @@
             <div class="grid-2col" id="onboardingCategoryList"></div>
           </div>
           <div class="onboarding-section" style="margin-top:14px;">
-            <h4 class="onboarding-sec-title">4. Khoảng ngân sách dự kiến:</h4>
+            <h4 class="onboarding-sec-title">4. Tiêu chí Cấu hình & Phần cứng mong muốn:</h4>
+            <div class="grid-2col" style="gap:10px; margin-top:6px;">
+              <div class="form-group">
+                <label class="form-label" style="font-size:12px;">Vi xử lý (CPU):</label>
+                <select id="onboardingCpu" class="styled-select w-100">
+                  <option value="any">Tất cả CPU</option>
+                  <option value="apple_silicon">Apple Silicon (M2 / M3 Pro / Max)</option>
+                  <option value="intel_i7_i9">Intel Core i7 / i9 Thế hệ mới</option>
+                  <option value="amd_ryzen">AMD Ryzen 7 / Ryzen 9</option>
+                  <option value="mid_range">Intel i5 / Ryzen 5 (Tầm trung)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size:12px;">Card đồ họa (GPU):</label>
+                <select id="onboardingGpu" class="styled-select w-100">
+                  <option value="any">Tất cả GPU</option>
+                  <option value="nvidia_rtx40">NVIDIA RTX 4080 / RTX 4090 (Đỉnh cao)</option>
+                  <option value="nvidia_rtx30_4060">NVIDIA RTX 4060 / 3070 (Tầm trung)</option>
+                  <option value="apple_gpu">Apple High-Core GPU</option>
+                  <option value="integrated">GPU Tích hợp tiết kiệm pin</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size:12px;">Bộ nhớ RAM:</label>
+                <select id="onboardingRam" class="styled-select w-100">
+                  <option value="any">Tùy chọn</option>
+                  <option value="16gb">16 GB (Tiêu chuẩn đồ họa / code)</option>
+                  <option value="32gb_plus">32 GB – 64 GB (Đa nhiệm nặng / AI)</option>
+                  <option value="8gb">8 GB (Cơ bản văn phòng)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" style="font-size:12px;">Ổ cứng SSD:</label>
+                <select id="onboardingSsd" class="styled-select w-100">
+                  <option value="any">Tùy chọn</option>
+                  <option value="512gb">512 GB NVMe</option>
+                  <option value="1tb_plus">1 TB – 2 TB NVMe Tốc độ cao</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="onboarding-section" style="margin-top:14px;">
+            <h4 class="onboarding-sec-title">5. Khoảng ngân sách dự kiến:</h4>
             <select id="onboardingBudget" class="styled-select w-100">
               <option value="all">Tất cả mức giá</option>
               <option value="under_5m">Dưới 5.000.000 ₫ (Linh kiện & Phụ kiện)</option>
@@ -693,6 +780,43 @@
         <div id="profileWishlistDisplay" class="profile-wishlist-box"></div>
         <h5 class="chain-title" style="margin-top:16px;">📜 Lịch sử tương tác trên Đồ thị Tri thức:</h5>
         <div id="profileInteractionsHistory" class="profile-history-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. FAVORITES (YÊU THÍCH) MODAL -->
+  <div class="modal-backdrop" id="favoritesModal" style="display:none;">
+    <div class="modal-dialog ebay-modal">
+      <button class="modal-close-btn" id="btnCloseFavoritesModal">×</button>
+      <div class="modal-header">
+        <span class="modal-badge-ebay" style="background:#fee2e2; color:#ef4444;">❤️ DANH SÁCH YÊU THÍCH</span>
+        <h3>Sản phẩm bạn đã lưu yêu thích</h3>
+        <p class="onboarding-sub">Các sản phẩm bạn yêu thích sẽ tạo liên kết <code>likes</code> trên Đồ thị Tri thức để tối ưu đề xuất.</p>
+      </div>
+      <div class="modal-body">
+        <div id="favoritesListContainer" class="cart-items-wrap"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. SHOPPING CART (GIỎ HÀNG) MODAL -->
+  <div class="modal-backdrop" id="cartModal" style="display:none;">
+    <div class="modal-dialog ebay-modal">
+      <button class="modal-close-btn" id="btnCloseCartModal">×</button>
+      <div class="modal-header">
+        <span class="modal-badge-ebay" style="background:#dbeafe; color:#2563eb;">🛒 GIỎ HÀNG MUA SẮM</span>
+        <h3>Giỏ hàng của bạn</h3>
+        <p class="onboarding-sub">Sản phẩm trong giỏ tạo liên kết <code>purchased</code> / <code>wants</code> trên Đồ thị Tri thức.</p>
+      </div>
+      <div class="modal-body">
+        <div id="cartListContainer" class="cart-items-wrap"></div>
+        <div class="cart-total-summary" id="cartTotalSummary" style="margin-top:16px; padding-top:14px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
+          <span style="font-weight:700; font-size:15px;">Tổng cộng:</span>
+          <span id="cartTotalPrice" style="font-weight:800; font-size:18px; color:#e53238;">0 ₫</span>
+        </div>
+        <button class="btn btn-ebay-primary w-100 btn-lg" id="btnCheckoutDemo" style="margin-top:16px;">
+          💳 Tiến Hành Đặt Hàng & Cập Nhật KG
+        </button>
       </div>
     </div>
   </div>

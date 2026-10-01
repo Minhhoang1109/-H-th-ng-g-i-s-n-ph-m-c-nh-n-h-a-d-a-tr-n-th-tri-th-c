@@ -308,10 +308,25 @@ class GraphService:
         }
         self.graph.add_node(prod_id, **attrs)
 
-        if category_id and category_id in self.graph:
-            self.graph.add_edge(prod_id, category_id, type="belongs_to", weight=1.5, label="thuộc danh mục")
-        if brand_id and brand_id in self.graph:
-            self.graph.add_edge(prod_id, brand_id, type="produced_by", weight=2.0, label="sản xuất bởi")
+        if category_id:
+            cat_node = category_id if category_id in self.graph else None
+            if not cat_node:
+                for n, a in self.graph.nodes(data=True):
+                    if a.get("type") == "Category" and a.get("name", "").lower() == category_id.lower():
+                        cat_node = n
+                        break
+            if cat_node:
+                self.graph.add_edge(prod_id, cat_node, type="belongs_to", weight=1.5, label="thuộc danh mục")
+
+        if brand_id:
+            brand_node = brand_id if brand_id in self.graph else None
+            if not brand_node:
+                for n, a in self.graph.nodes(data=True):
+                    if a.get("type") == "Brand" and (a.get("name", "").lower() == brand_id.lower() or n.lower() == f"b_{brand_id.lower()}"):
+                        brand_node = n
+                        break
+            if brand_node:
+                self.graph.add_edge(prod_id, brand_node, type="produced_by", weight=2.0, label="sản xuất bởi")
         if tag_ids:
             for t in tag_ids:
                 if t in self.graph:

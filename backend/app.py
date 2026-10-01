@@ -1,6 +1,11 @@
 import os
 import sys
 
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8')
+
 # Ensure root directory is on sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -260,13 +265,50 @@ def add_interaction():
         return jsonify({'success': False, 'error': str(e)}), 400
 
 @app.route('/api/survey', methods=['POST'])
+@app.route('/api/survey/detailed', methods=['POST'])
 def submit_survey():
     data = request.json or {}
     user_id = data.get('user_id')
     if not user_id:
         return jsonify({'success': False, 'error': 'user_id là bắt buộc'}), 400
 
+    # Ensure user exists; if username or display name was passed, resolve node id
+    if user_id not in graph_service.graph:
+        matched = False
+        for n, attrs in graph_service.graph.nodes(data=True):
+            if attrs.get('type') == 'User' and (attrs.get('username') == user_id or attrs.get('name') == user_id):
+                user_id = n
+                matched = True
+                break
+        if not matched:
+            return jsonify({'success': False, 'error': f'Không tìm thấy người dùng: {user_id}'}), 404
+
     try:
+        # Convert any brand/category display names to node IDs if necessary
+        categories = data.get('categories', [])
+        resolved_cats = []
+        for cat in categories:
+            if cat in graph_service.graph:
+                resolved_cats.append(cat)
+            else:
+                for c_node, c_attrs in graph_service.graph.nodes(data=True):
+                    if c_attrs.get('type') == 'Category' and c_attrs.get('name') == cat:
+                        resolved_cats.append(c_node)
+                        break
+        data['categories'] = resolved_cats if resolved_cats else categories
+
+        brands = data.get('brands', [])
+        resolved_brands = []
+        for brand in brands:
+            if brand in graph_service.graph:
+                resolved_brands.append(brand)
+            else:
+                for b_node, b_attrs in graph_service.graph.nodes(data=True):
+                    if b_attrs.get('type') == 'Brand' and b_attrs.get('name') == brand:
+                        resolved_brands.append(b_node)
+                        break
+        data['brands'] = resolved_brands if resolved_brands else brands
+
         graph_service.apply_detailed_survey(user_id=user_id, survey_data=data)
         return jsonify({
             'success': True,
@@ -286,5 +328,5 @@ def get_metrics():
     return jsonify({'success': True, 'metrics': metrics})
 
 if __name__ == '__main__':
-    print('Khởi động Knowledge Graph Recommendation Engine tại http://127.0.0.1:5000')
+    print('Khoi dong Knowledge Graph Recommendation Engine tai http://127.0.0.1:5000')
     app.run(host='0.0.0.0', port=5000, debug=False)
