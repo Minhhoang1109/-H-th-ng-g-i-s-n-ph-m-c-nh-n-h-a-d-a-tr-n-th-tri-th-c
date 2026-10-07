@@ -450,19 +450,38 @@ function renderAdminUsers(users) {
     }
     if (!targetNeed) targetNeed = 'Chưa ghi nhận';
 
+    const catsHtml = (u.preferred_categories || []).map(c => 
+      `<span style="background:#f1f5f9; color:#1e293b; padding:2px 6px; border-radius:4px; font-size:11px; margin-right:4px; display:inline-block; margin-top:3px;">${c.icon || '🏷️'} ${c.name}</span>`
+    ).join('');
+
+    const brandsHtml = (u.preferred_brands || []).map(b => 
+      `<span style="background:#ede9fe; color:#6d28d9; padding:2px 6px; border-radius:4px; font-size:11px; margin-right:4px; display:inline-block; margin-top:3px;">🏢 ${b.name}</span>`
+    ).join('');
+
+    const tagsHtml = (u.preferred_tags || []).map(t => 
+      `<span style="background:#fce7f3; color:#be185d; padding:2px 6px; border-radius:4px; font-size:11px; margin-right:4px; display:inline-block; margin-top:3px;">🎯 ${t.name}</span>`
+    ).join('');
+
     return `
-      <div class="user-card" style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-        <div style="display:flex; align-items:center; gap:16px;">
-          <img src="${u.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; border:2px solid #e2e8f0; flex-shrink:0;" />
+      <div class="user-card" style="background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:16px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:flex-start; box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+        <div style="display:flex; align-items:flex-start; gap:16px;">
+          <img src="${u.avatar || 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150'}" style="width:54px; height:54px; border-radius:50%; object-fit:cover; border:2px solid #e2e8f0; flex-shrink:0; margin-top:2px;" />
           <div>
-            <h4 style="margin:0; font-size:15px; color:#0f172a; font-weight:700;">${u.name || u.full_name || u.username} <code style="font-size:11px; color:#64748b; font-weight:normal;">(${u.id})</code></h4>
-            <span style="font-size:12px; color:#475569;">${u.role || 'Người dùng'} ${u.email ? '• ' + u.email : ''}</span>
-            <div style="font-size:12px; color:#334155; margin-top:5px;">
+            <div style="display:flex; align-items:center; gap:8px;">
+              <h4 style="margin:0; font-size:15px; color:#0f172a; font-weight:700;">${u.name || u.full_name || u.username} <code style="font-size:11px; color:#64748b; font-weight:normal;">(${u.id})</code></h4>
+              <span class="badge" style="background:${u.is_admin ? '#fef3c7; color:#b45309;' : '#eff6ff; color:#1d4ed8;'} font-size:11px; padding:1px 6px; border-radius:8px;">${u.is_admin ? 'Quản trị viên' : (u.role || 'Người dùng')}</span>
+            </div>
+            <span style="font-size:12px; color:#475569;">${u.email || ''} • Đăng nhập: <b>${u.login_count || 1}</b> lần • Liên kết KG: <b>${u.interactions_count || 0}</b> bậc</span>
+            
+            <div style="font-size:12px; color:#334155; margin-top:6px;">
               🎯 <b>Nhu cầu / Tìm kiếm:</b> <span style="color:#0284c7; font-weight:600;">${targetNeed}</span>
             </div>
-            <div style="font-size:11px; color:#64748b; margin-top:3px;">
-              Đăng nhập: <b>${u.login_count || 1}</b> lần • Tương tác đồ thị: <b>${u.interactions_count || 0}</b> liên kết
-            </div>
+
+            ${(catsHtml || brandsHtml || tagsHtml) ? `
+              <div style="margin-top:6px; display:flex; flex-wrap:wrap; gap:4px;">
+                ${catsHtml} ${brandsHtml} ${tagsHtml}
+              </div>
+            ` : ''}
           </div>
         </div>
         <div style="text-align:right; flex-shrink:0;">

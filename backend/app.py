@@ -91,6 +91,18 @@ def get_demo_accounts():
     return jsonify({'success': True, 'accounts': accounts})
 
 # --- USER WISHLIST & TARGET NEED (2ND LOGIN) ---
+@app.route('/api/user/<user_id>', methods=['GET'])
+def get_user_profile(user_id):
+    user = graph_service.get_user(user_id)
+    if not user:
+        for n, attrs in graph_service.graph.nodes(data=True):
+            if attrs.get('type') == 'User' and (attrs.get('username') == user_id or attrs.get('name') == user_id):
+                user = graph_service.get_user(n)
+                break
+    if not user:
+        return jsonify({'success': False, 'error': f'Không tìm thấy người dùng: {user_id}'}), 404
+    return jsonify({'success': True, 'user': user})
+
 @app.route('/api/user/wishlist', methods=['POST'])
 def save_user_wishlist():
     data = request.json or {}

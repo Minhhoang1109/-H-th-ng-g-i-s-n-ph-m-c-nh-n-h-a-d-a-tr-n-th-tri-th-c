@@ -228,6 +228,26 @@ function setupAuth() {
     document.getElementById('profileModal').style.display = 'none';
   });
 
+  document.getElementById('btnProfileRetakeSurvey')?.addEventListener('click', () => {
+    document.getElementById('profileModal').style.display = 'none';
+    document.getElementById('onboardingSurveyModal').style.display = 'flex';
+  });
+
+  document.getElementById('btnProfileOpenFavs')?.addEventListener('click', () => {
+    document.getElementById('profileModal').style.display = 'none';
+    renderFavoritesModal();
+  });
+
+  document.getElementById('btnProfileOpenCart')?.addEventListener('click', () => {
+    document.getElementById('profileModal').style.display = 'none';
+    renderCartModal();
+  });
+
+  document.getElementById('btnProfileLogout')?.addEventListener('click', () => {
+    document.getElementById('profileModal').style.display = 'none';
+    document.getElementById('btnLogout')?.click();
+  });
+
   document.getElementById('btnGuestOpenLogin')?.addEventListener('click', () => openAuthModal('login'));
   document.getElementById('btnHeroAuth')?.addEventListener('click', () => openAuthModal('login'));
 }
@@ -778,22 +798,242 @@ async function loadProductReviewsInModal(productId) {
 // ========================================================
 // PROFILE DRAWER & INTERACTIONS
 // ========================================================
-function openProfileDrawer() {
+async function openProfileDrawer() {
   if (!appState.currentUser) return;
   const modal = document.getElementById('profileModal');
-  document.getElementById('profileModalUserName').textContent = appState.currentUser.name || appState.currentUser.full_name;
-  
-  const summary = document.getElementById('profileInfoSummary');
-  summary.innerHTML = `
-    <p><b>Mã tài khoản:</b> <code>${appState.currentUser.id}</code></p>
-    <p><b>Vai trò / Sở thích:</b> ${appState.currentUser.role || 'Người dùng công nghệ'}</p>
-    <p><b>Trạng thái phiên:</b> Đã lưu tự động (Persistent Session)</p>
-  `;
+  if (!modal) return;
 
+  const userId = appState.currentUser.id;
+
+  // Attempt to fetch freshest profile from /api/user/<userId>
+  let user = appState.currentUser;
+  try {
+    const res = await fetch(`${API_BASE}/user/${userId}`);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && data.user) {
+        user = data.user;
+        appState.currentUser = user;
+      }
+    }
+  } catch (e) {
+    console.warn('Could not fetch fresh user profile:', e);
+  }
+
+  // 1. Header
+  const avatarEl = document.getElementById('profileModalAvatar');
+  if (avatarEl) {
+    avatarEl.src = user.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.username || user.id}`;
+  }
+
+  const nameEl = document.getElementById('profileModalUserName');
+  if (nameEl) nameEl.textContent = user.name || user.full_name || user.username || user.id;
+
+  const roleTag = document.getElementById('profileModalRoleTag');
+  if (roleTag) {
+    roleTag.textContent = user.is_admin ? '👑 Quản Trị Viên' : (user.role || 'Người dùng');
+    if (user.is_admin) {
+      roleTag.style.background = '#fef3c7';
+      roleTag.style.color = '#b45309';
+      roleTag.style.borderColor = '#fde68a';
+    } else {
+      roleTag.style.background = '#eff6ff';
+      roleTag.style.color = '#1d4ed8';
+      roleTag.style.borderColor = '#bfdbfe';
+    }
+  }
+
+  const metaEl = document.getElementById('profileModalMeta');
+  if (metaEl) {
+    metaEl.innerHTML = `Email: <b>${user.email || 'Chưa cung cấp'}</b> • Mã ID: <code>${user.id}</code> • Đăng nhập: <b>${user.login_count || 1}</b> lần`;
+  }
+
+  // 2. Stats
+  const favs = appState.favorites || JSON.parse(localStorage.getItem('kh_favorites') || '[]');
+  const cart = appState.cart || JSON.parse(localStorage.getItem('kh_cart') || '[]');
+  const totalEdges = user.interactions_count || ((user.interactions ? user.interactions.length : 0) + 
+    (user.preferred_categories ? user.preferred_categories.length : 0) + 
+    (user.preferred_brands ? user.preferred_brands.length : 0) + 
+    (user.preferred_tags ? user.preferred_tags.length : 0));
+
+  const elEdges = document.getElementById('pStatEdges');
+  if (elEdges) elEdges.textContent = totalEdges || 0;
+
+  const elFavs = document.getElementById('pStatFavs');
+  if (elFavs) elFavs.textContent = favs.length || 0;
+
+  const elCart = document.getElementById('pStatCart');
+  if (elCart) elCart.textContent = cart.length || 0;
+
+  const elLogins = document.getElementById('pStatLogins');
+  if (elLogins) elLogins.textContent = user.login_count || 1;
+
+  // 3. Account Details
+  const accountDetails = document.getElementById('profileAccountDetails');
+  if (accountDetails) {
+    accountDetails.innerHTML = `
+      <p><b>Tên đăng nhập:</b> <code>${user.username || user.id}</code></p>
+      <p><b>Họ và tên:</b> ${user.name || user.full_name || 'Khách hàng'}</p>
+      <p><b>Phân quyền hệ thống:</b> <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:10px;">${user.is_admin ? 'Quản trị viên (Admin)' : 'Thành viên'}</span></p>
+      <p><b>Trạng thái khảo sát KG:</b> <span class="badge" style="background:${user.survey_completed ? '#dcfce7; color:#166534;' : '#fef3c7; color:#b45309;'} padding:2px 8px; border-radius:10px;">${user.survey_completed ? '✅ Đã kích hoạt' : '⚠️ Chưa hoàn tất'}</span></p>
+      <p><b>Trạng thái phiên:</b> <span style="color:#10b981; font-weight:600;">● Đang hoạt động (Active Session)</span></p>
+      <p><b>Độ tin cậy đồ thị:</b> <span style="color:#3b82f6; font-weight:700;">100% Khớp tri thức</span></p>
+    `;
+  }
+
+  // 4. Preferences / Survey Content
+  const prefContainer = document.getElementById('profilePreferencesContent');
+  if (prefContainer) {
+    let catsHtml = '';
+    if (user.preferred_categories && user.preferred_categories.length > 0) {
+      catsHtml = user.preferred_categories.map(c => `<span class="pref-chip">${c.icon || '🏷️'} ${c.name}</span>`).join(' ');
+    } else if (user.detailed_survey && user.detailed_survey.categories && user.detailed_survey.categories.length > 0) {
+      catsHtml = user.detailed_survey.categories.map(c => `<span class="pref-chip">🏷️ ${c}</span>`).join(' ');
+    } else {
+      catsHtml = '<span style="color:#94a3b8; font-style:italic;">Chưa chọn danh mục</span>';
+    }
+
+    let brandsHtml = '';
+    if (user.preferred_brands && user.preferred_brands.length > 0) {
+      brandsHtml = user.preferred_brands.map(b => `<span class="pref-chip" style="background:#ede9fe; color:#6d28d9; border-color:#ddd6fe;">🏢 ${b.name}</span>`).join(' ');
+    } else if (user.detailed_survey && user.detailed_survey.brands && user.detailed_survey.brands.length > 0) {
+      brandsHtml = user.detailed_survey.brands.map(b => `<span class="pref-chip" style="background:#ede9fe; color:#6d28d9; border-color:#ddd6fe;">🏢 ${b}</span>`).join(' ');
+    } else {
+      brandsHtml = '<span style="color:#94a3b8; font-style:italic;">Chưa chọn thương hiệu</span>';
+    }
+
+    let tagsHtml = '';
+    if (user.preferred_tags && user.preferred_tags.length > 0) {
+      tagsHtml = user.preferred_tags.map(t => `<span class="pref-chip" style="background:#fce7f3; color:#be185d; border-color:#fbcfe8;">🎯 ${t.name}</span>`).join(' ');
+    } else if (user.detailed_survey && user.detailed_survey.tags && user.detailed_survey.tags.length > 0) {
+      tagsHtml = user.detailed_survey.tags.map(t => `<span class="pref-chip" style="background:#fce7f3; color:#be185d; border-color:#fbcfe8;">🎯 ${t}</span>`).join(' ');
+    } else {
+      tagsHtml = '<span style="color:#94a3b8; font-style:italic;">Chưa chọn mục đích sử dụng</span>';
+    }
+
+    // Specs & Budget
+    let budgetText = 'Mọi mức ngân sách';
+    if (user.detailed_survey && user.detailed_survey.budget) {
+      const bMap = {
+        'under_15m': 'Dưới 15 triệu VNĐ',
+        '15m_30m': 'Từ 15 đến 30 triệu VNĐ',
+        'above_30m': 'Phân khúc cao cấp (Trên 30 triệu VNĐ)',
+        'all': 'Mọi mức ngân sách'
+      };
+      budgetText = bMap[user.detailed_survey.budget] || user.detailed_survey.budget;
+    }
+
+    let specsHtml = '';
+    if (user.detailed_survey && user.detailed_survey.hardware_specs) {
+      const specs = user.detailed_survey.hardware_specs;
+      const specPairs = Object.entries(specs).filter(([k, v]) => v && v !== 'any').map(([k, v]) => `<b>${k.toUpperCase()}:</b> ${v}`).join(' • ');
+      if (specPairs) {
+        specsHtml = `<div class="pref-group"><div class="pref-label">⚙️ Yêu cầu thông số cấu hình:</div><div style="font-size:12px; color:#475569;">${specPairs}</div></div>`;
+      }
+    }
+
+    prefContainer.innerHTML = `
+      <div class="pref-group">
+        <div class="pref-label">💻 Danh mục quan tâm:</div>
+        <div class="pref-chips-wrap">${catsHtml}</div>
+      </div>
+      <div class="pref-group" style="margin-top:8px;">
+        <div class="pref-label">🏢 Thương hiệu ưa thích:</div>
+        <div class="pref-chips-wrap">${brandsHtml}</div>
+      </div>
+      <div class="pref-group" style="margin-top:8px;">
+        <div class="pref-label">🎯 Mục đích sử dụng & Nhu cầu:</div>
+        <div class="pref-chips-wrap">${tagsHtml}</div>
+      </div>
+      ${specsHtml}
+      <div class="pref-group" style="margin-top:8px;">
+        <div class="pref-label">💰 Ngân sách dự kiến:</div>
+        <div style="font-size:12px; color:#059669; font-weight:700;">${budgetText}</div>
+      </div>
+    `;
+  }
+
+  // 5. Wishlist / Target Need
   const wishBox = document.getElementById('profileWishlistDisplay');
-  wishBox.innerHTML = appState.currentUser.wishlist_need 
-    ? `🎯 <b>Sản phẩm săn đón:</b> "${appState.currentUser.wishlist_need}" (Đã kết nối cạnh KG trọng số 4.0)`
-    : 'Chưa đặt sản phẩm mong muốn cụ thể.';
+  if (wishBox) {
+    let targetNeed = user.last_target_need || user.wishlist_need;
+    if (!targetNeed && user.wishlist && user.wishlist.length > 0) {
+      const lastW = user.wishlist[user.wishlist.length - 1];
+      targetNeed = typeof lastW === 'object' ? (lastW.query || lastW.name) : lastW;
+    }
+
+    if (targetNeed) {
+      wishBox.innerHTML = `
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div>
+            <span style="font-size:14px; font-weight:700; color:#15803d;">🎯 ${targetNeed}</span>
+            <span class="badge" style="background:#bbf7d0; color:#14532d; font-size:11px; margin-left:8px; padding:2px 8px; border-radius:10px;">Trọng số KG: 4.0 (Tối đa)</span>
+          </div>
+        </div>
+        <p style="font-size:12px; color:#166534; margin:0;">
+          Thuật toán đồ thị tri thức ưu tiên sản phẩm tương thích với nhu cầu săn đón này lên vị trí đầu trang.
+        </p>
+      `;
+    } else {
+      wishBox.innerHTML = `
+        <p style="color:#64748b; font-size:12px; margin:0;">
+          Chưa đặt sản phẩm mong muốn cụ thể. Bạn có thể gõ tìm kiếm hoặc chọn danh mục để hệ thống tự động ghi nhận nhu cầu mục tiêu.
+        </p>
+      `;
+    }
+  }
+
+  // 6. Graph Interactions History
+  const historyBox = document.getElementById('profileInteractionsHistory');
+  if (historyBox) {
+    const interactions = user.interactions || [];
+
+    if (interactions.length === 0) {
+      historyBox.innerHTML = `
+        <div style="text-align:center; padding:18px; color:#94a3b8; font-size:12px; background:#f8fafc; border-radius:6px;">
+          Chưa có tương tác nào được ghi nhận trên đồ thị.<br>
+          <span style="font-size:11px; color:#64748b;">Hãy thử bấm <b>❤️ Yêu thích</b> hoặc <b>🛒 Thêm vào giỏ</b> tại trang chủ để mở rộng liên kết đồ thị tri thức!</span>
+        </div>
+      `;
+    } else {
+      const typeBadgeMap = {
+        'likes': { text: '❤️ Đã thích', class: 'likes', bg: '#fee2e2', color: '#dc2626' },
+        'wants': { text: '🎯 Mong muốn', class: 'wants', bg: '#dbeafe', color: '#2563eb' },
+        'cart': { text: '🛒 Giỏ hàng', class: 'cart', bg: '#dbeafe', color: '#2563eb' },
+        'viewed': { text: '👁️ Đã xem', class: 'viewed', bg: '#f1f5f9', color: '#475569' },
+        'purchased': { text: '🛍️ Đã mua', class: 'purchased', bg: '#dcfce7', color: '#166534' },
+        'reviewed': { text: '⭐ Đã đánh giá', class: 'reviewed', bg: '#fef3c7', color: '#d97706' }
+      };
+
+      historyBox.innerHTML = interactions.map(item => {
+        const badgeInfo = typeBadgeMap[item.edge_type] || { text: item.label || item.edge_type, bg: '#f1f5f9', color: '#334155' };
+        const displayPrice = item.target_price ? formatPrice(item.target_price) : '';
+        const displayImg = item.target_image || 'https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=100';
+
+        return `
+          <div class="history-item">
+            <div class="history-item-left">
+              <img src="${displayImg}" class="history-item-img" onerror="this.src='https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=100'" />
+              <div>
+                <strong style="font-size:13px; color:#0f172a; display:block;">${item.target_name || item.target_id}</strong>
+                <span style="font-size:11px; color:#64748b;">Mã SP: <code>${item.target_id}</code> ${displayPrice ? '• ' + displayPrice : ''}</span>
+              </div>
+            </div>
+            <div style="text-align:right;">
+              <span class="history-tag" style="background:${badgeInfo.bg}; color:${badgeInfo.color};">${badgeInfo.text}</span>
+              <div style="font-size:10px; color:#94a3b8; margin-top:2px;">KG Weight: <b>${item.weight || 1.0}</b></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // 7. Action buttons
+  const btnGoAdmin = document.getElementById('btnProfileGoAdmin');
+  if (btnGoAdmin) {
+    btnGoAdmin.style.display = user.is_admin ? 'inline-block' : 'none';
+  }
 
   modal.style.display = 'flex';
 }

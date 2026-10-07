@@ -768,18 +768,90 @@
 
   <!-- 6. USER PROFILE DRAWER / MODAL -->
   <div class="modal-backdrop" id="profileModal" style="display:none;">
-    <div class="modal-dialog ebay-modal">
+    <div class="modal-dialog ebay-modal profile-modal-dialog">
       <button class="modal-close-btn" id="btnCloseProfileModal">×</button>
-      <div class="modal-header">
-        <span class="modal-badge-ebay">HỒ SƠ NGƯỜI DÙNG</span>
-        <h3 id="profileModalUserName">Alice Nguyễn</h3>
+      <div class="modal-header profile-modal-header">
+        <div class="profile-header-user">
+          <img id="profileModalAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" class="profile-avatar-lg" alt="Avatar" />
+          <div style="flex:1;">
+            <div class="profile-badge-row">
+              <span class="modal-badge-ebay" id="profileModalBadge">HỒ SƠ NGƯỜI DÙNG</span>
+              <span class="profile-role-tag" id="profileModalRoleTag">Administrator</span>
+            </div>
+            <h3 id="profileModalUserName" class="profile-name">Quản Trị Viên Hệ Thống</h3>
+            <div class="profile-meta-line" id="profileModalMeta">admin@khteam.vn • ID: admin</div>
+          </div>
+        </div>
       </div>
-      <div class="modal-body">
-        <div class="profile-info-summary" id="profileInfoSummary"></div>
-        <h5 class="chain-title" style="margin-top:16px;">🎯 Sản phẩm / Thiết bị mong muốn hiện tại:</h5>
-        <div id="profileWishlistDisplay" class="profile-wishlist-box"></div>
-        <h5 class="chain-title" style="margin-top:16px;">📜 Lịch sử tương tác trên Đồ thị Tri thức:</h5>
-        <div id="profileInteractionsHistory" class="profile-history-box"></div>
+      
+      <div class="modal-body profile-modal-body">
+        <!-- 1. Quick Stats 4-col Cards -->
+        <div class="profile-stats-grid">
+          <div class="profile-stat-card">
+            <span class="p-stat-icon">🕸️</span>
+            <div>
+              <div class="p-stat-num" id="pStatEdges">0</div>
+              <div class="p-stat-lbl">Liên kết KG</div>
+            </div>
+          </div>
+          <div class="profile-stat-card">
+            <span class="p-stat-icon">❤️</span>
+            <div>
+              <div class="p-stat-num" id="pStatFavs">0</div>
+              <div class="p-stat-lbl">Yêu thích</div>
+            </div>
+          </div>
+          <div class="profile-stat-card">
+            <span class="p-stat-icon">🛒</span>
+            <div>
+              <div class="p-stat-num" id="pStatCart">0</div>
+              <div class="p-stat-lbl">Giỏ hàng</div>
+            </div>
+          </div>
+          <div class="profile-stat-card">
+            <span class="p-stat-icon">🔑</span>
+            <div>
+              <div class="p-stat-num" id="pStatLogins">1</div>
+              <div class="p-stat-lbl">Lần đăng nhập</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Account & Session Details -->
+        <div class="profile-section-card">
+          <h5 class="profile-section-title">👤 Thông tin tài khoản & Phiên làm việc</h5>
+          <div class="profile-info-grid" id="profileAccountDetails"></div>
+        </div>
+
+        <!-- 3. Preferences & Survey Profile -->
+        <div class="profile-section-card">
+          <div class="profile-section-header-flex">
+            <h5 class="profile-section-title">🏷️ Hồ sơ sở thích & Khảo sát tri thức (KG Profile)</h5>
+            <button class="btn btn-sm btn-ebay-outline" id="btnProfileRetakeSurvey">✏️ Cập nhật khảo sát</button>
+          </div>
+          <div id="profilePreferencesContent"></div>
+        </div>
+
+        <!-- 4. Target Need / Wishlist -->
+        <div class="profile-section-card">
+          <h5 class="profile-section-title">🎯 Nhu cầu săn đón / Sản phẩm mong muốn hiện tại</h5>
+          <div id="profileWishlistDisplay" class="profile-wishlist-box"></div>
+        </div>
+
+        <!-- 5. Knowledge Graph Interactions History -->
+        <div class="profile-section-card">
+          <h5 class="profile-section-title">📜 Lịch sử tương tác thực thể trên Đồ thị Tri thức</h5>
+          <div id="profileInteractionsHistory" class="profile-history-box"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer profile-modal-footer">
+        <div class="profile-actions-row">
+          <button class="btn btn-ebay-secondary" id="btnProfileOpenFavs">❤️ Xem Yêu Thích</button>
+          <button class="btn btn-ebay-secondary" id="btnProfileOpenCart">🛒 Xem Giỏ Hàng</button>
+          <a href="/admin" class="btn btn-ebay-primary" id="btnProfileGoAdmin" style="display:none; text-decoration:none;">🛠️ Trang Quản Trị</a>
+          <button class="btn btn-outline-danger" id="btnProfileLogout">🚪 Đăng Xuất</button>
+        </div>
       </div>
     </div>
   </div>

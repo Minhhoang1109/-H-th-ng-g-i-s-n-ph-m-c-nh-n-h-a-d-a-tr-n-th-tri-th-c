@@ -546,9 +546,41 @@
       "password_hash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
       "color": "#3b82f6",
-      "login_count": 4,
+      "login_count": 5,
       "survey_completed": true,
-      "wishlist": []
+      "wishlist": [
+        {
+          "query": "MacBook Pro M3 Max & RTX 4090 Workstation",
+          "timestamp": "init_admin",
+          "items": ["p_macbookpro16", "p_rtx4090"]
+        }
+      ],
+      "last_target_need": "MacBook Pro M3 Max & RTX 4090 Workstation",
+      "wishlist_need": "MacBook Pro M3 Max & RTX 4090 Workstation",
+      "detailed_survey": {
+        "categories": [
+          "c_laptop",
+          "c_component",
+          "c_phone"
+        ],
+        "brands": [
+          "b_apple",
+          "b_asus",
+          "b_sony"
+        ],
+        "tags": [
+          "t_laptrinh",
+          "t_caocap",
+          "t_dohoa"
+        ],
+        "hardware_specs": {
+          "cpu": "Apple M3 Max / Intel Core i9",
+          "gpu": "NVIDIA GeForce RTX 4090 24GB",
+          "ram": "64GB Unified Memory",
+          "ssd": "2TB NVMe PCIe 4.0"
+        },
+        "budget": "above_30m"
+      }
     },
     {
       "id": "u_văn mười",
@@ -566,6 +598,97 @@
     }
   ],
   "edges": [
+    {
+      "type": "prefers_category",
+      "weight": 3.0,
+      "label": "thích danh mục",
+      "source": "admin",
+      "target": "c_laptop"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "admin",
+      "target": "c_component"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.5,
+      "label": "thích danh mục",
+      "source": "admin",
+      "target": "c_phone"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.0,
+      "label": "chuộng thương hiệu",
+      "source": "admin",
+      "target": "b_apple"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 2.8,
+      "label": "chuộng thương hiệu",
+      "source": "admin",
+      "target": "b_asus"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 2.5,
+      "label": "chuộng thương hiệu",
+      "source": "admin",
+      "target": "b_sony"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.6,
+      "label": "quan tâm đặc tính",
+      "source": "admin",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "quan tâm đặc tính",
+      "source": "admin",
+      "target": "t_caocap"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.4,
+      "label": "quan tâm đặc tính",
+      "source": "admin",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "likes",
+      "weight": 3.0,
+      "label": "đã thích",
+      "source": "admin",
+      "target": "p_macbookpro16"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "mong muốn",
+      "source": "admin",
+      "target": "p_rtx4090"
+    },
+    {
+      "type": "viewed",
+      "weight": 1.0,
+      "label": "đã xem",
+      "source": "admin",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "đã mua",
+      "source": "admin",
+      "target": "p_wh1000xm5"
+    },
     {
       "type": "purchased",
       "weight": 3.5,
@@ -912,14 +1035,14 @@
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u1",
       "target": "c_laptop"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u1",
       "target": "b_apple"
     },

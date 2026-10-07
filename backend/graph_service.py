@@ -107,11 +107,9 @@ class GraphService:
         users = []
         for node_id, attrs in self.graph.nodes(data=True):
             if attrs.get("type") == "User":
-                out_degree = self.graph.out_degree(node_id)
-                u = dict(attrs)
-                u["interactions_count"] = out_degree
-                u.pop("password_hash", None)
-                users.append(u)
+                u = self.get_user(node_id)
+                if u:
+                    users.append(u)
         return sorted(users, key=lambda x: x.get("id"))
 
     def get_user(self, user_id):
@@ -119,6 +117,60 @@ class GraphService:
             u = dict(self.graph.nodes[user_id])
             u["interactions_count"] = self.graph.out_degree(user_id)
             u.pop("password_hash", None)
+
+            preferred_categories = []
+            preferred_brands = []
+            preferred_tags = []
+            preferred_specs = []
+            interactions = []
+
+            for _, target_id, edge_data in self.graph.out_edges(user_id, data=True):
+                target_node = self.graph.nodes.get(target_id, {})
+                edge_type = edge_data.get("type", "interacted")
+                edge_label = edge_data.get("label", edge_type)
+                weight = edge_data.get("weight", 1.0)
+                target_name = target_node.get("name", target_id)
+                target_type = target_node.get("type", "Unknown")
+
+                if edge_type == "prefers_category":
+                    preferred_categories.append({
+                        "id": target_id,
+                        "name": target_name,
+                        "icon": target_node.get("icon", "🏷️")
+                    })
+                elif edge_type == "prefers_brand":
+                    preferred_brands.append({
+                        "id": target_id,
+                        "name": target_name
+                    })
+                elif edge_type == "prefers_tag":
+                    preferred_tags.append({
+                        "id": target_id,
+                        "name": target_name
+                    })
+                elif edge_type == "prefers_spec":
+                    preferred_specs.append({
+                        "id": target_id,
+                        "name": target_name
+                    })
+                else:
+                    interactions.append({
+                        "target_id": target_id,
+                        "target_name": target_name,
+                        "target_type": target_type,
+                        "target_image": target_node.get("image", ""),
+                        "target_price": target_node.get("price", 0),
+                        "edge_type": edge_type,
+                        "label": edge_label,
+                        "weight": weight
+                    })
+
+            u["preferred_categories"] = preferred_categories
+            u["preferred_brands"] = preferred_brands
+            u["preferred_tags"] = preferred_tags
+            u["preferred_specs"] = preferred_specs
+            u["interactions"] = interactions
+
             return u
         return None
 
