@@ -50,11 +50,18 @@ function setupNavigation() {
 
   navItems.forEach(item => {
     item.addEventListener('click', () => {
+      const target = item.getAttribute('data-tab');
+      const isAdmin = !!(appState.currentUser && (appState.currentUser.is_admin || appState.currentUser.username === 'admin' || appState.currentUser.id === 'admin'));
+
+      if (target === 'graph-explorer' && !isAdmin) {
+        showToast('Tính năng Khám phá Đồ thị Tri thức 2D chỉ dành cho Quản trị viên (Admin)!', 'warning');
+        return;
+      }
+
       navItems.forEach(i => i.classList.remove('active'));
       tabContents.forEach(c => c.classList.remove('active'));
 
       item.classList.add('active');
-      const target = item.getAttribute('data-tab');
       const content = document.getElementById(`tab-${target}`);
       if (content) content.classList.add('active');
 
@@ -347,6 +354,27 @@ function updateAuthUI() {
   const isAdmin = !!(appState.currentUser && (appState.currentUser.is_admin || appState.currentUser.username === 'admin' || appState.currentUser.id === 'admin'));
   if (headerAdminLink) {
     headerAdminLink.style.display = isAdmin ? 'inline-flex' : 'none';
+  }
+
+  // Khám phá Đồ thị Tri thức 2D: Chỉ hiển thị cho tài khoản có quyền Admin
+  const navGraphExplorer = document.getElementById('navItemGraphExplorer') || document.querySelector('.nav-item[data-tab="graph-explorer"]');
+  if (navGraphExplorer) {
+    navGraphExplorer.style.display = isAdmin ? '' : 'none';
+  }
+
+  // Nếu người dùng không phải admin mà đang ở tab đồ thị thì tự động chuyển về tab gợi ý
+  if (!isAdmin) {
+    const activeTab = document.querySelector('.nav-item.active');
+    if (activeTab && activeTab.getAttribute('data-tab') === 'graph-explorer') {
+      const recTab = document.querySelector('.nav-item[data-tab="recommendations"]');
+      if (recTab) {
+        recTab.click();
+      } else {
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        document.getElementById('tab-recommendations')?.classList.add('active');
+        document.querySelector('.nav-item[data-tab="recommendations"]')?.classList.add('active');
+      }
+    }
   }
 
   if (appState.currentUser && !appState.isGuest) {
@@ -1441,6 +1469,9 @@ function setupUserGraphExplorer() {
 }
 
 async function initUserGraphCanvas(forceReload = false) {
+  const isAdmin = !!(appState.currentUser && (appState.currentUser.is_admin || appState.currentUser.username === 'admin' || appState.currentUser.id === 'admin'));
+  if (!isAdmin) return;
+
   const container = document.getElementById('userVisNetworkGraph');
   if (!container) return;
 

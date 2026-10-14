@@ -920,7 +920,33 @@
           "ssd": "any"
         },
         "budget": "all"
-      }
+      },
+      "orders": [
+        {
+          "id": "DH-9EDB22",
+          "user_id": "u_nguyen trong vang",
+          "items": [
+            {
+              "id": "p_macbookpro16_m3max",
+              "name": "MacBook Pro 16 inch M3 Max (36GB/1TB SSD)",
+              "price": 89990000,
+              "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
+              "brand": "K/H",
+              "quantity": 1
+            }
+          ],
+          "customer": {
+            "name": "nguyen trong vang",
+            "phone": "0909123456",
+            "email": "nguyen trong vang@gmail.com",
+            "address": "Số 10, Đường Huỳnh Văn Nghệ, P. Bửu Long, TP. Biên Hòa, Đồng Nai"
+          },
+          "total": 89990000,
+          "payment_method": "COD (Thanh toán khi nhận hàng)",
+          "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
+          "timestamp": "Vừa xong"
+        }
+      ]
     }
   ],
   "edges": [
@@ -4157,6 +4183,34 @@
       "label": "chuộng thương hiệu",
       "source": "u_nguyen trong vang",
       "target": "b_logitech"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u_nguyen trong vang",
+      "target": "p_macbookpro16_m3max"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u_nguyen trong vang",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u_nguyen trong vang",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u_nguyen trong vang",
+      "target": "p_airpodspro"
     }
   ]
 }
