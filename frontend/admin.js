@@ -12,6 +12,7 @@ let adminState = {
 document.addEventListener('DOMContentLoaded', async () => {
   setupAdminTabs();
   setupProductForm();
+  setupAdminUserModalEvents();
   
   document.getElementById('btnAdminLogout')?.addEventListener('click', () => {
     localStorage.removeItem('kh_recsys_session');
@@ -484,12 +485,97 @@ function renderAdminUsers(users) {
             ` : ''}
           </div>
         </div>
-        <div style="text-align:right; flex-shrink:0;">
-          <span class="badge" style="background:#dcfce7; color:#166534; font-size:12px; padding:5px 12px; border-radius:12px; font-weight:600;">Đã kích hoạt KG</span>
+        <div style="text-align:right; flex-shrink:0; display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+          <span class="badge" style="background:#dcfce7; color:#166534; font-size:12px; padding:4px 10px; border-radius:12px; font-weight:600;">Đã kích hoạt KG</span>
+          <button class="btn btn-sm btn-ebay-outline" onclick="openAdminEditUserModal('${u.id}')" style="font-size:12px; padding:3px 10px;">✏️ Sửa hồ sơ</button>
         </div>
       </div>
     `;
   }).join('');
+}
+
+window.openAdminEditUserModal = function(userId) {
+  const user = adminState.users.find(u => u.id === userId);
+  if (!user) return;
+
+  document.getElementById('adminEditUserId').value = user.id;
+  document.getElementById('adminEditUserName').value = user.name || user.full_name || user.username || '';
+  document.getElementById('adminEditUserRole').value = user.role || '';
+  document.getElementById('adminEditUserEmail').value = user.email || '';
+  document.getElementById('adminEditUserPhone').value = user.phone || '';
+  document.getElementById('adminEditUserBio').value = user.bio || '';
+
+  const avatarUrl = user.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.username || user.id}`;
+  document.getElementById('adminEditUserAvatar').value = user.avatar || '';
+  document.getElementById('adminEditUserAvatarPreview').src = avatarUrl;
+
+  let targetNeed = user.last_target_need || user.wishlist_need;
+  if (!targetNeed && user.wishlist && user.wishlist.length > 0) {
+    const lastItem = user.wishlist[user.wishlist.length - 1];
+    targetNeed = typeof lastItem === 'object' ? (lastItem.query || lastItem.name) : lastItem;
+  }
+  document.getElementById('adminEditUserTargetNeed').value = targetNeed || '';
+
+  document.getElementById('adminUserModal').style.display = 'flex';
+};
+
+function setupAdminUserModalEvents() {
+  const modal = document.getElementById('adminUserModal');
+  const btnClose = document.getElementById('btnCloseAdminUserModal');
+  const btnCancel = document.getElementById('btnCancelAdminUserModal');
+  const form = document.getElementById('adminUserForm');
+  const avatarInput = document.getElementById('adminEditUserAvatar');
+
+  btnClose?.addEventListener('click', () => modal.style.display = 'none');
+  btnCancel?.addEventListener('click', () => modal.style.display = 'none');
+
+  avatarInput?.addEventListener('input', () => {
+    const val = avatarInput.value.trim();
+    const prev = document.getElementById('adminEditUserAvatarPreview');
+    if (val && prev) prev.src = val;
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const userId = document.getElementById('adminEditUserId').value;
+    const name = document.getElementById('adminEditUserName').value.trim();
+    const email = document.getElementById('adminEditUserEmail').value.trim();
+    const phone = document.getElementById('adminEditUserPhone').value.trim();
+    const role = document.getElementById('adminEditUserRole').value.trim();
+    const avatar = document.getElementById('adminEditUserAvatar').value.trim();
+    const targetNeed = document.getElementById('adminEditUserTargetNeed').value.trim();
+    const bio = document.getElementById('adminEditUserBio').value.trim();
+
+    const btnSubmit = document.getElementById('btnSaveAdminUserModal');
+    const origText = btnSubmit ? btnSubmit.innerHTML : '💾 Lưu';
+    if (btnSubmit) {
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = '⏳ Đang lưu...';
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/user/${userId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_id: userId, name, email, phone, role, avatar, bio, target_need: targetNeed })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        modal.style.display = 'none';
+        showToast('Cập nhật hồ sơ người dùng thành công!', 'success');
+        await loadAdminUsers();
+      } else {
+        showToast(data.error || 'Lỗi cập nhật hồ sơ!', 'error');
+      }
+    } catch (err) {
+      showToast('Lỗi kết nối máy chủ!', 'error');
+    } finally {
+      if (btnSubmit) {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = origText;
+      }
+    }
+  });
 }
 
 async function loadAdminUsers() {

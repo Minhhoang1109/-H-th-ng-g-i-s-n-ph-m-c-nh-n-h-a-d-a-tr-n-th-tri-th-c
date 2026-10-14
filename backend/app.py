@@ -13,11 +13,13 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 from backend.graph_service import GraphService
 from backend.recommender import get_recommendations, get_guest_recommendations
+from backend.chatbot_service import ChatbotService
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 CORS(app)
 
 graph_service = GraphService()
+chatbot_service = ChatbotService(graph_service)
 
 @app.route('/')
 def serve_index():
@@ -102,6 +104,36 @@ def get_user_profile(user_id):
     if not user:
         return jsonify({'success': False, 'error': f'Không tìm thấy người dùng: {user_id}'}), 404
     return jsonify({'success': True, 'user': user})
+
+@app.route('/api/user/<user_id>', methods=['PUT', 'POST'])
+@app.route('/api/user/profile', methods=['PUT', 'POST'])
+def update_user_profile(user_id=None):
+    data = request.json or {}
+    uid = user_id or data.get('user_id') or data.get('id')
+    if not uid:
+        return jsonify({'success': False, 'error': 'Thiếu mã định danh người dùng (user_id)'}), 400
+
+    try:
+        user = graph_service.update_user(
+            user_id=uid,
+            name=data.get('name'),
+            email=data.get('email'),
+            phone=data.get('phone'),
+            avatar=data.get('avatar'),
+            role=data.get('role'),
+            bio=data.get('bio'),
+            new_password=data.get('new_password'),
+            target_need=data.get('target_need') or data.get('target_query') or data.get('last_target_need')
+        )
+        return jsonify({
+            'success': True,
+            'message': 'Cập nhật hồ sơ người dùng thành công!',
+            'user': user
+        })
+    except ValueError as ve:
+        return jsonify({'success': False, 'error': str(ve)}), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Lỗi cập nhật hồ sơ: {str(e)}'}), 500
 
 @app.route('/api/user/wishlist', methods=['POST'])
 def save_user_wishlist():
@@ -338,6 +370,48 @@ def get_survey_stats():
 def get_metrics():
     metrics = graph_service.get_metrics()
     return jsonify({'success': True, 'metrics': metrics})
+
+# --- AI SHOPPING ASSISTANT & AUTOMATED PURCHASING CHATBOT ---
+@app.route('/api/chatbot/message', methods=['POST'])
+def chatbot_message():
+    data = request.json or {}
+    message = data.get('message', '')
+    user_id = data.get('user_id')
+    cart = data.get('cart', [])
+    context = data.get('context', {})
+
+    result = chatbot_service.process_message(
+        message=message,
+        user_id=user_id,
+        cart=cart,
+        context=context
+    )
+    return jsonify({'success': True, **result})
+
+@app.route('/api/chatbot/order', methods=['POST'])
+def chatbot_create_order():
+    data = request.json or {}
+    user_id = data.get('user_id', 'u1')
+    items = data.get('items', [])
+    customer = data.get('customer', {})
+    total = data.get('total', 0)
+    payment_method = data.get('payment_method', 'COD (Thanh toán khi nhận hàng)')
+
+    if not items:
+        return jsonify({'success': False, 'error': 'Giỏ hàng trống!'}), 400
+
+    order = chatbot_service.create_order(
+        user_id=user_id,
+        items=items,
+        customer_info=customer,
+        total_price=total,
+        payment_method=payment_method
+    )
+    return jsonify({
+        'success': True,
+        'message': f'Đơn hàng {order["id"]} đã được xử lý thành công!',
+        'order': order
+    })
 
 if __name__ == '__main__':
     print('Khoi dong Knowledge Graph Recommendation Engine tai http://127.0.0.1:5000')

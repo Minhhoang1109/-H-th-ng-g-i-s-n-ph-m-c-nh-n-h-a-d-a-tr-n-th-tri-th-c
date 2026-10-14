@@ -57,7 +57,8 @@ class GraphService:
             self.graph.add_node(admin_id, **admin_attrs)
         else:
             self.graph.nodes[admin_id]["is_admin"] = True
-            self.graph.nodes[admin_id]["password_hash"] = pwd_hash
+            if "password_hash" not in self.graph.nodes[admin_id] or not self.graph.nodes[admin_id]["password_hash"]:
+                self.graph.nodes[admin_id]["password_hash"] = pwd_hash
 
     def _hash_password(self, password):
         return hashlib.sha256(password.encode('utf-8')).hexdigest()
@@ -73,6 +74,8 @@ class GraphService:
         for node in data.get("nodes", []):
             node_attrs = dict(node)
             node_id = node_attrs.get("id")
+            if not node_id:
+                continue
             node_type = node_attrs.get("type", "Unknown")
             node_attrs["color"] = self.TYPE_COLORS.get(node_type, "#94a3b8")
             self.graph.add_node(node_id, **node_attrs)
@@ -80,20 +83,30 @@ class GraphService:
         for edge in data.get("edges", []):
             edge_type = edge.get("type", "related")
             weight = edge.get("weight", self.INTERACTION_WEIGHTS.get(edge_type, 1.0))
-            self.graph.add_edge(
-                edge["source"],
-                edge["target"],
-                type=edge_type,
-                weight=weight,
-                label=edge_type
-            )
+            if edge.get("source") and edge.get("target"):
+                self.graph.add_edge(
+                    edge["source"],
+                    edge["target"],
+                    type=edge_type,
+                    weight=weight,
+                    label=edge_type
+                )
         self.ensure_admin_user()
 
     def save_graph(self, path=None):
         target = path or self.graph_path
-        nodes = [attrs for _, attrs in self.graph.nodes(data=True)]
+        nodes = []
+        for n, attrs in self.graph.nodes(data=True):
+            if not n:
+                continue
+            node_data = dict(attrs)
+            if "id" not in node_data:
+                node_data["id"] = n
+            nodes.append(node_data)
         edges = []
         for u, v, attrs in self.graph.edges(data=True):
+            if not u or not v:
+                continue
             e = dict(attrs)
             e["source"] = u
             e["target"] = v
@@ -226,6 +239,63 @@ class GraphService:
 
         self.save_graph()
         return self.get_user(user_id)
+
+    def update_user(self, user_id, name=None, email=None, phone=None, avatar=None, role=None, bio=None, new_password=None, target_need=None):
+        target_node_id = None
+        if user_id in self.graph and self.graph.nodes[user_id].get("type") == "User":
+            target_node_id = user_id
+        else:
+            user_id_lower = str(user_id).strip().lower()
+            for n, attrs in self.graph.nodes(data=True):
+                if attrs.get("type") == "User":
+                    if (attrs.get("username") or "").lower() == user_id_lower or (attrs.get("name") or "").lower() == user_id_lower or n.lower() == user_id_lower:
+                        target_node_id = n
+                        break
+
+        if not target_node_id or target_node_id not in self.graph:
+            raise ValueError(f"Không tìm thấy người dùng: {user_id}")
+
+        node = self.graph.nodes[target_node_id]
+
+        if name is not None and str(name).strip():
+            clean_name = str(name).strip()
+            node["name"] = clean_name
+            node["full_name"] = clean_name
+
+        if email is not None and str(email).strip():
+            clean_email = str(email).strip().lower()
+            for other_id, attrs in self.graph.nodes(data=True):
+                if other_id != target_node_id and attrs.get("type") == "User":
+                    if (attrs.get("email") or "").lower() == clean_email:
+                        raise ValueError(f"Email '{email}' đã được sử dụng bởi tài khoản khác!")
+            node["email"] = str(email).strip()
+
+        if phone is not None:
+            node["phone"] = str(phone).strip()
+
+        if avatar is not None and str(avatar).strip():
+            node["avatar"] = str(avatar).strip()
+
+        if role is not None and str(role).strip():
+            node["role"] = str(role).strip()
+
+        if bio is not None:
+            node["bio"] = str(bio).strip()
+
+        if new_password is not None and str(new_password).strip():
+            pwd_clean = str(new_password).strip()
+            if len(pwd_clean) < 4:
+                raise ValueError("Mật khẩu mới phải có tối thiểu 4 ký tự!")
+            node["password_hash"] = self._hash_password(pwd_clean)
+
+        if target_need is not None and str(target_need).strip():
+            clean_target = str(target_need).strip()
+            self.set_user_wishlist(target_node_id, clean_target)
+            node["last_target_need"] = clean_target
+            node["wishlist_need"] = clean_target
+
+        self.save_graph()
+        return self.get_user(target_node_id)
 
     def authenticate_user(self, username_or_email, password):
         query = username_or_email.strip().lower()

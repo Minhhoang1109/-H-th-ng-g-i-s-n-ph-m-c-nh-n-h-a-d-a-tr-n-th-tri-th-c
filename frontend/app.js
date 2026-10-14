@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupFiltersAndSort();
   setupUserGraphExplorer();
   setupCartAndFavorites();
+  setupChatbot();
 
   await loadMetadata();
   await loadUsers();
@@ -226,6 +227,26 @@ function setupAuth() {
   btnOpenProfile?.addEventListener('click', openProfileDrawer);
   document.getElementById('btnCloseProfileModal')?.addEventListener('click', () => {
     document.getElementById('profileModal').style.display = 'none';
+  });
+
+  // Edit User Profile triggers
+  document.getElementById('btnOpenEditProfile')?.addEventListener('click', () => openEditProfileModal());
+  document.getElementById('btnHeaderEditProfile')?.addEventListener('click', () => openEditProfileModal());
+  document.getElementById('profileAvatarClickWrap')?.addEventListener('click', () => openEditProfileModal('editProfileAvatarInput'));
+  document.getElementById('btnQuickEditTargetNeed')?.addEventListener('click', () => openEditProfileModal('editProfileTargetNeed'));
+  document.getElementById('btnCloseEditProfileModal')?.addEventListener('click', () => {
+    document.getElementById('editProfileModal').style.display = 'none';
+  });
+  document.getElementById('btnCancelEditProfile')?.addEventListener('click', () => {
+    document.getElementById('editProfileModal').style.display = 'none';
+  });
+  document.getElementById('editProfileForm')?.addEventListener('submit', handleEditProfileSubmit);
+
+  const editAvatarInput = document.getElementById('editProfileAvatarInput');
+  editAvatarInput?.addEventListener('input', () => {
+    const val = editAvatarInput.value.trim();
+    const prev = document.getElementById('editProfileAvatarPreview');
+    if (val && prev) prev.src = val;
   });
 
   document.getElementById('btnProfileRetakeSurvey')?.addEventListener('click', () => {
@@ -874,10 +895,14 @@ async function openProfileDrawer() {
     accountDetails.innerHTML = `
       <p><b>Tên đăng nhập:</b> <code>${user.username || user.id}</code></p>
       <p><b>Họ và tên:</b> ${user.name || user.full_name || 'Khách hàng'}</p>
+      <p><b>Email:</b> ${user.email || 'Chưa cung cấp'}</p>
+      <p><b>Số điện thoại:</b> ${user.phone || '<span style="color:#94a3b8; font-style:italic;">Chưa cập nhật</span>'}</p>
+      <p><b>Vai trò / Chức danh:</b> ${user.role || 'Thành viên'}</p>
       <p><b>Phân quyền hệ thống:</b> <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:2px 8px; border-radius:10px;">${user.is_admin ? 'Quản trị viên (Admin)' : 'Thành viên'}</span></p>
       <p><b>Trạng thái khảo sát KG:</b> <span class="badge" style="background:${user.survey_completed ? '#dcfce7; color:#166534;' : '#fef3c7; color:#b45309;'} padding:2px 8px; border-radius:10px;">${user.survey_completed ? '✅ Đã kích hoạt' : '⚠️ Chưa hoàn tất'}</span></p>
       <p><b>Trạng thái phiên:</b> <span style="color:#10b981; font-weight:600;">● Đang hoạt động (Active Session)</span></p>
       <p><b>Độ tin cậy đồ thị:</b> <span style="color:#3b82f6; font-weight:700;">100% Khớp tri thức</span></p>
+      ${user.bio ? `<p style="grid-column:1 / -1; margin-top:4px; font-style:italic; color:#475569; background:#f1f5f9; padding:8px 12px; border-radius:6px; border-left:3px solid #3b82f6;"><b>📝 Giới thiệu:</b> "${user.bio}"</p>` : ''}
     `;
   }
 
@@ -1036,6 +1061,179 @@ async function openProfileDrawer() {
   }
 
   modal.style.display = 'flex';
+}
+
+// ========================================================
+// USER PROFILE EDITING & AVATAR PRESETS
+// ========================================================
+const AVATAR_PRESETS = [
+  { url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', title: 'Nữ Quản Trị / Diana' },
+  { url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', title: 'Nữ Tech / Alice' },
+  { url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', title: 'Nam Gamer / Bob' },
+  { url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150', title: 'Kỹ Sư Phần Mềm / Charlie' },
+  { url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150', title: 'Thiết Kế 3D / Edward' },
+  { url: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150', title: 'Chuyên Gia Tối Giản' },
+  { url: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150', title: 'Tech Lead / Alex' },
+  { url: 'https://api.dicebear.com/7.x/bottts/svg?seed=ai_core', title: 'AI Bot Cyberpunk' }
+];
+
+function renderAvatarPresets(currentUrl) {
+  const container = document.getElementById('avatarPresetsGrid');
+  if (!container) return;
+  container.innerHTML = AVATAR_PRESETS.map(p => `
+    <button type="button" class="avatar-preset-btn ${p.url === currentUrl ? 'active' : ''}" data-url="${p.url}" title="${p.title}">
+      <img src="${p.url}" alt="${p.title}" />
+    </button>
+  `).join('');
+
+  container.querySelectorAll('.avatar-preset-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const url = btn.dataset.url;
+      const input = document.getElementById('editProfileAvatarInput');
+      const prev = document.getElementById('editProfileAvatarPreview');
+      if (input) input.value = url;
+      if (prev) prev.src = url;
+      container.querySelectorAll('.avatar-preset-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+}
+
+function openEditProfileModal(focusField = null) {
+  const user = appState.currentUser;
+  if (!user) {
+    showToast('Vui lòng đăng nhập để chỉnh sửa hồ sơ!', 'warning');
+    return;
+  }
+
+  const userIdEl = document.getElementById('editProfileUserId');
+  const nameEl = document.getElementById('editProfileName');
+  const emailEl = document.getElementById('editProfileEmail');
+  const phoneEl = document.getElementById('editProfilePhone');
+  const roleEl = document.getElementById('editProfileRole');
+  const bioEl = document.getElementById('editProfileBio');
+  const pwdEl = document.getElementById('editProfileNewPassword');
+  const targetNeedEl = document.getElementById('editProfileTargetNeed');
+  const avatarInput = document.getElementById('editProfileAvatarInput');
+  const avatarPreview = document.getElementById('editProfileAvatarPreview');
+
+  if (userIdEl) userIdEl.value = user.id;
+  if (nameEl) nameEl.value = user.name || user.full_name || user.username || '';
+  if (emailEl) emailEl.value = user.email || '';
+  if (phoneEl) phoneEl.value = user.phone || '';
+  if (roleEl) roleEl.value = user.role || '';
+  if (bioEl) bioEl.value = user.bio || '';
+  if (pwdEl) pwdEl.value = '';
+
+  const avatarUrl = user.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.username || user.id}`;
+  if (avatarInput) avatarInput.value = user.avatar || '';
+  if (avatarPreview) avatarPreview.src = avatarUrl;
+
+  let targetNeed = user.last_target_need || user.wishlist_need;
+  if (!targetNeed && user.wishlist && user.wishlist.length > 0) {
+    const lastItem = user.wishlist[user.wishlist.length - 1];
+    targetNeed = typeof lastItem === 'object' ? (lastItem.query || lastItem.name) : lastItem;
+  }
+  if (targetNeedEl) targetNeedEl.value = targetNeed || '';
+
+  renderAvatarPresets(avatarUrl);
+
+  const modal = document.getElementById('editProfileModal');
+  if (modal) modal.style.display = 'flex';
+
+  if (focusField) {
+    setTimeout(() => {
+      document.getElementById(focusField)?.focus();
+    }, 100);
+  }
+}
+
+async function handleEditProfileSubmit(e) {
+  e.preventDefault();
+  const userId = document.getElementById('editProfileUserId')?.value || (appState.currentUser ? appState.currentUser.id : null);
+  const name = document.getElementById('editProfileName')?.value.trim();
+  const email = document.getElementById('editProfileEmail')?.value.trim();
+  const phone = document.getElementById('editProfilePhone')?.value.trim();
+  const role = document.getElementById('editProfileRole')?.value.trim();
+  const avatar = document.getElementById('editProfileAvatarInput')?.value.trim();
+  const targetNeed = document.getElementById('editProfileTargetNeed')?.value.trim();
+  const bio = document.getElementById('editProfileBio')?.value.trim();
+  const newPassword = document.getElementById('editProfileNewPassword')?.value.trim();
+
+  if (!name || !email) {
+    showToast('Vui lòng nhập đầy đủ Họ và tên và Email!', 'error');
+    return;
+  }
+
+  const payload = {
+    user_id: userId,
+    name,
+    email,
+    phone,
+    role,
+    avatar,
+    bio,
+    target_need: targetNeed
+  };
+  if (newPassword) {
+    payload.new_password = newPassword;
+  }
+
+  const btnSave = document.getElementById('btnSubmitEditProfile');
+  const origText = btnSave ? btnSave.innerHTML : '💾 Lưu';
+  if (btnSave) {
+    btnSave.disabled = true;
+    btnSave.innerHTML = '⏳ Đang lưu hồ sơ...';
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/user/${userId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Cập nhật hồ sơ thành công! Đồ thị Tri thức đã được đồng bộ.', 'success');
+      appState.currentUser = data.user;
+
+      // Update session in localStorage
+      const rawSess = localStorage.getItem('kh_recsys_session');
+      if (rawSess) {
+        try {
+          const sess = JSON.parse(rawSess);
+          sess.username = data.user.username;
+          localStorage.setItem('kh_recsys_session', JSON.stringify(sess));
+        } catch (e) {}
+      }
+
+      // Update in appState.users list
+      const uIndex = appState.users.findIndex(u => u.id === data.user.id);
+      if (uIndex > -1) {
+        appState.users[uIndex] = data.user;
+      }
+
+      document.getElementById('editProfileModal').style.display = 'none';
+
+      // Update Top Nav UI
+      updateAuthUI();
+
+      // Refresh Open Profile Drawer
+      await openProfileDrawer();
+
+      // Refresh recommendations
+      await loadRecommendations();
+    } else {
+      showToast(data.error || 'Lỗi cập nhật hồ sơ người dùng!', 'error');
+    }
+  } catch (err) {
+    showToast('Lỗi kết nối máy chủ khi cập nhật hồ sơ!', 'error');
+  } finally {
+    if (btnSave) {
+      btnSave.disabled = false;
+      btnSave.innerHTML = origText;
+    }
+  }
 }
 
 // ========================================================
@@ -1481,6 +1679,9 @@ function updateCartAndFavoritesBadges() {
     const totalQty = appState.cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     cartBadge.textContent = totalQty;
   }
+  if (typeof updateChatbotCartBar === 'function') {
+    updateChatbotCartBar();
+  }
 }
 
 window.toggleFavoriteProduct = async function(productId, event) {
@@ -1639,3 +1840,369 @@ function renderCartList() {
 
   if (totalPriceEl) totalPriceEl.textContent = formatPrice(total);
 }
+
+// ========================================================
+// AI SHOPPING ASSISTANT & AUTOMATED PURCHASING CHATBOT
+// ========================================================
+let chatbotState = {
+  isOpen: false,
+  isWaiting: false,
+  history: []
+};
+
+function setupChatbot() {
+  const triggerBtn = document.getElementById('chatbotFloatingBtn');
+  const widget = document.getElementById('chatbotWidget');
+  const btnClose = document.getElementById('btnChatbotClose');
+  const btnMinimize = document.getElementById('btnChatbotMinimize');
+  const btnReset = document.getElementById('btnChatbotReset');
+  const form = document.getElementById('chatbotForm');
+  const input = document.getElementById('chatbotInput');
+  const quickCheckoutBtn = document.getElementById('btnChatbotQuickCheckout');
+
+  triggerBtn?.addEventListener('click', toggleChatbot);
+  btnClose?.addEventListener('click', () => closeChatbot());
+  btnMinimize?.addEventListener('click', () => closeChatbot());
+  btnReset?.addEventListener('click', () => resetChatbot());
+  quickCheckoutBtn?.addEventListener('click', () => handleChatbotCheckoutClick());
+
+  form?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const query = input.value.trim();
+    if (!query) return;
+    input.value = '';
+    sendChatbotMessage(query);
+  });
+
+  // Initial welcome message
+  initChatbotWelcome();
+  updateChatbotCartBar();
+}
+
+function toggleChatbot() {
+  const widget = document.getElementById('chatbotWidget');
+  if (!widget) return;
+  chatbotState.isOpen = !chatbotState.isOpen;
+  widget.style.display = chatbotState.isOpen ? 'flex' : 'none';
+
+  if (chatbotState.isOpen) {
+    const dot = document.getElementById('chatbotUnreadDot');
+    if (dot) dot.style.display = 'none';
+    updateChatbotCartBar();
+    scrollChatbotToBottom();
+    setTimeout(() => document.getElementById('chatbotInput')?.focus(), 200);
+  }
+}
+
+function closeChatbot() {
+  const widget = document.getElementById('chatbotWidget');
+  if (widget) widget.style.display = 'none';
+  chatbotState.isOpen = false;
+}
+
+function resetChatbot() {
+  const container = document.getElementById('chatbotMessages');
+  if (container) container.innerHTML = '';
+  chatbotState.history = [];
+  initChatbotWelcome(true);
+}
+
+function updateChatbotCartBar() {
+  const bar = document.getElementById('chatbotCartBar');
+  const countEl = document.getElementById('chatbotCartCount');
+  const totalEl = document.getElementById('chatbotCartTotal');
+  if (!bar) return;
+
+  const count = appState.cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  const total = appState.cart.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+
+  if (count > 0) {
+    bar.style.display = 'flex';
+    if (countEl) countEl.textContent = count;
+    if (totalEl) totalEl.textContent = formatPrice(total);
+  } else {
+    bar.style.display = 'none';
+  }
+}
+
+function initChatbotWelcome(force = false) {
+  const container = document.getElementById('chatbotMessages');
+  if (!container || (container.children.length > 0 && !force)) return;
+
+  const userName = appState.currentUser ? (appState.currentUser.name || appState.currentUser.username) : 'bạn';
+  const welcomeText = 
+    `👋 **Xin chào ${userName}!** Tôi là **Trợ lý Mua Sắm AI (KG-Bot)**.\n\n` +
+    `Tôi có thể tự động hóa toàn bộ khâu mua sắm cho bạn:\n` +
+    `• 🔍 **Tư vấn cấu hình & sản phẩm** dựa trên Đồ thị Tri thức (KG).\n` +
+    `• 🛒 **Tự động thêm giỏ hàng & kiểm tra phụ kiện mua kèm**.\n` +
+    `• ⚡ **Tự động hóa khâu chốt đơn & đặt hàng** tức thì!\n\n` +
+    `Bạn đang tìm kiếm thiết bị công nghệ nào?`;
+
+  const initialPills = [
+    "💻 Laptop lập trình & đồ họa",
+    "🎮 PC Gaming RTX 4090",
+    "📱 iPhone 16 Pro Max",
+    "🛒 Xem giỏ hàng & Chốt đơn",
+    "⚡ Đặt hàng nhanh"
+  ];
+
+  appendBotMessage(welcomeText, [], initialPills);
+}
+
+function appendUserMessage(text) {
+  const container = document.getElementById('chatbotMessages');
+  if (!container) return;
+
+  const row = document.createElement('div');
+  row.className = 'chat-row chat-row-user';
+  row.innerHTML = `<div class="chat-bubble chat-bubble-user">${escapeHtml(text)}</div>`;
+  container.appendChild(row);
+  scrollChatbotToBottom();
+}
+
+function appendTypingIndicator() {
+  const container = document.getElementById('chatbotMessages');
+  if (!container) return null;
+
+  const row = document.createElement('div');
+  row.className = 'chat-row chat-row-bot';
+  row.id = 'chatTypingIndicator';
+  row.innerHTML = `
+    <div class="chat-bot-avatar">🤖</div>
+    <div class="chat-bubble chat-bubble-bot">
+      <div class="chat-typing-dots">
+        <span class="chat-typing-dot"></span>
+        <span class="chat-typing-dot"></span>
+        <span class="chat-typing-dot"></span>
+      </div>
+    </div>
+  `;
+  container.appendChild(row);
+  scrollChatbotToBottom();
+  return row;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('chatTypingIndicator');
+  if (el) el.remove();
+}
+
+function appendBotMessage(text, products = [], pills = [], order = null) {
+  const container = document.getElementById('chatbotMessages');
+  if (!container) return;
+
+  const row = document.createElement('div');
+  row.className = 'chat-row chat-row-bot';
+
+  let formattedText = formatChatMarkdown(text);
+
+  let productsHtml = '';
+  if (products && products.length > 0) {
+    productsHtml = `
+      <div class="chat-products-list">
+        ${products.map(p => `
+          <div class="chat-product-item">
+            <img src="${p.image || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200'}" alt="${p.name}" class="chat-prod-img" onerror="this.src='https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200'" />
+            <div class="chat-prod-info">
+              <h5 class="chat-prod-name" title="${p.name}">${p.name}</h5>
+              <div class="chat-prod-price-row">
+                <span class="chat-prod-price">${formatPrice(p.price)}</span>
+                <span class="chat-prod-badge">⭐ ${p.rating || 4.8}</span>
+              </div>
+              <div class="chat-prod-kg-reason">💡 ${p.kg_reason || 'Độ khớp cao trên Đồ thị Tri thức'}</div>
+              <div class="chat-prod-actions">
+                <button class="chat-btn-cart" onclick="botAddProductToCart('${p.id}')">🛒 Thêm giỏ</button>
+                <button class="chat-btn-buy" onclick="botBuyNow('${p.id}')">⚡ Mua ngay</button>
+              </div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  let orderHtml = '';
+  if (order) {
+    orderHtml = `
+      <div class="chat-order-receipt">
+        <div class="chat-order-header">
+          <span class="chat-order-id">Mã đơn: ${order.id}</span>
+          <span class="chat-order-status-badge">Đã xác nhận</span>
+        </div>
+        <div class="chat-order-details">
+          <div>👤 <b>Người nhận:</b> ${order.customer?.name || 'Khách hàng'} (${order.customer?.phone || ''})</div>
+          <div>📍 <b>Địa chỉ:</b> ${order.customer?.address || 'Tại địa chỉ đăng ký'}</div>
+          <div>💳 <b>Thanh toán:</b> ${order.payment_method || 'COD'}</div>
+        </div>
+        <div class="chat-order-total-row">
+          <span>Tổng thanh toán:</span>
+          <span style="color:#e53238;">${formatPrice(order.total)}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  row.innerHTML = `
+    <div class="chat-bot-avatar">🤖</div>
+    <div class="chat-bubble chat-bubble-bot">
+      <div>${formattedText}</div>
+      ${productsHtml}
+      ${orderHtml}
+    </div>
+  `;
+
+  container.appendChild(row);
+  renderChatbotPills(pills);
+  scrollChatbotToBottom();
+}
+
+function renderChatbotPills(pills = []) {
+  const container = document.getElementById('chatbotPills');
+  if (!container) return;
+
+  if (!pills || pills.length === 0) {
+    pills = ["💻 Laptop", "📱 Điện thoại", "🎮 PC Gaming", "🛒 Xem giỏ hàng", "⚡ Chốt đơn ngay"];
+  }
+
+  container.innerHTML = pills.map(p => `
+    <button type="button" class="chatbot-pill" onclick="sendChatbotMessage('${escapeHtml(p)}')">
+      ${p}
+    </button>
+  `).join('');
+}
+
+function scrollChatbotToBottom() {
+  const container = document.getElementById('chatbotMessages');
+  if (container) {
+    container.scrollTop = container.scrollHeight;
+  }
+}
+
+async function sendChatbotMessage(text) {
+  if (!text || chatbotState.isWaiting) return;
+
+  appendUserMessage(text);
+  chatbotState.isWaiting = true;
+  appendTypingIndicator();
+
+  const uid = appState.currentUser ? appState.currentUser.id : 'u1';
+  const payload = {
+    message: text,
+    user_id: uid,
+    cart: appState.cart,
+    context: {
+      is_guest: appState.isGuest,
+      current_category: appState.selectedCategory
+    }
+  };
+
+  try {
+    const res = await fetch(`${API_BASE}/chatbot/message`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    removeTypingIndicator();
+
+    if (res.ok && data.success) {
+      appendBotMessage(data.reply, data.products || [], data.suggested_replies || [], data.order || null);
+
+      if (data.action) {
+        handleBotAutomatedAction(data.action);
+      }
+    } else {
+      appendBotMessage("Xin lỗi, tôi gặp chút gián đoạn kết nối. Bạn vui lòng thử lại nhé!");
+    }
+  } catch (err) {
+    removeTypingIndicator();
+    appendBotMessage("Lỗi kết nối máy chủ! Vui lòng kiểm tra lại đường truyền mạng.");
+  } finally {
+    chatbotState.isWaiting = false;
+  }
+}
+
+function handleBotAutomatedAction(action) {
+  if (!action) return;
+
+  if (action.type === 'add_to_cart' && action.product) {
+    const p = action.product;
+    const existing = appState.cart.find(it => it.id === p.id);
+    if (existing) {
+      existing.quantity = (existing.quantity || 1) + 1;
+    } else {
+      appState.cart.push({
+        id: p.id,
+        name: p.name,
+        price: p.price,
+        image: p.image,
+        brand: p.brand || (p.brands ? p.brands[0] : 'K/H'),
+        quantity: 1
+      });
+    }
+    saveCartAndFavoritesToStorage();
+    updateCartAndFavoritesBadges();
+    updateChatbotCartBar();
+    showToast(`Đã thêm "${p.name}" vào giỏ hàng! 🛒`, 'success');
+  } else if (action.type === 'clear_cart') {
+    appState.cart = [];
+    saveCartAndFavoritesToStorage();
+    updateCartAndFavoritesBadges();
+    updateChatbotCartBar();
+  } else if (action.type === 'order_completed') {
+    appState.cart = [];
+    saveCartAndFavoritesToStorage();
+    updateCartAndFavoritesBadges();
+    updateChatbotCartBar();
+    showToast('Đơn hàng đã được tự động xử lý thành công! 🎉', 'success');
+    loadRecommendations();
+  } else if (action.type === 'view_cart') {
+    updateChatbotCartBar();
+  }
+}
+
+window.botAddProductToCart = function(productId) {
+  const prod = appState.recommendations.find(p => p.id === productId) || { id: productId };
+  sendChatbotMessage(`Thêm ${prod.name || productId} vào giỏ hàng`);
+};
+
+window.botBuyNow = function(productId) {
+  const prod = appState.recommendations.find(p => p.id === productId) || { id: productId };
+  const existing = appState.cart.find(it => it.id === productId);
+  if (existing) {
+    existing.quantity = (existing.quantity || 1) + 1;
+  } else {
+    appState.cart.push({
+      id: prod.id,
+      name: prod.name || productId,
+      price: prod.price || 0,
+      image: prod.image || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200',
+      brand: prod.brand || 'K/H',
+      quantity: 1
+    });
+  }
+  saveCartAndFavoritesToStorage();
+  updateCartAndFavoritesBadges();
+  updateChatbotCartBar();
+  sendChatbotMessage("Chốt đơn ngay");
+};
+
+function handleChatbotCheckoutClick() {
+  sendChatbotMessage("Chốt đơn ngay");
+}
+
+function formatChatMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+    .replace(/\*(.*?)\*/g, '<i>$1</i>')
+    .replace(/`(.*?)`/g, '<code>$1</code>')
+    .replace(/\n\n/g, '<br><br>')
+    .replace(/\n/g, '<br>');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+

@@ -3,7 +3,7 @@
     {
       "id": "u1",
       "type": "User",
-      "name": "Alice Nguyễn",
+      "name": "Alice Nguyễn (Tech Pro)",
       "role": "Content Creator & Tín đồ Apple",
       "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150",
       "color": "#3b82f6",
@@ -52,10 +52,43 @@
           "query": "MacBook Pro M3",
           "timestamp": "7b921cd5",
           "items": "t_laptrinh"
+        },
+        {
+          "query": "MacBook Pro M3 Max 16 inch",
+          "timestamp": "d0e10b23",
+          "items": []
         }
       ],
-      "last_target_need": "MacBook Pro M3",
-      "login_count": 5
+      "last_target_need": "MacBook Pro M3 Max 16 inch",
+      "login_count": 5,
+      "full_name": "Alice Nguyễn (Tech Pro)",
+      "phone": "0912345678",
+      "bio": "Setup tối giản và công nghệ",
+      "wishlist_need": "MacBook Pro M3 Max 16 inch",
+      "orders": [
+        {
+          "id": "DH-D832EC",
+          "user_id": "u1",
+          "items": [
+            {
+              "id": "p_macbookpro16",
+              "name": "MacBook Pro 16 M3 Max",
+              "price": 89990000,
+              "quantity": 1
+            }
+          ],
+          "customer": {
+            "name": "Alice Nguyễn (Tech Pro)",
+            "phone": "0912345678",
+            "email": "kh@example.com",
+            "address": "Số 10, Đường Huỳnh Văn Nghệ, P. Bửu Long, TP. Biên Hòa, Đồng Nai"
+          },
+          "total": 89990000,
+          "payment_method": "COD (Thanh toán khi nhận hàng)",
+          "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
+          "timestamp": "Vừa xong"
+        }
+      ]
     },
     {
       "id": "u2",
@@ -538,7 +571,7 @@
     {
       "id": "admin",
       "type": "User",
-      "name": "Quản Trị Viên Hệ Thống",
+      "name": "admin",
       "username": "admin",
       "email": "admin@khteam.vn",
       "role": "Administrator",
@@ -546,13 +579,21 @@
       "password_hash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
       "color": "#3b82f6",
-      "login_count": 5,
+      "login_count": 6,
       "survey_completed": true,
       "wishlist": [
         {
           "query": "MacBook Pro M3 Max & RTX 4090 Workstation",
           "timestamp": "init_admin",
-          "items": ["p_macbookpro16", "p_rtx4090"]
+          "items": [
+            "p_macbookpro16",
+            "p_rtx4090"
+          ]
+        },
+        {
+          "query": "MacBook Pro M3 Max & RTX 4090 Workstation",
+          "timestamp": "c01840ac",
+          "items": []
         }
       ],
       "last_target_need": "MacBook Pro M3 Max & RTX 4090 Workstation",
@@ -580,7 +621,10 @@
           "ssd": "2TB NVMe PCIe 4.0"
         },
         "budget": "above_30m"
-      }
+      },
+      "full_name": "admin",
+      "phone": "",
+      "bio": ""
     },
     {
       "id": "u_văn mười",
@@ -595,100 +639,252 @@
       "survey_completed": false,
       "wishlist": [],
       "color": "#3b82f6"
+    },
+    {
+      "id": "p_macbookpro16_m3max",
+      "type": "Product",
+      "name": "MacBook Pro 16 inch M3 Max (36GB/1TB SSD)",
+      "price": 89990000,
+      "rating": 5.0,
+      "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
+      "description": "Siêu quái vật đồ họa với Chip M3 Max 16 nhân CPU, 40 nhân GPU, RAM 36GB Unified, màn hình Liquid Retina XDR 16.2 inch.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_asus_rog_strix_g18",
+      "type": "Product",
+      "name": "ASUS ROG Strix SCAR 18 (i9-14900HX/64GB/RTX 4090)",
+      "price": 95000000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400",
+      "description": "Cỗ máy gaming đỉnh cao: Intel Core i9-14900HX, RTX 4090 16GB, màn hình 18 inch QHD+ 240Hz Nebula HDR Mini LED.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_dell_xps13_plus",
+      "type": "Product",
+      "name": "Dell XPS 13 Plus 9320 OLED (i7-1360P/32GB/1TB)",
+      "price": 46990000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=400",
+      "description": "Thiết kế tương lai siêu mỏng nhẹ, bàn phím tràn viền cảm ứng, màn hình cảm ứng OLED 3.5K sắc nét.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_lenovo_thinkpad_x1",
+      "type": "Product",
+      "name": "Lenovo ThinkPad X1 Carbon Gen 12 (Core Ultra 7/32GB)",
+      "price": 48500000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1588872657578-7efd1f1555ed?w=400",
+      "description": "Đỉnh cao laptop doanh nhân & kỹ sư: Khung sợi carbon siêu bền chuẩn quân đội, bàn phím huyền thoại, bảo mật ThinkShield.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_galaxy_zfold6",
+      "type": "Product",
+      "name": "Samsung Galaxy Z Fold6 512GB AI Edition",
+      "price": 43990000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400",
+      "description": "Màn hình gập Dynamic AMOLED 2X 7.6 inch siêu mỏng nhẹ, tích hợp bộ công cụ Galaxy AI thông minh và bút S-Pen.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_iphone16_promax",
+      "type": "Product",
+      "name": "iPhone 16 Pro Max 256GB Titan Sa Mạc",
+      "price": 34990000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=400",
+      "description": "Chip Apple A18 Pro 3nm thế hệ mới, nút Camera Control xúc giác, viền màn hình siêu mỏng, quay 4K 120fps Dolby Vision.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_galaxy_s24_plus",
+      "type": "Product",
+      "name": "Samsung Galaxy S24 Plus 256GB Galaxy AI",
+      "price": 21990000,
+      "rating": 4.7,
+      "image": "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=400",
+      "description": "Màn hình QHD+ 6.7 inch 120Hz siêu sáng 2600 nits, camera AI 50MP, pin 4900mAh kèm sạc nhanh 45W.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_rtx4090_rog",
+      "type": "Product",
+      "name": "Card đồ họa ASUS ROG Strix GeForce RTX 4090 24GB OC White",
+      "price": 58990000,
+      "rating": 5.0,
+      "image": "https://images.unsplash.com/photo-1587202372775-e229f172b9d7?w=400",
+      "description": "Vua hiệu năng xử lý đồ họa & mô hình AI: 24GB GDDR6X, hệ thống tản nhiệt buồng hơi MaxContact và quạt Axial-tech.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_i7_14700k",
+      "type": "Product",
+      "name": "CPU Intel Core i7-14700K (20 nhân 28 luồng, Turbo 5.6GHz)",
+      "price": 10490000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1555680202-c86f0e12f086?w=400",
+      "description": "Bộ vi xử lý hiệu năng cao thế hệ 14 Raptor Lake Refresh, tối ưu hoàn hảo cho dựng phim, render 3D và gaming nặng.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_ram_corsair_dominator",
+      "type": "Product",
+      "name": "RAM Corsair Dominator Titanium RGB 64GB (2x32GB) DDR5 6000MHz",
+      "price": 7990000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=400",
+      "description": "Thanh RAM nhôm đúc nguyên khối tinh xảo, chip nhớ tuyển chọn, công nghệ làm mát DHX đã được cấp bằng sáng chế.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_ssd_samsung_990pro_2tb",
+      "type": "Product",
+      "name": "SSD Samsung 990 Pro 2TB PCIe Gen 4.0 NVMe Heatsink",
+      "price": 4890000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400",
+      "description": "Tốc độ đọc tuần tự lên đến 7450 MB/s, tích hợp tản nhiệt Heatsink chuyên dụng cho PS5 và PC Gaming cao cấp.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_tannhiet_corsair_h150i",
+      "type": "Product",
+      "name": "Tản nhiệt nước AIO Corsair iCUE LINK H150i LCD RGB 360mm",
+      "price": 6890000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=400",
+      "description": "Màn hình IPS 2.1 inch hiển thị nhiệt độ theo thời gian thực, hệ thống dây kết nối thông minh iCUE LINK gọn gàng.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_dell_ultrasharp_u3224kb",
+      "type": "Product",
+      "name": "Màn hình Đồ họa Dell UltraSharp 32 inch 6K UHD IPS Black",
+      "price": 62900000,
+      "rating": 5.0,
+      "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400",
+      "description": "Độ phân giải 6K đột phá (6144 x 3456), tấm nền IPS Black độ tương phản 2000:1, tích hợp camera 4K HDR và loa kép 14W.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_asus_rog_swift_oled",
+      "type": "Product",
+      "name": "Màn hình Gaming ASUS ROG Swift OLED PG32UCDM 32 inch 4K 240Hz",
+      "price": 36900000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400",
+      "description": "Tấm nền QD-OLED thế hệ 3, tần số quét 240Hz thời gian phản hồi 0.03ms, công nghệ tản nhiệt custom không cần quạt ồn.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_keyboard_keychron_q1pro",
+      "type": "Product",
+      "name": "Bàn phím cơ Custom Keychron Q1 Pro Full Nhôm CNC Wireless",
+      "price": 4690000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400",
+      "description": "Thân vỏ nhôm nguyên khối cắt CNC, thiết kế Double Gasket êm ái, hỗ trợ QMK/VIA tùy biến từng phím, kết nối không dây Bluetooth 5.1.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_mouse_logitech_superlight2",
+      "type": "Product",
+      "name": "Chuột Gaming Logitech G Pro X Superlight 2 Wireless 44K DPI",
+      "price": 3490000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1615663245857-ac93bb7c39e7?w=400",
+      "description": "Trọng lượng siêu nhẹ chỉ 60g, switch hybrid quang học cơ học LIGHTFORCE, cảm biến HERO 2 độ chính xác sub-micron.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_anker_prime_27650mah",
+      "type": "Product",
+      "name": "Sạc dự phòng đa năng Anker Prime 27.650mAh 250W 3 cổng",
+      "price": 3790000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1609592807664-884845511b06?w=400",
+      "description": "Công suất tổng cực khủng 250W sạc cùng lúc 2 laptop, màn hình thông minh hiển thị điện áp công suất, kết nối app theo dõi qua Bluetooth.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_sony_wf1000xm5",
+      "type": "Product",
+      "name": "Tai nghe True Wireless Sony WF-1000XM5 Hi-Res Chống ồn",
+      "price": 5690000,
+      "rating": 4.9,
+      "image": "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400",
+      "description": "Hai bộ xử lý âm thanh khử tiếng ồn V2 và QN2e độc quyền, màng loa Dynamic Driver X thế hệ mới cho âm bass sâu lắng.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_apple_airpods_max",
+      "type": "Product",
+      "name": "Tai nghe chụp tai Apple AirPods Max USB-C Space Gray",
+      "price": 13990000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=400",
+      "description": "Chụp tai nhôm cao cấp, đệm tai dạng lưới thoáng khí, công nghệ Spatial Audio theo dõi chuyển động đầu và cổng sạc USB-C mới.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_loa_sony_srs_xg500",
+      "type": "Product",
+      "name": "Loa Bluetooth di động Sony SRS-XG500 Mega Bass chống nước",
+      "price": 7490000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1545454675-3531b543be5d?w=400",
+      "description": "Loa công suất lớn với màng loa X-Balanced Speaker Unit, thời lượng pin 30 giờ, đèn LED RGB đồng bộ nhịp điệu và chống nước chuẩn IP66.",
+      "color": "#8b5cf6",
+      "reviews": []
+    },
+    {
+      "id": "p_macbookpro16",
+      "color": "#94a3b8"
+    },
+    {
+      "id": "p_rtx4090",
+      "color": "#94a3b8"
+    },
+    {
+      "id": "p_wh1000xm5",
+      "color": "#94a3b8"
+    },
+    {
+      "id": "G835LXG-TQ473W",
+      "type": "Product",
+      "name": "Laptop ASUS ROG Strix Scar 18 G835LXG-TQ473W",
+      "price": 182990000,
+      "rating": 4.8,
+      "image": "https://images.unsplash.com/photo-1525547719571-a2d4ac8945e2?w=400",
+      "description": "Sản phẩm công nghệ cao cấp Laptop ASUS ROG Strix Scar 18 G835LXG-TQ473W.",
+      "reviews": [],
+      "color": "#8b5cf6"
     }
   ],
   "edges": [
-    {
-      "type": "prefers_category",
-      "weight": 3.0,
-      "label": "thích danh mục",
-      "source": "admin",
-      "target": "c_laptop"
-    },
-    {
-      "type": "prefers_category",
-      "weight": 2.8,
-      "label": "thích danh mục",
-      "source": "admin",
-      "target": "c_component"
-    },
-    {
-      "type": "prefers_category",
-      "weight": 2.5,
-      "label": "thích danh mục",
-      "source": "admin",
-      "target": "c_phone"
-    },
-    {
-      "type": "prefers_brand",
-      "weight": 3.0,
-      "label": "chuộng thương hiệu",
-      "source": "admin",
-      "target": "b_apple"
-    },
-    {
-      "type": "prefers_brand",
-      "weight": 2.8,
-      "label": "chuộng thương hiệu",
-      "source": "admin",
-      "target": "b_asus"
-    },
-    {
-      "type": "prefers_brand",
-      "weight": 2.5,
-      "label": "chuộng thương hiệu",
-      "source": "admin",
-      "target": "b_sony"
-    },
-    {
-      "type": "prefers_tag",
-      "weight": 2.6,
-      "label": "quan tâm đặc tính",
-      "source": "admin",
-      "target": "t_laptrinh"
-    },
-    {
-      "type": "prefers_tag",
-      "weight": 2.5,
-      "label": "quan tâm đặc tính",
-      "source": "admin",
-      "target": "t_caocap"
-    },
-    {
-      "type": "prefers_tag",
-      "weight": 2.4,
-      "label": "quan tâm đặc tính",
-      "source": "admin",
-      "target": "t_dohoa"
-    },
-    {
-      "type": "likes",
-      "weight": 3.0,
-      "label": "đã thích",
-      "source": "admin",
-      "target": "p_macbookpro16"
-    },
-    {
-      "type": "wants",
-      "weight": 4.0,
-      "label": "mong muốn",
-      "source": "admin",
-      "target": "p_rtx4090"
-    },
-    {
-      "type": "viewed",
-      "weight": 1.0,
-      "label": "đã xem",
-      "source": "admin",
-      "target": "p_iphone15"
-    },
-    {
-      "type": "purchased",
-      "weight": 3.5,
-      "label": "đã mua",
-      "source": "admin",
-      "target": "p_wh1000xm5"
-    },
     {
       "type": "purchased",
       "weight": 3.5,
@@ -739,9 +935,23 @@
       "target": "p_iphone15"
     },
     {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_iphone15"
+    },
+    {
       "type": "likes",
       "weight": 2.5,
       "label": "likes",
+      "source": "u1",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
       "source": "u1",
       "target": "p_airpodspro"
     },
@@ -869,6 +1079,20 @@
       "weight": 4.0,
       "label": "wants",
       "source": "u1",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_rogphone8"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
       "target": "p_rogphone8"
     },
     {
@@ -953,7 +1177,7 @@
       "weight": 4.0,
       "label": "wants",
       "source": "u1",
-      "target": "p_ssdsamsung"
+      "target": "p_macbookair"
     },
     {
       "type": "wants",
@@ -989,6 +1213,27 @@
       "label": "wants",
       "source": "u1",
       "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ankercharger"
     },
     {
       "type": "wants",
@@ -1045,6 +1290,139 @@
       "label": "prefers_brand",
       "source": "u1",
       "target": "b_apple"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_zephyrusg16"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_rtx4080"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ramcorsair"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_mainasus"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_dellmonitor"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_macbookpro16_m3max"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_asus_rog_strix_g18"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_galaxy_zfold6"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_iphone16_promax"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_galaxy_s24_plus"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_rtx4090_rog"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_ssd_samsung_990pro_2tb"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_tannhiet_corsair_h150i"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_dell_ultrasharp_u3224kb"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_asus_rog_swift_oled"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_keyboard_keychron_q1pro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_mouse_logitech_superlight2"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_apple_airpods_max"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u1",
+      "target": "p_macbookpro16"
     },
     {
       "type": "purchased",
@@ -1453,6 +1831,20 @@
       "target": "p_iphone15"
     },
     {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_airpodspro",
+      "target": "p_macbookpro16_m3max"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_airpodspro",
+      "target": "p_iphone16_promax"
+    },
+    {
       "type": "belongs_to",
       "weight": 1.5,
       "label": "belongs_to",
@@ -1670,6 +2062,13 @@
       "target": "p_mainasus"
     },
     {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_i914900k",
+      "target": "p_rtx4090_rog"
+    },
+    {
       "type": "belongs_to",
       "weight": 1.5,
       "label": "belongs_to",
@@ -1689,6 +2088,13 @@
       "label": "has_tag",
       "source": "p_ramcorsair",
       "target": "t_tannhiet"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ramcorsair",
+      "target": "p_i7_14700k"
     },
     {
       "type": "belongs_to",
@@ -1705,6 +2111,13 @@
       "target": "b_samsung"
     },
     {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ssdsamsung",
+      "target": "p_i7_14700k"
+    },
+    {
       "type": "belongs_to",
       "weight": 1.5,
       "label": "belongs_to",
@@ -1724,6 +2137,13 @@
       "label": "has_tag",
       "source": "p_psucorsair",
       "target": "t_tannhiet"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_psucorsair",
+      "target": "p_rtx4090_rog"
     },
     {
       "type": "belongs_to",
@@ -1761,6 +2181,41 @@
       "target": "p_ssdsamsung"
     },
     {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mainasus",
+      "target": "p_rtx4090_rog"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mainasus",
+      "target": "p_i7_14700k"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mainasus",
+      "target": "p_ram_corsair_dominator"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mainasus",
+      "target": "p_ssd_samsung_990pro_2tb"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mainasus",
+      "target": "p_tannhiet_corsair_h150i"
+    },
+    {
       "type": "belongs_to",
       "weight": 1.5,
       "label": "belongs_to",
@@ -1789,6 +2244,34 @@
       "target": "p_mxkeyss"
     },
     {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mxmaster3s",
+      "target": "p_asus_rog_strix_g18"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mxmaster3s",
+      "target": "p_dell_xps13_plus"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mxmaster3s",
+      "target": "p_dell_ultrasharp_u3224kb"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mxmaster3s",
+      "target": "p_keyboard_keychron_q1pro"
+    },
+    {
       "type": "belongs_to",
       "weight": 1.5,
       "label": "belongs_to",
@@ -1808,6 +2291,13 @@
       "label": "has_tag",
       "source": "p_mxkeyss",
       "target": "t_laptrinh"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mxkeyss",
+      "target": "p_lenovo_thinkpad_x1"
     },
     {
       "type": "belongs_to",
@@ -1831,6 +2321,20 @@
       "target": "t_dohoa"
     },
     {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_dellmonitor",
+      "target": "p_macbookpro16_m3max"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_dellmonitor",
+      "target": "p_lenovo_thinkpad_x1"
+    },
+    {
       "type": "belongs_to",
       "weight": 1.5,
       "label": "belongs_to",
@@ -1852,6 +2356,20 @@
       "target": "t_chongon"
     },
     {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_sonywh1000",
+      "target": "p_asus_rog_strix_g18"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_sonywh1000",
+      "target": "p_galaxy_zfold6"
+    },
+    {
       "type": "belongs_to",
       "weight": 1.5,
       "label": "belongs_to",
@@ -1864,6 +2382,34 @@
       "label": "produced_by",
       "source": "p_ankercharger",
       "target": "b_anker"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ankercharger",
+      "target": "p_dell_xps13_plus"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ankercharger",
+      "target": "p_galaxy_zfold6"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ankercharger",
+      "target": "p_iphone16_promax"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ankercharger",
+      "target": "p_galaxy_s24_plus"
     },
     {
       "type": "prefers_category",
@@ -2076,6 +2622,237 @@
       "target": "t_gaming"
     },
     {
+      "type": "prefers_category",
+      "weight": 3.0,
+      "label": "prefers_category",
+      "source": "admin",
+      "target": "c_laptop"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "prefers_category",
+      "source": "admin",
+      "target": "c_component"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.5,
+      "label": "prefers_category",
+      "source": "admin",
+      "target": "c_phone"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.0,
+      "label": "prefers_brand",
+      "source": "admin",
+      "target": "b_apple"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 2.8,
+      "label": "prefers_brand",
+      "source": "admin",
+      "target": "b_asus"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 2.5,
+      "label": "prefers_brand",
+      "source": "admin",
+      "target": "b_sony"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.6,
+      "label": "prefers_tag",
+      "source": "admin",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.5,
+      "label": "prefers_tag",
+      "source": "admin",
+      "target": "t_caocap"
+    },
+    {
+      "type": "prefers_tag",
+      "weight": 2.4,
+      "label": "prefers_tag",
+      "source": "admin",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "likes",
+      "weight": 3.0,
+      "label": "likes",
+      "source": "admin",
+      "target": "p_macbookpro16"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_rtx4090"
+    },
+    {
+      "type": "viewed",
+      "weight": 1.0,
+      "label": "viewed",
+      "source": "admin",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_iphone15"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "admin",
+      "target": "p_wh1000xm5"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_rogphone8"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_dellxps15"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_zephyrusg16"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_macbookair"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_rtx4080"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_mainasus"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_macbookpro16_m3max"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_asus_rog_strix_g18"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_lenovo_thinkpad_x1"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_iphone16_promax"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_rtx4090_rog"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_ssd_samsung_990pro_2tb"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_keyboard_keychron_q1pro"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_mouse_logitech_superlight2"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_apple_airpods_max"
+    },
+    {
       "type": "likes",
       "weight": 2.5,
       "label": "likes",
@@ -2116,6 +2893,1154 @@
       "label": "wants",
       "source": "u_văn mười",
       "target": "p_macbookm3"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_macbookpro16_m3max",
+      "target": "c_laptop"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_macbookpro16_m3max",
+      "target": "b_apple"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_macbookpro16_m3max",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_macbookpro16_m3max",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_macbookpro16_m3max",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_macbookpro16_m3max",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_macbookpro16_m3max",
+      "target": "p_dellmonitor"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_macbookpro16_m3max",
+      "target": "p_dell_ultrasharp_u3224kb"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_macbookpro16_m3max",
+      "target": "p_keyboard_keychron_q1pro"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_macbookpro16_m3max",
+      "target": "p_anker_prime_27650mah"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_macbookpro16_m3max",
+      "target": "p_apple_airpods_max"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_asus_rog_strix_g18",
+      "target": "c_laptop"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_asus_rog_strix_g18",
+      "target": "b_asus"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_asus_rog_strix_g18",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_asus_rog_strix_g18",
+      "target": "t_tannhiet"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_asus_rog_strix_g18",
+      "target": "t_caocap"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_asus_rog_strix_g18",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_asus_rog_strix_g18",
+      "target": "p_mxmaster3s"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_asus_rog_strix_g18",
+      "target": "p_sonywh1000"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_asus_rog_strix_g18",
+      "target": "p_mouse_logitech_superlight2"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_dell_xps13_plus",
+      "target": "c_laptop"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_dell_xps13_plus",
+      "target": "b_dell"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_dell_xps13_plus",
+      "target": "t_vanphong"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_dell_xps13_plus",
+      "target": "t_caocap"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_dell_xps13_plus",
+      "target": "t_pinlau"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_dell_xps13_plus",
+      "target": "p_mxmaster3s"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_dell_xps13_plus",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_lenovo_thinkpad_x1",
+      "target": "c_laptop"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_lenovo_thinkpad_x1",
+      "target": "b_dell"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_lenovo_thinkpad_x1",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_lenovo_thinkpad_x1",
+      "target": "t_vanphong"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_lenovo_thinkpad_x1",
+      "target": "t_pinlau"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_lenovo_thinkpad_x1",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_lenovo_thinkpad_x1",
+      "target": "p_mxkeyss"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_lenovo_thinkpad_x1",
+      "target": "p_dellmonitor"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_galaxy_zfold6",
+      "target": "c_phone"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_galaxy_zfold6",
+      "target": "b_samsung"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_galaxy_zfold6",
+      "target": "t_caocap"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_galaxy_zfold6",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_galaxy_zfold6",
+      "target": "t_vanphong"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_galaxy_zfold6",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_galaxy_zfold6",
+      "target": "p_sonywh1000"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_galaxy_zfold6",
+      "target": "p_sony_wf1000xm5"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_iphone16_promax",
+      "target": "c_phone"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_iphone16_promax",
+      "target": "b_apple"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_iphone16_promax",
+      "target": "t_caocap"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_iphone16_promax",
+      "target": "t_pinlau"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_iphone16_promax",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_iphone16_promax",
+      "target": "p_airpodspro"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_iphone16_promax",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_iphone16_promax",
+      "target": "p_anker_prime_27650mah"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_iphone16_promax",
+      "target": "p_sony_wf1000xm5"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_iphone16_promax",
+      "target": "p_apple_airpods_max"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_galaxy_s24_plus",
+      "target": "c_phone"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_galaxy_s24_plus",
+      "target": "b_samsung"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_galaxy_s24_plus",
+      "target": "t_caocap"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_galaxy_s24_plus",
+      "target": "t_pinlau"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_galaxy_s24_plus",
+      "target": "t_vanphong"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_galaxy_s24_plus",
+      "target": "p_ankercharger"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_rtx4090_rog",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_rtx4090_rog",
+      "target": "b_nvidia"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_rtx4090_rog",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_rtx4090_rog",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_rtx4090_rog",
+      "target": "t_tannhiet"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_rtx4090_rog",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_rtx4090_rog",
+      "target": "p_psucorsair"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_rtx4090_rog",
+      "target": "p_mainasus"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_rtx4090_rog",
+      "target": "p_i914900k"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_rtx4090_rog",
+      "target": "p_ssd_samsung_990pro_2tb"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_rtx4090_rog",
+      "target": "p_asus_rog_swift_oled"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_i7_14700k",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_i7_14700k",
+      "target": "b_intel"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_i7_14700k",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_i7_14700k",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_i7_14700k",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_i7_14700k",
+      "target": "p_mainasus"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_i7_14700k",
+      "target": "p_ramcorsair"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_i7_14700k",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_i7_14700k",
+      "target": "p_ram_corsair_dominator"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_i7_14700k",
+      "target": "p_tannhiet_corsair_h150i"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_ram_corsair_dominator",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_ram_corsair_dominator",
+      "target": "b_corsair"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_ram_corsair_dominator",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_ram_corsair_dominator",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_ram_corsair_dominator",
+      "target": "t_caocap"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_ram_corsair_dominator",
+      "target": "t_tannhiet"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ram_corsair_dominator",
+      "target": "p_mainasus"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ram_corsair_dominator",
+      "target": "p_i7_14700k"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_ssd_samsung_990pro_2tb",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_ssd_samsung_990pro_2tb",
+      "target": "b_samsung"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_ssd_samsung_990pro_2tb",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_ssd_samsung_990pro_2tb",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_ssd_samsung_990pro_2tb",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ssd_samsung_990pro_2tb",
+      "target": "p_mainasus"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_ssd_samsung_990pro_2tb",
+      "target": "p_rtx4090_rog"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_tannhiet_corsair_h150i",
+      "target": "c_component"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_tannhiet_corsair_h150i",
+      "target": "b_corsair"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_tannhiet_corsair_h150i",
+      "target": "t_tannhiet"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_tannhiet_corsair_h150i",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_tannhiet_corsair_h150i",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_tannhiet_corsair_h150i",
+      "target": "p_i7_14700k"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_tannhiet_corsair_h150i",
+      "target": "p_mainasus"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_dell_ultrasharp_u3224kb",
+      "target": "c_accessory"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_dell_ultrasharp_u3224kb",
+      "target": "b_dell"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_dell_ultrasharp_u3224kb",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_dell_ultrasharp_u3224kb",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_dell_ultrasharp_u3224kb",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_dell_ultrasharp_u3224kb",
+      "target": "p_macbookpro16_m3max"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_dell_ultrasharp_u3224kb",
+      "target": "p_mxmaster3s"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_asus_rog_swift_oled",
+      "target": "c_accessory"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_asus_rog_swift_oled",
+      "target": "b_asus"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_asus_rog_swift_oled",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_asus_rog_swift_oled",
+      "target": "t_caocap"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_asus_rog_swift_oled",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_asus_rog_swift_oled",
+      "target": "p_rtx4090_rog"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_asus_rog_swift_oled",
+      "target": "p_mouse_logitech_superlight2"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_asus_rog_swift_oled",
+      "target": "p_mouse_logitech_superlight2"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_keyboard_keychron_q1pro",
+      "target": "c_accessory"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_keyboard_keychron_q1pro",
+      "target": "b_logitech"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_keyboard_keychron_q1pro",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_keyboard_keychron_q1pro",
+      "target": "t_vanphong"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_keyboard_keychron_q1pro",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_keyboard_keychron_q1pro",
+      "target": "p_mxmaster3s"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_keyboard_keychron_q1pro",
+      "target": "p_macbookpro16_m3max"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mouse_logitech_superlight2",
+      "target": "p_asus_rog_swift_oled"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mouse_logitech_superlight2",
+      "target": "p_asus_rog_swift_oled"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_mouse_logitech_superlight2",
+      "target": "c_accessory"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_mouse_logitech_superlight2",
+      "target": "b_logitech"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_mouse_logitech_superlight2",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_mouse_logitech_superlight2",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_mouse_logitech_superlight2",
+      "target": "p_asus_rog_strix_g18"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_anker_prime_27650mah",
+      "target": "c_accessory"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_anker_prime_27650mah",
+      "target": "b_anker"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_anker_prime_27650mah",
+      "target": "t_pinlau"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_anker_prime_27650mah",
+      "target": "t_vanphong"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_anker_prime_27650mah",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_anker_prime_27650mah",
+      "target": "p_iphone16_promax"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_anker_prime_27650mah",
+      "target": "p_macbookpro16_m3max"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_sony_wf1000xm5",
+      "target": "c_audio"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_sony_wf1000xm5",
+      "target": "b_sony"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_sony_wf1000xm5",
+      "target": "t_chongon"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_sony_wf1000xm5",
+      "target": "t_caocap"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_sony_wf1000xm5",
+      "target": "t_pinlau"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_sony_wf1000xm5",
+      "target": "p_galaxy_zfold6"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_sony_wf1000xm5",
+      "target": "p_iphone16_promax"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_sony_wf1000xm5",
+      "target": "p_loa_sony_srs_xg500"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_apple_airpods_max",
+      "target": "c_audio"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_apple_airpods_max",
+      "target": "b_apple"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_apple_airpods_max",
+      "target": "t_chongon"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_apple_airpods_max",
+      "target": "t_caocap"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_apple_airpods_max",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_apple_airpods_max",
+      "target": "p_macbookpro16_m3max"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_apple_airpods_max",
+      "target": "p_iphone16_promax"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "p_loa_sony_srs_xg500",
+      "target": "c_audio"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "p_loa_sony_srs_xg500",
+      "target": "b_sony"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_loa_sony_srs_xg500",
+      "target": "t_pinlau"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "p_loa_sony_srs_xg500",
+      "target": "t_caocap"
+    },
+    {
+      "type": "bought_together",
+      "weight": 2.8,
+      "label": "bought_together",
+      "source": "p_loa_sony_srs_xg500",
+      "target": "p_sony_wf1000xm5"
+    },
+    {
+      "type": "belongs_to",
+      "weight": 1.5,
+      "label": "belongs_to",
+      "source": "G835LXG-TQ473W",
+      "target": "c_laptop"
+    },
+    {
+      "type": "produced_by",
+      "weight": 2.0,
+      "label": "produced_by",
+      "source": "G835LXG-TQ473W",
+      "target": "b_asus"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "G835LXG-TQ473W",
+      "target": "t_laptrinh"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "G835LXG-TQ473W",
+      "target": "t_gaming"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "G835LXG-TQ473W",
+      "target": "t_dohoa"
+    },
+    {
+      "type": "has_tag",
+      "weight": 1.4,
+      "label": "has_tag",
+      "source": "G835LXG-TQ473W",
+      "target": "t_caocap"
     }
   ]
 }

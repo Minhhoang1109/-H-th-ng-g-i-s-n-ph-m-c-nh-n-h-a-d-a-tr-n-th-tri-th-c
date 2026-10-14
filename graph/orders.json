@@ -1,0 +1,24 @@
+[
+  {
+    "order_id": "ORD-KG-261011-9958",
+    "user_id": "u1",
+    "created_at": "11/10/2026 23:08",
+    "items": [
+      {
+        "id": "p_macbookpro14",
+        "name": "MacBook Pro 14 inch M3 Pro",
+        "price": 49990000,
+        "quantity": 1
+      }
+    ],
+    "total_amount": 49990000,
+    "shipping_info": {
+      "name": "Alice Nguyễn (Tech Pro)",
+      "phone": "0912345678",
+      "address": "Địa chỉ khách hàng đã lưu",
+      "payment_method": "COD"
+    },
+    "status": "Đang chuẩn bị hàng",
+    "kg_updated": true
+  }
+]

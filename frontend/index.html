@@ -772,13 +772,19 @@
       <button class="modal-close-btn" id="btnCloseProfileModal">×</button>
       <div class="modal-header profile-modal-header">
         <div class="profile-header-user">
-          <img id="profileModalAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" class="profile-avatar-lg" alt="Avatar" />
+          <div class="profile-avatar-wrap" style="position:relative; cursor:pointer;" id="profileAvatarClickWrap" title="Bấm để đổi ảnh đại diện">
+            <img id="profileModalAvatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" class="profile-avatar-lg" alt="Avatar" />
+            <span class="btn-avatar-quick-edit">📷</span>
+          </div>
           <div style="flex:1;">
             <div class="profile-badge-row">
               <span class="modal-badge-ebay" id="profileModalBadge">HỒ SƠ NGƯỜI DÙNG</span>
               <span class="profile-role-tag" id="profileModalRoleTag">Administrator</span>
             </div>
-            <h3 id="profileModalUserName" class="profile-name">Quản Trị Viên Hệ Thống</h3>
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+              <h3 id="profileModalUserName" class="profile-name">Quản Trị Viên Hệ Thống</h3>
+              <button class="btn btn-sm btn-ebay-outline" id="btnHeaderEditProfile" style="font-size:12px; padding:3px 10px;">✏️ Sửa hồ sơ</button>
+            </div>
             <div class="profile-meta-line" id="profileModalMeta">admin@khteam.vn • ID: admin</div>
           </div>
         </div>
@@ -819,7 +825,10 @@
 
         <!-- 2. Account & Session Details -->
         <div class="profile-section-card">
-          <h5 class="profile-section-title">👤 Thông tin tài khoản & Phiên làm việc</h5>
+          <div class="profile-section-header-flex">
+            <h5 class="profile-section-title">👤 Thông tin tài khoản & Phiên làm việc</h5>
+            <button class="btn btn-sm btn-ebay-primary" id="btnOpenEditProfile">✏️ Chỉnh sửa hồ sơ</button>
+          </div>
           <div class="profile-info-grid" id="profileAccountDetails"></div>
         </div>
 
@@ -834,7 +843,10 @@
 
         <!-- 4. Target Need / Wishlist -->
         <div class="profile-section-card">
-          <h5 class="profile-section-title">🎯 Nhu cầu săn đón / Sản phẩm mong muốn hiện tại</h5>
+          <div class="profile-section-header-flex">
+            <h5 class="profile-section-title">🎯 Nhu cầu săn đón / Sản phẩm mong muốn hiện tại</h5>
+            <button class="btn btn-sm btn-ebay-outline" id="btnQuickEditTargetNeed" style="font-size:11px; padding:2px 8px;">🎯 Đổi nhu cầu</button>
+          </div>
           <div id="profileWishlistDisplay" class="profile-wishlist-box"></div>
         </div>
 
@@ -889,6 +901,178 @@
         <button class="btn btn-ebay-primary w-100 btn-lg" id="btnCheckoutDemo" style="margin-top:16px;">
           💳 Tiến Hành Đặt Hàng & Cập Nhật KG
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. EDIT USER PROFILE MODAL -->
+  <div class="modal-backdrop" id="editProfileModal" style="display:none; z-index:1060;">
+    <div class="modal-dialog ebay-modal edit-profile-dialog">
+      <button class="modal-close-btn" id="btnCloseEditProfileModal">×</button>
+      <div class="modal-header edit-profile-header">
+        <div class="profile-badge-row" style="margin-bottom:6px;">
+          <span class="modal-badge-ebay">CẬP NHẬT HỒ SƠ</span>
+          <span class="badge" style="background:#e0f2fe; color:#0369a1; font-size:11px; padding:2px 8px; border-radius:10px;">Đồ Thị Tri Thức</span>
+        </div>
+        <h3 style="margin:0; font-size:18px; font-weight:800; color:#0f172a;">✏️ Chỉnh Sửa Hồ Sơ Cá Nhân</h3>
+        <p style="margin:4px 0 0; font-size:12px; color:#64748b;">Thông tin cập nhật sẽ được đồng bộ và phản chiếu tức thì vào hệ thống đồ thị tri thức (KG).</p>
+      </div>
+
+      <div class="modal-body edit-profile-body">
+        <form id="editProfileForm">
+          <input type="hidden" id="editProfileUserId" />
+
+          <!-- A. AVATAR SECTION -->
+          <div class="edit-section-card">
+            <label class="edit-field-label">📸 Ảnh đại diện (Avatar):</label>
+            <div class="edit-avatar-picker-row">
+              <div class="edit-avatar-preview-box">
+                <img id="editProfileAvatarPreview" src="" alt="Preview" class="edit-avatar-img-preview" />
+                <span class="edit-avatar-preview-badge">Xem trước</span>
+              </div>
+              <div style="flex:1;">
+                <input type="url" id="editProfileAvatarInput" class="styled-input" placeholder="Dán link ảnh đại diện (URL https://...)" style="width:100%; margin-bottom:8px;" />
+                <div style="font-size:11px; color:#64748b; margin-bottom:6px;">Hoặc bấm chọn nhanh 1 trong các avatar mẫu phong cách công nghệ:</div>
+                <div class="avatar-presets-grid" id="avatarPresetsGrid"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- B. BASIC INFO (NAME, ROLE) -->
+          <div class="edit-section-card">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <div>
+                <label class="edit-field-label" for="editProfileName">👤 Họ và tên: <span style="color:#ef4444;">*</span></label>
+                <input type="text" id="editProfileName" class="styled-input" required placeholder="Nhập họ và tên hiển thị..." style="width:100%;" />
+              </div>
+              <div>
+                <label class="edit-field-label" for="editProfileRole">💼 Chức danh / Nghề nghiệp:</label>
+                <input type="text" id="editProfileRole" class="styled-input" placeholder="VD: Senior Software Engineer, Hardcore Gamer..." style="width:100%;" />
+              </div>
+            </div>
+          </div>
+
+          <!-- C. CONTACT INFO (EMAIL, PHONE) -->
+          <div class="edit-section-card">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+              <div>
+                <label class="edit-field-label" for="editProfileEmail">✉️ Địa chỉ Email: <span style="color:#ef4444;">*</span></label>
+                <input type="email" id="editProfileEmail" class="styled-input" required placeholder="name@example.com" style="width:100%;" />
+              </div>
+              <div>
+                <label class="edit-field-label" for="editProfilePhone">📞 Số điện thoại:</label>
+                <input type="tel" id="editProfilePhone" class="styled-input" placeholder="09xx xxx xxx" style="width:100%;" />
+              </div>
+            </div>
+          </div>
+
+          <!-- D. TARGET SEARCH / KG WISH (WEIGHT 4.0) -->
+          <div class="edit-section-card" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+              <label class="edit-field-label" style="color:#166534; margin:0;" for="editProfileTargetNeed">🎯 Nhu cầu săn đón / Sản phẩm tìm kiếm mong muốn:</label>
+              <span class="badge" style="background:#16a34a; color:#fff; font-size:11px; padding:2px 8px; border-radius:10px;">Trọng số KG 4.0</span>
+            </div>
+            <input type="text" id="editProfileTargetNeed" class="styled-input" placeholder="VD: MacBook Pro M3 Max, Bàn phím cơ DareU, Card RTX 4090..." style="width:100%; background:#fff;" />
+            <div style="font-size:11px; color:#15803d; margin-top:6px;">
+              💡 <b>Tối ưu đồ thị KG:</b> Khi cập nhật mục này, hệ thống sẽ kết nối ngay lập tức cạnh <code>wants</code> (trọng số 4.0) từ bạn tới các sản phẩm và đặc tính liên quan, đẩy các sản phẩm này lên ưu tiên cao nhất trong bộ gợi ý.
+            </div>
+          </div>
+
+          <!-- E. BIO / SHORT INTRO -->
+          <div class="edit-section-card">
+            <label class="edit-field-label" for="editProfileBio">📝 Giới thiệu ngắn & Ghi chú sở thích cá nhân:</label>
+            <textarea id="editProfileBio" class="styled-input" rows="2" placeholder="Ví dụ: Đam mê setup góc làm việc tối giản, thường xuyên render video 4K và lập trình fullstack..." style="width:100%; resize:vertical; font-size:13px;"></textarea>
+          </div>
+
+          <!-- F. PASSWORD CHANGE (OPTIONAL) -->
+          <div class="edit-section-card" style="background:#fafaf9;">
+            <label class="edit-field-label" for="editProfileNewPassword" style="color:#44403c;">🔒 Đổi mật khẩu mới (Tùy chọn):</label>
+            <input type="password" id="editProfileNewPassword" class="styled-input" placeholder="Nhập mật khẩu mới (để trống nếu giữ nguyên mật khẩu cũ)" style="width:100%; background:#fff;" />
+            <div style="font-size:11px; color:#78716c; margin-top:4px;">Chỉ điền khi bạn muốn thay đổi mật khẩu đăng nhập (tối thiểu 4 ký tự).</div>
+          </div>
+
+          <div class="modal-footer edit-profile-footer">
+            <button type="button" class="btn btn-ebay-secondary" id="btnCancelEditProfile">Hủy Bỏ</button>
+            <button type="submit" class="btn btn-ebay-primary" id="btnSubmitEditProfile">💾 Lưu Thay Đổi Hồ Sơ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <!-- ==================== 10. AI SHOPPING ASSISTANT & AUTOMATED PURCHASING CHATBOT ==================== -->
+  <!-- Floating Chatbot Launcher Button -->
+  <button id="chatbotFloatingBtn" class="chatbot-floating-trigger" title="Trợ lý Mua Sắm AI (KG-Bot)">
+    <div class="chatbot-icon-wrap">
+      <span class="chatbot-robot-icon">🤖</span>
+      <span class="chatbot-pulse-ring"></span>
+      <span class="chatbot-unread-dot" id="chatbotUnreadDot">1</span>
+    </div>
+    <span class="chatbot-btn-text">Trợ lý Mua hàng</span>
+  </button>
+
+  <!-- Chatbot Drawer Window -->
+  <div id="chatbotWidget" class="chatbot-widget-container" style="display:none;">
+    <!-- Chatbot Header -->
+    <div class="chatbot-header">
+      <div class="chatbot-header-profile">
+        <div class="chatbot-avatar-circle">
+          <span style="font-size: 22px;">🤖</span>
+          <span class="chatbot-status-online"></span>
+        </div>
+        <div>
+          <div class="chatbot-title-row">
+            <h4 class="chatbot-title">KG Shopping Assistant</h4>
+            <span class="chatbot-badge">AI 24/7</span>
+          </div>
+          <span class="chatbot-sub">Tự động hóa khâu mua hàng & Tư vấn KG</span>
+        </div>
+      </div>
+      <div class="chatbot-window-actions">
+        <button class="chatbot-btn-control" id="btnChatbotReset" title="Bắt đầu hội thoại mới">🔄</button>
+        <button class="chatbot-btn-control" id="btnChatbotMinimize" title="Thu nhỏ">−</button>
+        <button class="chatbot-btn-control" id="btnChatbotClose" title="Đóng">×</button>
+      </div>
+    </div>
+
+    <!-- Live Cart Bar (Shows current items & total within chat) -->
+    <div class="chatbot-cart-bar" id="chatbotCartBar" style="display:none;">
+      <div class="chatbot-cart-bar-left">
+        <span>🛒 Giỏ hàng: <b id="chatbotCartCount">0</b> món</span>
+        <span class="chatbot-cart-total-badge" id="chatbotCartTotal">0 ₫</span>
+      </div>
+      <button class="btn btn-sm btn-ebay-primary chatbot-quick-checkout-btn" id="btnChatbotQuickCheckout">
+        ⚡ Chốt đơn
+      </button>
+    </div>
+
+    <!-- Chat Messages Scroll Container -->
+    <div class="chatbot-messages-body" id="chatbotMessages">
+      <!-- Dynamic messages will be populated here -->
+    </div>
+
+    <!-- Suggested Quick Reply Pills -->
+    <div class="chatbot-pills-bar" id="chatbotPills">
+      <!-- Dynamic pills here -->
+    </div>
+
+    <!-- Chat Input Area -->
+    <div class="chatbot-footer-input">
+      <form id="chatbotForm" class="chatbot-form">
+        <input 
+          type="text" 
+          id="chatbotInput" 
+          class="chatbot-input" 
+          placeholder="Hỏi sản phẩm, thêm giỏ, hoặc gõ 'chốt đơn'..." 
+          autocomplete="off" 
+          required 
+        />
+        <button type="submit" class="chatbot-btn-send" id="btnChatbotSend" title="Gửi tin nhắn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+          </svg>
+        </button>
+      </form>
+      <div class="chatbot-footer-note">
+        Tích hợp suy luận Đồ thị Tri thức (KG-RecSys) • Tự động hóa mua hàng tức thì
       </div>
     </div>
   </div>
