@@ -1,4 +1,4 @@
-// K/H Team Electronics - User Portal Logic
+// K/H Store - User Portal Logic
 const API_BASE = '/api';
 
 let appState = {
@@ -384,7 +384,7 @@ function updateAuthUI() {
     if (userSelect) userSelect.value = appState.currentUser.id;
 
     document.getElementById('userName').textContent = appState.currentUser.name || appState.currentUser.full_name;
-    document.getElementById('userRole').textContent = appState.currentUser.role || 'Thành viên K/H Team';
+    document.getElementById('userRole').textContent = appState.currentUser.role || 'Thành viên K/H Store';
     if (appState.currentUser.avatar) {
       document.getElementById('userAvatar').src = appState.currentUser.avatar;
     }
@@ -1962,7 +1962,7 @@ function initChatbotWelcome(force = false) {
 
   const userName = appState.currentUser ? (appState.currentUser.name || appState.currentUser.username) : 'bạn';
   const welcomeText = 
-    `👋 **Xin chào ${userName}!** Tôi là **Trợ lý Mua Sắm AI (KG-Bot)**.\n\n` +
+    `👋 **Xin chào ${userName}!** Tôi là **Trợ lý Mua Sắm AI (K/H Store)**.\n\n` +
     `Tôi có thể tự động hóa toàn bộ khâu mua sắm cho bạn:\n` +
     `• 🔍 **Tư vấn cấu hình & sản phẩm** dựa trên Đồ thị Tri thức (KG).\n` +
     `• 🛒 **Tự động thêm giỏ hàng & kiểm tra phụ kiện mua kèm**.\n` +
@@ -2167,7 +2167,7 @@ function handleBotAutomatedAction(action) {
         name: p.name,
         price: p.price,
         image: p.image,
-        brand: p.brand || (p.brands ? p.brands[0] : 'K/H'),
+        brand: p.brand || (p.brands ? p.brands[0] : 'K/H Store'),
         quantity: 1
       });
     }
@@ -2208,7 +2208,7 @@ window.botBuyNow = function(productId) {
       name: prod.name || productId,
       price: prod.price || 0,
       image: prod.image || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200',
-      brand: prod.brand || 'K/H',
+      brand: prod.brand || 'K/H Store',
       quantity: 1
     });
   }

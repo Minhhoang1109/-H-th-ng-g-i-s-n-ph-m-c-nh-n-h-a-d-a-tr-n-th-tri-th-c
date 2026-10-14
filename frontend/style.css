@@ -1,4 +1,4 @@
-/* K/H Team Electronics Theme for KG-RecSys */
+/* K/H Store Theme for KG-RecSys */
 :root {
   --ebay-blue: #3665f3;
   --ebay-blue-hover: #2954dc;
@@ -150,7 +150,7 @@ body {
   gap: 24px;
 }
 
-/* K/H Team Logo */
+/* K/H Store Logo */
 .ebay-logo {
   text-decoration: none;
   display: flex;
@@ -164,7 +164,7 @@ body {
 .logo-k { font-size: 32px; font-weight: 900; color: #e53238; letter-spacing: -1px; }
 .logo-slash { font-size: 28px; font-weight: 800; color: #94a3b8; margin: 0 1px; }
 .logo-h { font-size: 32px; font-weight: 900; color: #0064d2; letter-spacing: -1px; }
-.logo-team { 
+.logo-team, .logo-store { 
   font-size: 24px; 
   font-weight: 800; 
   color: #f5af02; 

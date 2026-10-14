@@ -44,7 +44,7 @@ class GraphService:
                 "type": "User",
                 "name": "Quản Trị Viên Hệ Thống",
                 "username": "admin",
-                "email": "admin@khteam.vn",
+                "email": "admin@khstore.vn",
                 "role": "Administrator",
                 "is_admin": True,
                 "password_hash": pwd_hash,

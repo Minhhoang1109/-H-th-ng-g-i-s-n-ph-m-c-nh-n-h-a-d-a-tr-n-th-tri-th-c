@@ -158,7 +158,7 @@ class ChatbotService:
 
         # Pre-fill customer details from user profile if available
         customer = {
-            "name": user.get("name", "") if user else "Khách Hàng K/H Team",
+            "name": user.get("name", "") if user else "Khách Hàng K/H Store",
             "phone": user.get("phone", "") if user else "0912345678",
             "email": user.get("email", "") if user else "customer@example.com",
             "address": "TP. Biên Hòa, Đồng Nai (Giao hàng tận nơi)"
@@ -230,7 +230,7 @@ class ChatbotService:
             f"⚡ **Trạng thái:** Đã ghi nhận & Đang chuẩn bị xuất kho\n\n"
             "🕸️ **Tối ưu hóa Đồ thị Tri thức:** Hệ thống đã tự động kết nối các cạnh `purchased` (trọng số 3.5) "
             "giữa tài khoản của bạn và các sản phẩm trên để cá nhân hóa chuẩn xác hơn cho các lần truy cập tiếp theo!\n\n"
-            "Cảm ơn bạn đã tin tưởng mua sắm cùng K/H Team!"
+            "Cảm ơn bạn đã tin tưởng mua sắm cùng K/H Store!"
         )
 
         return {
@@ -380,7 +380,7 @@ class ChatbotService:
     def _handle_policy_faq(self, text):
         if "bảo hành" in text or "bao hanh" in text:
             reply = (
-                "🛡️ **CHÍNH SÁCH BẢO HÀNH K/H TEAM:**\n\n"
+                "🛡️ **CHÍNH SÁCH BẢO HÀNH K/H STORE:**\n\n"
                 "• **100% Sản phẩm chính hãng:** Bảo hành từ 12 đến 36 tháng tùy linh kiện.\n"
                 "• **Lỗi 1 đổi 1:** Trong vòng 30 ngày đầu nếu phát sinh lỗi phần cứng từ nhà sản xuất.\n"
                 "• **Hỗ trợ trọn đời:** Cài đặt phần mềm, vệ sinh máy và tra keo tản nhiệt miễn phí.\n\n"
