@@ -882,6 +882,45 @@
       "description": "Sản phẩm công nghệ cao cấp Laptop ASUS ROG Strix Scar 18 G835LXG-TQ473W.",
       "reviews": [],
       "color": "#8b5cf6"
+    },
+    {
+      "id": "u_nguyen trong vang",
+      "type": "User",
+      "name": "nguyen trong vang",
+      "username": "nguyen trong vang",
+      "email": "nguyen trong vang@gmail.com",
+      "role": "Lập trình viên & IT",
+      "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
+      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=nguyen trong vang",
+      "login_count": 1,
+      "survey_completed": true,
+      "wishlist": [],
+      "color": "#3b82f6",
+      "detailed_survey": {
+        "categories": [
+          "c_phone",
+          "c_laptop",
+          "c_component",
+          "c_accessory",
+          "c_audio"
+        ],
+        "brands": [
+          "b_samsung",
+          "b_asus",
+          "b_dell",
+          "b_nvidia",
+          "b_intel",
+          "b_logitech"
+        ],
+        "tags": [],
+        "hardware_specs": {
+          "cpu": "any",
+          "gpu": "any",
+          "ram": "any",
+          "ssd": "any"
+        },
+        "budget": "all"
+      }
     }
   ],
   "edges": [
@@ -4041,6 +4080,83 @@
       "label": "has_tag",
       "source": "G835LXG-TQ473W",
       "target": "t_caocap"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_phone"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_laptop"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_component"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_accessory"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_audio"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_samsung"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_asus"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_dell"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_nvidia"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_intel"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_logitech"
     }
   ]
 }
