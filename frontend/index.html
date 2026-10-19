@@ -15,7 +15,7 @@
       document.write('<script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"><\\/script>');
     }
   </script>
-  <link rel="stylesheet" href="style.css?v=khstore1" />
+  <link rel="stylesheet" href="style.css?v=khcheckout1" />
 </head>
 <body>
 
@@ -855,6 +855,12 @@
           <h5 class="profile-section-title">📜 Lịch sử tương tác thực thể trên Đồ thị Tri thức</h5>
           <div id="profileInteractionsHistory" class="profile-history-box"></div>
         </div>
+
+        <!-- 6. Order History -->
+        <div class="profile-section-card">
+          <h5 class="profile-section-title">📦 Lịch sử đơn hàng đã đặt (<span id="profileOrderCountBadge">0</span>)</h5>
+          <div id="profileOrdersList" class="profile-history-box"></div>
+        </div>
       </div>
 
       <div class="modal-footer profile-modal-footer">
@@ -899,8 +905,303 @@
           <span id="cartTotalPrice" style="font-weight:800; font-size:18px; color:#e53238;">0 ₫</span>
         </div>
         <button class="btn btn-ebay-primary w-100 btn-lg" id="btnCheckoutDemo" style="margin-top:16px;">
-          💳 Tiến Hành Đặt Hàng & Cập Nhật KG
+          💳 Tiến Hành Thanh Toán (Giao Hàng & Mã Chuyển Khoản)
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8.1 CHECKOUT & DELIVERY INFO + TRANSFER QR MODAL -->
+  <div class="modal-backdrop" id="checkoutModal" style="display:none; z-index:1065;">
+    <div class="modal-dialog ebay-modal checkout-modal-dialog">
+      <button class="modal-close-btn" id="btnCloseCheckoutModal">×</button>
+      
+      <!-- Checkout Header -->
+      <div class="modal-header checkout-modal-header">
+        <div class="checkout-badge-row">
+          <span class="modal-badge-ebay" style="background:#dbeafe; color:#2563eb;">🛒 THANH TOÁN ĐƠN HÀNG</span>
+          <span class="badge" style="background:#dcfce7; color:#166534; font-size:11px; padding:2px 8px; border-radius:10px;">🛡️ K/H Store Certified</span>
+        </div>
+        <h3 style="margin:4px 0 0; font-size:20px; font-weight:800; color:#0f172a;">Thông Tin Giao Hàng & Mã Chuyển Khoản</h3>
+        <p class="onboarding-sub" style="margin:4px 0 0;">Điền địa chỉ giao hàng và quét mã VietQR tự động để hoàn tất đơn hàng nhanh chóng.</p>
+      </div>
+
+      <!-- Checkout Body: 2 Columns Grid -->
+      <div class="modal-body checkout-modal-body">
+        <form id="checkoutForm">
+          <div class="checkout-layout-grid">
+            
+            <!-- LEFT COLUMN: Delivery Info + Payment Method & QR -->
+            <div class="checkout-col-main">
+              
+              <!-- SECTION 1: Recipient & Delivery Information -->
+              <div class="checkout-card">
+                <div class="checkout-card-header">
+                  <span class="checkout-step-num">1</span>
+                  <h4>📍 Thông Tin Người Nhận & Địa Chỉ Giao Hàng</h4>
+                </div>
+                <div class="checkout-form-grid">
+                  <div class="form-group">
+                    <label class="checkout-label">Họ và tên người nhận <span class="req">*</span></label>
+                    <input type="text" id="checkoutRecipientName" class="styled-input w-100" placeholder="Ví dụ: Nguyễn Văn A" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="checkout-label">Số điện thoại liên hệ <span class="req">*</span></label>
+                    <input type="tel" id="checkoutRecipientPhone" class="styled-input w-100" placeholder="Ví dụ: 0912345678" required />
+                  </div>
+                  <div class="form-group full-width">
+                    <label class="checkout-label">Email nhận hóa đơn điện tử & bảo hành</label>
+                    <input type="email" id="checkoutRecipientEmail" class="styled-input w-100" placeholder="Ví dụ: email@gmail.com" />
+                  </div>
+                  <div class="form-group">
+                    <label class="checkout-label">Tỉnh / Thành phố <span class="req">*</span></label>
+                    <select id="checkoutCity" class="styled-select w-100" required>
+                      <option value="Đồng Nai">Đồng Nai (TP. Biên Hòa)</option>
+                      <option value="Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                      <option value="Hà Nội">Hà Nội</option>
+                      <option value="Bình Dương">Bình Dương</option>
+                      <option value="Đà Nẵng">Đà Nẵng</option>
+                      <option value="Cần Thơ">Cần Thơ</option>
+                      <option value="Hải Phòng">Hải Phòng</option>
+                      <option value="Khác">Tỉnh / Thành phố khác</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="checkout-label">Địa chỉ nhận hàng chi tiết <span class="req">*</span></label>
+                    <input type="text" id="checkoutAddress" class="styled-input w-100" placeholder="Số nhà, tên đường, phường/xã..." required />
+                  </div>
+                  <div class="form-group full-width">
+                    <label class="checkout-label">Ghi chú giao hàng (Tùy chọn)</label>
+                    <textarea id="checkoutNote" class="styled-textarea w-100" rows="2" placeholder="Ví dụ: Giao giờ hành chính, gọi trước khi giao 15 phút..."></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- SECTION 2: Payment Method & Transfer QR -->
+              <div class="checkout-card" style="margin-top:16px;">
+                <div class="checkout-card-header">
+                  <span class="checkout-step-num">2</span>
+                  <h4>💳 Phương Thức Thanh Toán & Mã Chuyển Khoản</h4>
+                </div>
+
+                <!-- Payment Method Radios -->
+                <div class="payment-method-selector">
+                  <label class="payment-option active" id="optPaymentTransfer">
+                    <input type="radio" name="checkout_payment_method" value="banking" checked />
+                    <div class="payment-option-info">
+                      <div class="payment-option-title">
+                        <span class="pay-icon">⚡</span> 
+                        <b>Chuyển khoản Ngân hàng (Mã VietQR 24/7)</b>
+                        <span class="pay-tag-hot">Tự động nhận diện</span>
+                      </div>
+                      <p class="pay-desc">Quét mã QR tự động điền đúng Số tài khoản, Số tiền và Mã đơn trong 3 giây.</p>
+                    </div>
+                  </label>
+
+                  <label class="payment-option" id="optPaymentCod">
+                    <input type="radio" name="checkout_payment_method" value="cod" />
+                    <div class="payment-option-info">
+                      <div class="payment-option-title">
+                        <span class="pay-icon">💵</span> 
+                        <b>Thanh toán khi nhận hàng (COD)</b>
+                      </div>
+                      <p class="pay-desc">Nhận hàng, kiểm tra sản phẩm và thanh toán tiền mặt cho nhân viên giao hàng.</p>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- BANK TRANSFER DETAILS & QR CODE CONTAINER -->
+                <div id="transferDetailsBox" class="transfer-details-box" style="margin-top:16px;">
+                  <div class="transfer-box-inner">
+                    <div class="transfer-qr-col">
+                      <div class="qr-wrapper">
+                        <img id="checkoutQrImg" src="" alt="Mã VietQR Chuyển Khoản" class="vietqr-image" />
+                        <div class="qr-overlay-scan-hint">
+                          <span>🔍 Quét mã qua bất kỳ App Ngân hàng hoặc Ví MoMo</span>
+                        </div>
+                      </div>
+                      <div class="qr-supported-logos">
+                        <span>Hỗ trợ Vietcombank, MB, Techcombank, VPBank, MoMo, ZaloPay...</span>
+                      </div>
+                    </div>
+
+                    <div class="transfer-info-col">
+                      <div class="bank-pill">
+                        <span class="bank-logo-badge">MB BANK</span>
+                        <span class="bank-name-sub">Ngân hàng Quân Đội (Chi nhánh Đồng Nai)</span>
+                      </div>
+
+                      <div class="transfer-field-item">
+                        <span class="tf-label">Chủ tài khoản:</span>
+                        <div class="tf-val-row">
+                          <b class="tf-val" id="checkoutBankOwner">K/H STORE OFFICIAL</b>
+                        </div>
+                      </div>
+
+                      <div class="transfer-field-item">
+                        <span class="tf-label">Số tài khoản:</span>
+                        <div class="tf-val-row">
+                          <b class="tf-val highlight-blue" id="checkoutBankAcc">0909123456</b>
+                          <button type="button" class="btn-copy-code" id="btnCopyBankAcc" title="Sao chép">📋 Sao chép</button>
+                        </div>
+                      </div>
+
+                      <div class="transfer-field-item">
+                        <span class="tf-label">Số tiền cần chuyển:</span>
+                        <div class="tf-val-row">
+                          <b class="tf-val highlight-red" id="checkoutBankAmount">0 ₫</b>
+                          <button type="button" class="btn-copy-code" id="btnCopyBankAmount" title="Sao chép">📋 Sao chép</button>
+                        </div>
+                      </div>
+
+                      <div class="transfer-field-item">
+                        <span class="tf-label">Mã chuyển khoản (Nội dung CK):</span>
+                        <div class="tf-val-row">
+                          <code class="tf-val highlight-gold" id="checkoutTransferCode">KHSTORE-DHXXXX</code>
+                          <button type="button" class="btn-copy-code" id="btnCopyTransferCode" title="Sao chép mã">📋 Sao chép</button>
+                        </div>
+                      </div>
+
+                      <div class="transfer-field-item" style="margin-top:8px;">
+                        <span class="tf-label">Mã giao dịch ngân hàng (Tùy chọn):</span>
+                        <input type="text" id="checkoutBankRefCode" class="styled-input w-100" placeholder="Nhập mã FT... hoặc mã giao dịch sau khi chuyển" style="font-size:12px; height:32px;" />
+                      </div>
+
+                      <div class="transfer-notice-box">
+                        <span class="notice-icon">ℹ️</span>
+                        <span><b>Lưu ý:</b> Vui lòng điền đúng <b>Mã chuyển khoản</b> để hệ thống tự động xác nhận đơn hàng ngay tức thì.</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- COD NOTICE BOX (Hidden by default when banking is active) -->
+                <div id="codDetailsBox" class="cod-details-box" style="display:none; margin-top:16px;">
+                  <div class="cod-notice-inner">
+                    <span style="font-size:32px;">🚚</span>
+                    <div>
+                      <h5 style="margin:0 0 4px; font-size:14px; color:#1e293b;">Giao hàng thu tiền tận nơi (COD)</h5>
+                      <p style="margin:0; font-size:12px; color:#64748b; line-height:1.5;">
+                        Bạn sẽ thanh toán tiền mặt trực tiếp cho nhân viên vận chuyển khi nhận hàng. K/H Store hỗ trợ <b>đồng kiểm thiết bị</b> trước khi thanh toán.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- RIGHT COLUMN: Order Summary -->
+            <div class="checkout-col-summary">
+              <div class="checkout-card sticky-card">
+                <div class="checkout-card-header">
+                  <h4>📦 Đơn Hàng Của Bạn (<span id="checkoutItemCount">0</span>)</h4>
+                </div>
+
+                <!-- Product items list in checkout -->
+                <div id="checkoutItemsList" class="checkout-items-scroll"></div>
+
+                <!-- Price breakdown -->
+                <div class="checkout-breakdown">
+                  <div class="breakdown-row">
+                    <span>Tạm tính:</span>
+                    <span id="checkoutSubtotalPrice" style="font-weight:600;">0 ₫</span>
+                  </div>
+                  <div class="breakdown-row">
+                    <span>Phí vận chuyển:</span>
+                    <span style="color:#16a34a; font-weight:700;">Miễn phí (Freeship)</span>
+                  </div>
+                  <div class="breakdown-row">
+                    <span>Mã đơn / CK:</span>
+                    <span id="checkoutSummaryTransferCode" style="font-weight:700; color:#2563eb;">--</span>
+                  </div>
+                  <div class="breakdown-row total-row">
+                    <span>Tổng thanh toán:</span>
+                    <span id="checkoutFinalTotalPrice" class="checkout-final-price">0 ₫</span>
+                  </div>
+                </div>
+
+                <!-- Guarantee badges -->
+                <div class="checkout-guarantee-box">
+                  <div class="g-item"><span>🛡️</span> 100% Sản phẩm chính hãng K/H Store</div>
+                  <div class="g-item"><span>🔄</span> Đổi mới trong 30 ngày nếu lỗi NSX</div>
+                  <div class="g-item"><span>🕸️</span> Tự động cập nhật Đồ thị Tri thức (KG)</div>
+                </div>
+
+                <!-- Actions -->
+                <div class="checkout-actions-wrap" style="margin-top:16px;">
+                  <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" id="btnConfirmCheckoutOrder">
+                    ✅ Xác Nhận Đặt Hàng & Hoàn Tất
+                  </button>
+                  <button type="button" class="btn btn-ebay-secondary w-100" id="btnBackToCartModal" style="margin-top:8px;">
+                    ← Quay lại Giỏ Hàng
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 8.2 ORDER SUCCESS MODAL -->
+  <div class="modal-backdrop" id="orderSuccessModal" style="display:none; z-index:1075;">
+    <div class="modal-dialog ebay-modal order-success-dialog">
+      <button class="modal-close-btn" id="btnCloseOrderSuccessModal">×</button>
+      <div class="modal-body order-success-body">
+        <div class="success-icon-wrap">
+          <span class="success-icon">🎉</span>
+        </div>
+        <h3 class="success-title">ĐẶT HÀNG THÀNH CÔNG!</h3>
+        <p class="success-sub">Cảm ơn bạn đã tin tưởng mua sắm tại <b>K/H Store</b>. Đơn hàng của bạn đã được tiếp nhận và đang được chuẩn bị xuất kho.</p>
+
+        <div class="order-success-receipt">
+          <div class="receipt-row">
+            <span>Mã đơn hàng:</span>
+            <b id="successOrderId" class="receipt-code">DH-XXXXXX</b>
+          </div>
+          <div class="receipt-row">
+            <span>Mã chuyển khoản:</span>
+            <b id="successTransferCode" class="receipt-val highlight-blue">--</b>
+          </div>
+          <div class="receipt-row">
+            <span>Người nhận hàng:</span>
+            <span id="successCustomerName" class="receipt-val">--</span>
+          </div>
+          <div class="receipt-row">
+            <span>Số điện thoại:</span>
+            <span id="successCustomerPhone" class="receipt-val">--</span>
+          </div>
+          <div class="receipt-row">
+            <span>Địa chỉ nhận hàng:</span>
+            <span id="successCustomerAddress" class="receipt-val">--</span>
+          </div>
+          <div class="receipt-row">
+            <span>Phương thức:</span>
+            <span id="successPaymentMethod" class="receipt-val">--</span>
+          </div>
+          <div class="receipt-row receipt-total">
+            <span>Tổng thanh toán:</span>
+            <span id="successTotalAmount" class="receipt-total-price">0 ₫</span>
+          </div>
+        </div>
+
+        <div class="kg-reinforce-alert">
+          <span style="font-size:22px;">🕸️</span>
+          <div>
+            <b>Đồ thị Tri thức (KG) đã được cá nhân hóa:</b>
+            <p>Hệ thống đã tự động kết nối các cạnh <code>purchased</code> (trọng số 3.5) giữa tài khoản của bạn và các sản phẩm trên để tối ưu thuật toán gợi ý chính xác hơn!</p>
+          </div>
+        </div>
+
+        <div class="order-success-actions">
+          <button class="btn btn-ebay-primary btn-lg" id="btnContinueShopping">🛍️ Tiếp Tục Mua Sắm</button>
+          <button class="btn btn-ebay-secondary btn-lg" id="btnViewProfileOrders">📋 Xem Hồ Sơ & Đơn Hàng</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1118,6 +1419,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=khstore1"></script>
+  <script src="app.js?v=khcheckout1"></script>
 </body>
 </html>

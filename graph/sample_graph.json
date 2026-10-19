@@ -945,6 +945,29 @@
           "payment_method": "COD (Thanh toán khi nhận hàng)",
           "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
           "timestamp": "Vừa xong"
+        },
+        {
+          "id": "DH-TEST01",
+          "transfer_code": "KHSTORE DH-TEST01",
+          "user_id": "u_nguyen trong vang",
+          "items": [
+            {
+              "price": 44990000,
+              "quantity": 1,
+              "name": "MacBook Pro 14 inch",
+              "id": "p_macbookm3"
+            }
+          ],
+          "customer": {
+            "name": "Nguyen Trong Vang",
+            "phone": "0909123456",
+            "address": "Bien Hoa, Dong Nai"
+          },
+          "total": 44990000,
+          "payment_method": "Chuyen khoan Ngan hang (VietQR 24/7)",
+          "note": "",
+          "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
+          "timestamp": "Vừa xong"
         }
       ]
     }
@@ -2918,6 +2941,13 @@
       "target": "p_apple_airpods_max"
     },
     {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_dellmonitor"
+    },
+    {
       "type": "likes",
       "weight": 2.5,
       "label": "likes",
@@ -4110,77 +4140,77 @@
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_phone"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_laptop"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_component"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_accessory"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_audio"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_samsung"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_asus"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_dell"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_nvidia"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_intel"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_logitech"
     },
@@ -4202,6 +4232,13 @@
       "type": "wants",
       "weight": 4.0,
       "label": "wants",
+      "source": "u_nguyen trong vang",
+      "target": "p_macbookm3"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
       "source": "u_nguyen trong vang",
       "target": "p_macbookm3"
     },

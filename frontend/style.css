@@ -3213,4 +3213,621 @@ body {
   40% { transform: scale(1); opacity: 1; }
 }
 
+/* ========================================================
+   CHECKOUT, DELIVERY INFO & VIETQR PAYMENT STYLES
+   ======================================================== */
+.checkout-modal-dialog {
+  max-width: 980px;
+  width: 95%;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 50px rgba(0, 0, 0, 0.25);
+}
+
+.checkout-modal-header {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e0f2fe 100%);
+  padding: 18px 24px;
+  border-bottom: 1px solid #bae6fd;
+}
+
+.checkout-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.checkout-modal-body {
+  padding: 20px 24px 28px;
+  background: #f8fafc;
+  overflow-y: auto;
+}
+
+.checkout-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .checkout-layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.checkout-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+.checkout-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+}
+
+.checkout-card-header h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.checkout-step-num {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--ebay-blue);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.checkout-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.checkout-form-grid .full-width {
+  grid-column: 1 / -1;
+}
+
+.checkout-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  margin-bottom: 5px;
+}
+
+.checkout-label .req {
+  color: #ef4444;
+}
+
+/* Payment Selector */
+.payment-method-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.payment-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.payment-option:hover {
+  border-color: #93c5fd;
+  background: #f8fafc;
+}
+
+.payment-option.active {
+  border-color: var(--ebay-blue);
+  background: #eff6ff;
+}
+
+.payment-option input[type="radio"] {
+  margin-top: 3px;
+  accent-color: var(--ebay-blue);
+  width: 16px;
+  height: 16px;
+}
+
+.payment-option-info {
+  flex: 1;
+}
+
+.payment-option-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.pay-tag-hot {
+  font-size: 10px;
+  font-weight: 800;
+  background: #fee2e2;
+  color: #ef4444;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.pay-desc {
+  margin: 3px 0 0;
+  font-size: 11px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+/* VietQR Transfer Box */
+.transfer-details-box {
+  background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.transfer-box-inner {
+  display: grid;
+  grid-template-columns: 210px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .transfer-box-inner {
+    grid-template-columns: 1fr;
+  }
+}
+
+.transfer-qr-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.qr-wrapper {
+  background: #fff;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  width: 100%;
+  max-width: 200px;
+}
+
+.vietqr-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 4px;
+  min-height: 180px;
+  background: #f1f5f9;
+}
+
+.qr-overlay-scan-hint {
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #0284c7;
+}
+
+.qr-supported-logos {
+  margin-top: 8px;
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.transfer-info-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bank-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: #1e3a8a;
+  color: #fff;
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+
+.bank-logo-badge {
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  font-size: 13px;
+  background: #3b82f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.bank-name-sub {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.transfer-field-item {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 7px 10px;
+}
+
+.tf-label {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.tf-val-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.tf-val {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.highlight-blue {
+  color: var(--ebay-blue);
+  font-size: 15px;
+  letter-spacing: 0.5px;
+}
+
+.highlight-red {
+  color: #e53238;
+  font-size: 15px;
+}
+
+.highlight-gold {
+  color: #b45309;
+  background: #fef3c7;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.btn-copy-code {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.btn-copy-code:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.transfer-notice-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  background: #fffbeb;
+  border: 1px solid #fef3c7;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  color: #92400e;
+  line-height: 1.4;
+  margin-top: 4px;
+}
+
+.cod-notice-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  padding: 14px;
+  border-radius: 8px;
+}
+
+/* Right Summary Column */
+.sticky-card {
+  position: sticky;
+  top: 10px;
+}
+
+.checkout-items-scroll {
+  max-height: 180px;
+  overflow-y: auto;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+}
+
+.checkout-item-mini {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 12px;
+}
+
+.checkout-item-mini img {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
+.checkout-item-mini .ci-name {
+  flex: 1;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkout-item-mini .ci-price {
+  font-weight: 700;
+  color: #e53238;
+}
+
+.checkout-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.breakdown-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.breakdown-row.total-row {
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 10px;
+  margin-top: 4px;
+  font-weight: 800;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.checkout-final-price {
+  font-size: 20px;
+  font-weight: 900;
+  color: #e53238;
+}
+
+.checkout-guarantee-box {
+  margin-top: 14px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 10px;
+  font-size: 11px;
+  color: #166534;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Order Success Modal */
+.order-success-dialog {
+  max-width: 540px;
+  width: 92%;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.28);
+}
+
+.order-success-body {
+  padding: 30px 24px 24px;
+  text-align: center;
+}
+
+.success-icon-wrap {
+  width: 68px;
+  height: 68px;
+  background: #dcfce7;
+  color: #16a34a;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  margin-bottom: 12px;
+  animation: bounceIn 0.6s ease;
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+.success-title {
+  font-size: 20px;
+  font-weight: 900;
+  color: #0f172a;
+  margin: 0 0 6px;
+}
+
+.success-sub {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0 0 16px;
+  line-height: 1.5;
+}
+
+.order-success-receipt {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: #475569;
+}
+
+.receipt-code {
+  color: var(--ebay-blue);
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.receipt-val {
+  font-weight: 600;
+  color: #0f172a;
+  text-align: right;
+}
+
+.receipt-row.receipt-total {
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 8px;
+  margin-top: 4px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.receipt-total-price {
+  font-size: 18px;
+  font-weight: 900;
+  color: #e53238;
+}
+
+.kg-reinforce-alert {
+  margin-top: 14px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  text-align: left;
+  font-size: 12px;
+  color: #1e40af;
+}
+
+.kg-reinforce-alert p {
+  margin: 3px 0 0;
+  line-height: 1.4;
+  color: #3b82f6;
+}
+
+.order-success-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.order-success-actions button {
+  flex: 1;
+}
+
+/* User Profile Order History Styling */
+.profile-order-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.profile-order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 6px;
+  margin-bottom: 8px;
+}
+
+.profile-order-id {
+  font-family: monospace;
+  font-weight: 800;
+  color: var(--ebay-blue);
+}
+
+.profile-order-status {
+  font-size: 11px;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #166534;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.profile-order-items {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.profile-order-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed #f1f5f9;
+  font-size: 12px;
+}
+
+
 

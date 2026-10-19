@@ -389,6 +389,7 @@ def chatbot_message():
     return jsonify({'success': True, **result})
 
 @app.route('/api/chatbot/order', methods=['POST'])
+@app.route('/api/checkout', methods=['POST'])
 def chatbot_create_order():
     data = request.json or {}
     user_id = data.get('user_id', 'u1')
@@ -396,6 +397,9 @@ def chatbot_create_order():
     customer = data.get('customer', {})
     total = data.get('total', 0)
     payment_method = data.get('payment_method', 'COD (Thanh toán khi nhận hàng)')
+    order_id = data.get('order_id')
+    transfer_code = data.get('transfer_code', '')
+    note = data.get('note', '')
 
     if not items:
         return jsonify({'success': False, 'error': 'Giỏ hàng trống!'}), 400
@@ -405,7 +409,10 @@ def chatbot_create_order():
         items=items,
         customer_info=customer,
         total_price=total,
-        payment_method=payment_method
+        payment_method=payment_method,
+        order_id=order_id,
+        transfer_code=transfer_code,
+        note=note
     )
     return jsonify({
         'success': True,

@@ -588,15 +588,18 @@ class ChatbotService:
 
         return compatible
 
-    def create_order(self, user_id, items, customer_info, total_price, payment_method="COD"):
-        order_id = f"DH-{os.urandom(3).hex().upper()}"
+    def create_order(self, user_id, items, customer_info, total_price, payment_method="COD", order_id=None, transfer_code="", note=""):
+        if not order_id:
+            order_id = f"DH-{os.urandom(3).hex().upper()}"
         order = {
             "id": order_id,
+            "transfer_code": transfer_code or order_id,
             "user_id": user_id,
             "items": items,
             "customer": customer_info,
             "total": total_price,
             "payment_method": payment_method,
+            "note": note,
             "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
             "timestamp": "Vừa xong"
         }

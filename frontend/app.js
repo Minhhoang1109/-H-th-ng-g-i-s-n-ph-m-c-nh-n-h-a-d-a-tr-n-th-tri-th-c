@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupFiltersAndSort();
   setupUserGraphExplorer();
   setupCartAndFavorites();
+  setupCheckout();
   setupChatbot();
 
   await loadMetadata();
@@ -1082,6 +1083,38 @@ async function openProfileDrawer() {
     }
   }
 
+  // 6. Orders History
+  const ordersListEl = document.getElementById('profileOrdersList');
+  const orderCountBadge = document.getElementById('profileOrderCountBadge');
+  const orders = user.orders || [];
+  if (orderCountBadge) orderCountBadge.textContent = orders.length;
+
+  if (ordersListEl) {
+    if (orders.length === 0) {
+      ordersListEl.innerHTML = '<div style="text-align:center; padding:18px 0; color:#94a3b8; font-size:12px;"><p style="font-size:24px; margin-bottom:4px;">📦</p>Chưa có đơn hàng nào được ghi nhận.</div>';
+    } else {
+      ordersListEl.innerHTML = orders.slice().reverse().map(ord => {
+        const items = ord.items || [];
+        const itemsSummary = items.map(it => `• <b>${it.name}</b> (x${it.quantity || 1})`).join('<br>');
+        return `
+          <div class="profile-order-card">
+            <div class="profile-order-header">
+              <span class="profile-order-id">Mã: ${ord.id}</span>
+              <span class="profile-order-status">${ord.status || 'Đã tiếp nhận'}</span>
+            </div>
+            <div class="profile-order-items">
+              ${itemsSummary}
+            </div>
+            <div class="profile-order-footer">
+              <span style="color:#64748b;">Hình thức: <b>${ord.payment_method || 'Chuyển khoản'}</b></span>
+              <span style="color:#e53238; font-weight:800; font-size:13px;">${formatPrice(ord.total || 0)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
   // 7. Action buttons
   const btnGoAdmin = document.getElementById('btnProfileGoAdmin');
   if (btnGoAdmin) {
@@ -1661,29 +1694,8 @@ function setupCartAndFavorites() {
     document.getElementById('cartModal').style.display = 'none';
   });
 
-  document.getElementById('btnCheckoutDemo')?.addEventListener('click', async () => {
-    if (appState.cart.length === 0) {
-      showToast('Giỏ hàng của bạn đang trống!', 'warning');
-      return;
-    }
-
-    const uid = appState.currentUser ? appState.currentUser.id : 'u1';
-    for (const item of appState.cart) {
-      try {
-        await fetch(`${API_BASE}/interact`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: uid, product_id: item.id, type: 'purchased' })
-        });
-      } catch (e) {}
-    }
-
-    showToast('Đặt hàng thành công! Đã tạo cạnh "purchased" trên Đồ thị Tri thức.', 'success');
-    appState.cart = [];
-    saveCartAndFavoritesToStorage();
-    updateCartAndFavoritesBadges();
-    document.getElementById('cartModal').style.display = 'none';
-    await loadRecommendations();
+  document.getElementById('btnCheckoutDemo')?.addEventListener('click', () => {
+    openCheckoutModal();
   });
 }
 
@@ -1870,6 +1882,309 @@ function renderCartList() {
   }).join('');
 
   if (totalPriceEl) totalPriceEl.textContent = formatPrice(total);
+}
+
+// ========================================================
+// CHECKOUT, DELIVERY INFORMATION & VIETQR PAYMENT
+// ========================================================
+let currentCheckoutState = {
+  orderId: '',
+  transferCode: '',
+  totalAmount: 0,
+  paymentMethod: 'Chuyển khoản Ngân hàng (VietQR 24/7)'
+};
+
+window.copyText = function(text, successMsg = 'Đã sao chép vào bộ nhớ tạm!') {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => {
+      showToast(successMsg, 'success');
+    }).catch(() => {
+      fallbackCopyText(text, successMsg);
+    });
+  } else {
+    fallbackCopyText(text, successMsg);
+  }
+};
+
+function fallbackCopyText(text, successMsg) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand('copy');
+    showToast(successMsg, 'success');
+  } catch (e) {
+    showToast('Không thể sao chép tự động, vui lòng copy thủ công!', 'warning');
+  }
+  document.body.removeChild(ta);
+}
+
+function openCheckoutModal() {
+  if (!appState.cart || appState.cart.length === 0) {
+    showToast('Giỏ hàng của bạn đang trống! Vui lòng chọn sản phẩm trước.', 'warning');
+    return;
+  }
+
+  // 1. Hide Cart Modal
+  const cartModal = document.getElementById('cartModal');
+  if (cartModal) cartModal.style.display = 'none';
+
+  // 2. Generate unique order ID and transfer code
+  const randomSuffix = Math.random().toString(36).substring(2, 8).toUpperCase();
+  const orderId = `DH-${randomSuffix}`;
+  const transferCode = `KHSTORE ${orderId}`;
+  currentCheckoutState.orderId = orderId;
+  currentCheckoutState.transferCode = transferCode;
+
+  // 3. Pre-fill user delivery information
+  const user = appState.currentUser;
+  const nameInput = document.getElementById('checkoutRecipientName');
+  const phoneInput = document.getElementById('checkoutRecipientPhone');
+  const emailInput = document.getElementById('checkoutRecipientEmail');
+  const addressInput = document.getElementById('checkoutAddress');
+  const noteInput = document.getElementById('checkoutNote');
+  const refCodeInput = document.getElementById('checkoutBankRefCode');
+
+  if (nameInput) nameInput.value = user ? (user.name || user.full_name || user.username || '') : '';
+  if (phoneInput) phoneInput.value = user ? (user.phone || '') : '';
+  if (emailInput) emailInput.value = user ? (user.email || '') : '';
+  if (addressInput && user && user.address) addressInput.value = user.address;
+  if (noteInput) noteInput.value = '';
+  if (refCodeInput) refCodeInput.value = '';
+
+  // 4. Render items in order summary & calculate total
+  const itemsContainer = document.getElementById('checkoutItemsList');
+  let total = 0;
+  let totalCount = 0;
+
+  if (itemsContainer) {
+    itemsContainer.innerHTML = appState.cart.map(item => {
+      const qty = item.quantity || 1;
+      const subtotal = (item.price || 0) * qty;
+      total += subtotal;
+      totalCount += qty;
+
+      return `
+        <div class="checkout-item-mini">
+          <img src="${item.image || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=100'}" alt="${item.name}" />
+          <div class="ci-name" title="${item.name}">${item.name} <span style="color:#64748b; font-weight:400;">x${qty}</span></div>
+          <div class="ci-price">${formatPrice(subtotal)}</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  currentCheckoutState.totalAmount = total;
+
+  // 5. Update summary breakdown
+  const countEl = document.getElementById('checkoutItemCount');
+  if (countEl) countEl.textContent = totalCount;
+  const subtotalEl = document.getElementById('checkoutSubtotalPrice');
+  if (subtotalEl) subtotalEl.textContent = formatPrice(total);
+  const finalTotalEl = document.getElementById('checkoutFinalTotalPrice');
+  if (finalTotalEl) finalTotalEl.textContent = formatPrice(total);
+  const summaryCodeEl = document.getElementById('checkoutSummaryTransferCode');
+  if (summaryCodeEl) summaryCodeEl.textContent = orderId;
+
+  // 6. Update Bank Transfer Box details
+  const bankAmountEl = document.getElementById('checkoutBankAmount');
+  if (bankAmountEl) bankAmountEl.textContent = formatPrice(total);
+  const transferCodeEl = document.getElementById('checkoutTransferCode');
+  if (transferCodeEl) transferCodeEl.textContent = transferCode;
+
+  // 7. Update VietQR image
+  const qrImg = document.getElementById('checkoutQrImg');
+  if (qrImg) {
+    const encodedMemo = encodeURIComponent(transferCode);
+    qrImg.src = `https://img.vietqr.io/image/MB-0909123456-compact2.png?amount=${total}&addInfo=${encodedMemo}&accountName=KH%20STORE%20OFFICIAL`;
+  }
+
+  // 8. Reset payment method to banking
+  const optBanking = document.getElementById('optPaymentTransfer');
+  const optCod = document.getElementById('optPaymentCod');
+  const radioBanking = document.querySelector('input[name="checkout_payment_method"][value="banking"]');
+  if (radioBanking) radioBanking.checked = true;
+  if (optBanking) optBanking.classList.add('active');
+  if (optCod) optCod.classList.remove('active');
+  const transferBox = document.getElementById('transferDetailsBox');
+  if (transferBox) transferBox.style.display = 'block';
+  const codBox = document.getElementById('codDetailsBox');
+  if (codBox) codBox.style.display = 'none';
+  currentCheckoutState.paymentMethod = 'Chuyển khoản Ngân hàng (VietQR 24/7)';
+
+  // 9. Open modal
+  const checkoutModal = document.getElementById('checkoutModal');
+  if (checkoutModal) checkoutModal.style.display = 'flex';
+}
+
+function setupCheckout() {
+  const checkoutModal = document.getElementById('checkoutModal');
+  const btnCloseCheckout = document.getElementById('btnCloseCheckoutModal');
+  const btnBackToCart = document.getElementById('btnBackToCartModal');
+  const form = document.getElementById('checkoutForm');
+
+  // Close & Back buttons
+  btnCloseCheckout?.addEventListener('click', () => {
+    if (checkoutModal) checkoutModal.style.display = 'none';
+  });
+
+  btnBackToCart?.addEventListener('click', () => {
+    if (checkoutModal) checkoutModal.style.display = 'none';
+    const cartModal = document.getElementById('cartModal');
+    if (cartModal) {
+      renderCartList();
+      cartModal.style.display = 'flex';
+    }
+  });
+
+  // Copy buttons
+  document.getElementById('btnCopyBankAcc')?.addEventListener('click', () => {
+    copyText('0909123456', 'Đã sao chép Số tài khoản MB Bank: 0909123456');
+  });
+
+  document.getElementById('btnCopyBankAmount')?.addEventListener('click', () => {
+    copyText(currentCheckoutState.totalAmount.toString(), `Đã sao chép số tiền: ${formatPrice(currentCheckoutState.totalAmount)}`);
+  });
+
+  document.getElementById('btnCopyTransferCode')?.addEventListener('click', () => {
+    copyText(currentCheckoutState.transferCode, `Đã sao chép Mã chuyển khoản: ${currentCheckoutState.transferCode}`);
+  });
+
+  // Payment method radio toggling
+  document.querySelectorAll('input[name="checkout_payment_method"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+      const val = e.target.value;
+      const optBanking = document.getElementById('optPaymentTransfer');
+      const optCod = document.getElementById('optPaymentCod');
+      const transferBox = document.getElementById('transferDetailsBox');
+      const codBox = document.getElementById('codDetailsBox');
+
+      if (val === 'banking') {
+        optBanking?.classList.add('active');
+        optCod?.classList.remove('active');
+        if (transferBox) transferBox.style.display = 'block';
+        if (codBox) codBox.style.display = 'none';
+        currentCheckoutState.paymentMethod = 'Chuyển khoản Ngân hàng (VietQR 24/7)';
+      } else {
+        optCod?.classList.add('active');
+        optBanking?.classList.remove('active');
+        if (transferBox) transferBox.style.display = 'none';
+        if (codBox) codBox.style.display = 'block';
+        currentCheckoutState.paymentMethod = 'COD (Thanh toán khi nhận hàng)';
+      }
+    });
+  });
+
+  // Submit Checkout Form
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const recipientName = document.getElementById('checkoutRecipientName')?.value.trim() || '';
+    const recipientPhone = document.getElementById('checkoutRecipientPhone')?.value.trim() || '';
+    const recipientEmail = document.getElementById('checkoutRecipientEmail')?.value.trim() || '';
+    const recipientCity = document.getElementById('checkoutCity')?.value || 'Đồng Nai';
+    const recipientAddress = document.getElementById('checkoutAddress')?.value.trim() || '';
+    const orderNote = document.getElementById('checkoutNote')?.value.trim() || '';
+    const bankRefCode = document.getElementById('checkoutBankRefCode')?.value.trim() || '';
+
+    if (!recipientName || !recipientPhone || !recipientAddress) {
+      showToast('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ nhận hàng!', 'warning');
+      return;
+    }
+
+    const fullAddress = `${recipientAddress}, ${recipientCity}`;
+    const customerInfo = {
+      name: recipientName,
+      phone: recipientPhone,
+      email: recipientEmail,
+      city: recipientCity,
+      address: fullAddress,
+      note: orderNote,
+      bank_tx_id: bankRefCode
+    };
+
+    const submitBtn = document.getElementById('btnConfirmCheckoutOrder');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '⏳ Đang xử lý đơn hàng...';
+    }
+
+    try {
+      const uid = appState.currentUser ? appState.currentUser.id : 'u1';
+      const res = await fetch(`${API_BASE}/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: uid,
+          items: appState.cart,
+          customer: customerInfo,
+          total: currentCheckoutState.totalAmount,
+          payment_method: currentCheckoutState.paymentMethod,
+          order_id: currentCheckoutState.orderId,
+          transfer_code: currentCheckoutState.transferCode,
+          note: orderNote
+        })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        const order = data.order || {};
+
+        // 1. Clear Cart
+        appState.cart = [];
+        saveCartAndFavoritesToStorage();
+        updateCartAndFavoritesBadges();
+        if (typeof updateChatbotCartBar === 'function') updateChatbotCartBar();
+
+        // 2. Hide Checkout Modal
+        if (checkoutModal) checkoutModal.style.display = 'none';
+
+        // 3. Populate & show Order Success Modal
+        document.getElementById('successOrderId').textContent = order.id || currentCheckoutState.orderId;
+        document.getElementById('successTransferCode').textContent = currentCheckoutState.paymentMethod.includes('Chuyển khoản') ? currentCheckoutState.transferCode : '(Thanh toán COD khi nhận)';
+        document.getElementById('successCustomerName').textContent = customerInfo.name;
+        document.getElementById('successCustomerPhone').textContent = customerInfo.phone;
+        document.getElementById('successCustomerAddress').textContent = customerInfo.address;
+        document.getElementById('successPaymentMethod').textContent = currentCheckoutState.paymentMethod;
+        document.getElementById('successTotalAmount').textContent = formatPrice(currentCheckoutState.totalAmount);
+
+        const successModal = document.getElementById('orderSuccessModal');
+        if (successModal) successModal.style.display = 'flex';
+
+        showToast('🎉 Đặt hàng thành công! Đơn hàng đã được lưu và cập nhật vào Đồ thị Tri thức.', 'success');
+
+        // 4. Reload Recommendations (due to newly created 'purchased' edges on KG)
+        await loadRecommendations();
+      } else {
+        showToast(data.error || 'Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại!', 'error');
+      }
+    } catch (err) {
+      showToast('Lỗi kết nối máy chủ! Vui lòng thử lại sau.', 'error');
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '✅ Xác Nhận Đặt Hàng & Hoàn Tất';
+      }
+    }
+  });
+
+  // Order Success Modal Actions
+  const successModal = document.getElementById('orderSuccessModal');
+  document.getElementById('btnCloseOrderSuccessModal')?.addEventListener('click', () => {
+    if (successModal) successModal.style.display = 'none';
+  });
+  document.getElementById('btnContinueShopping')?.addEventListener('click', () => {
+    if (successModal) successModal.style.display = 'none';
+    const recTab = document.querySelector('.nav-item[data-tab="recommendations"]');
+    if (recTab) recTab.click();
+  });
+  document.getElementById('btnViewProfileOrders')?.addEventListener('click', () => {
+    if (successModal) successModal.style.display = 'none';
+    openProfileDrawer();
+  });
 }
 
 // ========================================================
