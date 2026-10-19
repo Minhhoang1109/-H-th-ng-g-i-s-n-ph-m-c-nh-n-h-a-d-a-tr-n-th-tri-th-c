@@ -4,6 +4,8 @@ const API_BASE = '/api';
 let adminState = {
   products: [],
   users: [],
+  bankAccounts: [],
+  paymentCodes: [],
   metrics: null,
   graphData: null,
   visNetwork: null
@@ -13,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupAdminTabs();
   setupProductForm();
   setupAdminUserModalEvents();
+  setupPaymentManagement();
   
   document.getElementById('btnAdminLogout')?.addEventListener('click', () => {
     localStorage.removeItem('kh_recsys_session');
@@ -55,6 +58,8 @@ function setupAdminTabs() {
         } else {
           renderAdminUsers(adminState.users);
         }
+      } else if (view === 'payments') {
+        loadAdminPayments();
       }
     });
   });
@@ -606,3 +611,360 @@ function showToast(msg, type = 'info') {
   container.appendChild(toast);
   setTimeout(() => toast.remove(), 4000);
 }
+
+// ========================================================
+// ADMIN PAYMENT & BANK ACCOUNTS MANAGEMENT
+// ========================================================
+async function loadAdminPayments() {
+  try {
+    const res = await fetch(`${API_BASE}/payment-settings`);
+    const data = await res.json();
+    if (data.success) {
+      adminState.bankAccounts = data.bank_accounts || [];
+      adminState.paymentCodes = data.payment_codes || [];
+      renderBankAccountsTable(adminState.bankAccounts);
+      renderPaymentCodesTable(adminState.paymentCodes);
+    }
+  } catch (err) {
+    console.error('Lỗi tải cài đặt thanh toán:', err);
+    showToast('Lỗi tải dữ liệu thanh toán và ngân hàng!', 'error');
+  }
+}
+
+function renderBankAccountsTable(accounts) {
+  const tbody = document.getElementById('adminBankAccountsTableBody');
+  if (!tbody) return;
+
+  if (!accounts || accounts.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:24px; color:#94a3b8;">Chưa có tài khoản ngân hàng nào. Hãy bấm "Thêm Tài Khoản Ngân Hàng"!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = accounts.map(acc => {
+    const isDefault = !!acc.is_default;
+    const isActive = !!acc.is_active;
+    const qrUrl = `https://img.vietqr.io/image/${acc.bank_id}-${acc.account_number}-compact2.png?amount=100000&accountName=${encodeURIComponent(acc.account_name)}`;
+
+    return `
+      <tr style="${isDefault ? 'background:#f0fdf4;' : ''}">
+        <td>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="badge" style="background:#1e3a8a; color:#fff; font-weight:800; font-size:11px; padding:2px 6px;">${acc.bank_id}</span>
+            <b style="color:#0f172a;">${acc.bank_name}</b>
+          </div>
+        </td>
+        <td>
+          <code style="font-size:14px; font-weight:800; color:#2563eb;">${acc.account_number}</code>
+        </td>
+        <td>
+          <b style="font-size:13px; color:#1e293b;">${acc.account_name}</b>
+        </td>
+        <td>
+          <span style="font-size:12px; color:#64748b;">${acc.branch || 'Toàn quốc'}</span>
+        </td>
+        <td>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <img src="${qrUrl}" alt="VietQR Demo" style="width:36px; height:36px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1; cursor:pointer;" onclick="window.open('${qrUrl}')" title="Nhấp để phóng to mã VietQR" />
+            <a href="${qrUrl}" target="_blank" style="font-size:11px; color:#2563eb; text-decoration:none;">🔍 Xem QR</a>
+          </div>
+        </td>
+        <td>
+          ${isDefault && isActive ? 
+            `<span class="badge" style="background:#dcfce7; color:#166534; font-weight:800; font-size:11px; padding:3px 8px; border-radius:12px;">🌟 ĐANG NHẬN TIỀN CHÍNH</span>` : 
+            `<button class="btn btn-sm btn-ebay-outline" onclick="setPrimaryBankAccount('${acc.id}')" title="Chọn làm tài khoản nhận tiền thanh toán chính">Đặt làm chính</button>`
+          }
+        </td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-sm btn-ebay-outline" onclick="openEditBankAccountModal('${acc.id}')" title="Chỉnh sửa">✏️ Sửa</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteBankAccount('${acc.id}')" title="Xóa tài khoản" ${accounts.length <= 1 ? 'disabled style="opacity:0.5;"' : ''}>🗑️ Xóa</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderPaymentCodesTable(codes) {
+  const tbody = document.getElementById('adminPaymentCodesTableBody');
+  if (!tbody) return;
+
+  if (!codes || codes.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:#94a3b8;">Chưa có mã thanh toán nào. Hãy bấm "Tạo Mã Thanh Toán Mới"!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = codes.map(c => {
+    const isPercent = c.discount_type === 'percent';
+    const discountText = isPercent 
+      ? `<b style="color:#2563eb; font-size:13px;">${c.discount_value}%</b> ${c.max_discount ? `<span style="font-size:11px; color:#64748b;">(Tối đa ${formatPrice(c.max_discount)})</span>` : ''}` 
+      : `<b style="color:#e53238; font-size:13px;">${formatPrice(c.discount_value)}</b>`;
+
+    return `
+      <tr>
+        <td>
+          <code style="font-size:14px; font-weight:900; color:#b45309; background:#fef3c7; padding:3px 8px; border-radius:4px; font-family:monospace;">${c.code}</code>
+        </td>
+        <td>${discountText}</td>
+        <td><span style="font-size:12px; color:#334155;">${c.min_order_amount ? formatPrice(c.min_order_amount) : '0 ₫'}</span></td>
+        <td><span style="font-size:12px; color:#475569;">${c.description || '--'}</span></td>
+        <td><span style="font-size:12px; color:#64748b;">${c.expires_at || 'Không thời hạn'}</span></td>
+        <td><span class="badge" style="background:#f1f5f9; color:#0f172a; font-weight:700;">${c.usage_count || 0} lần</span></td>
+        <td>
+          <span class="badge" style="background:${c.is_active ? '#dcfce7; color:#166534;' : '#fee2e2; color:#dc2626;'} font-weight:700; font-size:11px; padding:3px 8px; border-radius:12px;">
+            ${c.is_active ? '● Đang chạy' : '○ Tạm dừng'}
+          </span>
+        </td>
+        <td>
+          <div style="display:flex; gap:6px;">
+            <button class="btn btn-sm btn-ebay-outline" onclick="togglePaymentCode('${c.id}')" title="Bật / Tắt trạng thái">
+              ${c.is_active ? '⏸️ Tắt' : '▶️ Bật'}
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deletePaymentCode('${c.id}')" title="Xóa mã">🗑️ Xóa</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function setupPaymentManagement() {
+  // 1. Bank Account Modal Triggers
+  document.getElementById('btnOpenAddBankAccountModal')?.addEventListener('click', () => {
+    openAddBankAccountModal();
+  });
+  document.getElementById('btnCloseAdminBankModal')?.addEventListener('click', () => {
+    document.getElementById('adminBankAccountModal').style.display = 'none';
+  });
+  document.getElementById('btnCancelAdminBankModal')?.addEventListener('click', () => {
+    document.getElementById('adminBankAccountModal').style.display = 'none';
+  });
+
+  // Bank Form Submit
+  document.getElementById('adminBankAccountForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('adminBankAccId').value;
+    const bankVal = document.getElementById('adminBankSelect').value.split('|');
+    const bank_id = bankVal[0];
+    const bank_name = bankVal[1];
+    const account_number = document.getElementById('adminBankAccNumber').value.trim();
+    const branch = document.getElementById('adminBankBranch').value.trim();
+    const account_name = document.getElementById('adminBankAccountName').value.trim().toUpperCase();
+    const is_default = document.getElementById('adminBankIsDefault').checked;
+
+    if (!account_number || !account_name) {
+      showToast('Vui lòng điền đầy đủ Số tài khoản và Tên chủ tài khoản!', 'warning');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/bank-accounts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: id || undefined,
+          bank_id,
+          bank_name,
+          account_number,
+          account_name,
+          branch,
+          is_default,
+          is_active: true
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'Lưu tài khoản ngân hàng thành công!', 'success');
+        document.getElementById('adminBankAccountModal').style.display = 'none';
+        await loadAdminPayments();
+      } else {
+        showToast(data.error || 'Lỗi lưu tài khoản!', 'error');
+      }
+    } catch (err) {
+      showToast('Lỗi máy chủ khi lưu tài khoản!', 'error');
+    }
+  });
+
+  // 2. Payment Code Modal Triggers
+  document.getElementById('btnOpenAddPaymentCodeModal')?.addEventListener('click', () => {
+    openAddPaymentCodeModal();
+  });
+  document.getElementById('btnCloseAdminCodeModal')?.addEventListener('click', () => {
+    document.getElementById('adminPaymentCodeModal').style.display = 'none';
+  });
+  document.getElementById('btnCancelAdminCodeModal')?.addEventListener('click', () => {
+    document.getElementById('adminPaymentCodeModal').style.display = 'none';
+  });
+
+  // Type change handler
+  const codeTypeSelect = document.getElementById('adminCodeType');
+  codeTypeSelect?.addEventListener('change', (e) => {
+    const isPercent = e.target.value === 'percent';
+    const lblVal = document.getElementById('lblAdminCodeValue');
+    const wrapMax = document.getElementById('wrapAdminCodeMaxDiscount');
+    if (lblVal) lblVal.innerHTML = isPercent ? 'Mức giảm (%) <span style="color:#ef4444;">*</span>:' : 'Mức giảm (VNĐ) <span style="color:#ef4444;">*</span>:';
+    if (wrapMax) wrapMax.style.display = isPercent ? 'block' : 'none';
+  });
+
+  // Payment Code Form Submit
+  document.getElementById('adminPaymentCodeForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('adminCodeId').value;
+    const code = document.getElementById('adminCodeStr').value.trim().toUpperCase();
+    const discount_type = document.getElementById('adminCodeType').value;
+    const discount_value = parseFloat(document.getElementById('adminCodeValue').value) || 0;
+    const max_discount = parseFloat(document.getElementById('adminCodeMaxDiscount').value) || undefined;
+    const min_order_amount = parseFloat(document.getElementById('adminCodeMinOrder').value) || 0;
+    const expires_at = document.getElementById('adminCodeExpires').value || '2026-12-31';
+    const is_active = document.getElementById('adminCodeIsActive').checked;
+    const description = document.getElementById('adminCodeDesc').value.trim();
+
+    if (!code || discount_value <= 0) {
+      showToast('Vui lòng nhập mã và mức giảm giá hợp lệ!', 'warning');
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/payment-codes`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: id || undefined,
+          code,
+          discount_type,
+          discount_value,
+          max_discount,
+          min_order_amount,
+          expires_at,
+          is_active,
+          description
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast(data.message || 'Lưu mã thanh toán thành công!', 'success');
+        document.getElementById('adminPaymentCodeModal').style.display = 'none';
+        await loadAdminPayments();
+      } else {
+        showToast(data.error || 'Lỗi lưu mã thanh toán!', 'error');
+      }
+    } catch (err) {
+      showToast('Lỗi máy chủ khi lưu mã!', 'error');
+    }
+  });
+}
+
+function openAddBankAccountModal() {
+  document.getElementById('adminBankAccId').value = '';
+  document.getElementById('adminBankModalTitle').textContent = 'Thêm Tài Khoản Nhận Tiền Mới';
+  document.getElementById('adminBankAccNumber').value = '';
+  document.getElementById('adminBankBranch').value = '';
+  document.getElementById('adminBankAccountName').value = 'K/H STORE OFFICIAL';
+  document.getElementById('adminBankIsDefault').checked = true;
+  document.getElementById('adminBankAccountModal').style.display = 'flex';
+}
+
+function openEditBankAccountModal(accId) {
+  const acc = adminState.bankAccounts.find(a => a.id === accId);
+  if (!acc) return;
+
+  document.getElementById('adminBankAccId').value = acc.id;
+  document.getElementById('adminBankModalTitle').textContent = 'Chỉnh Sửa Tài Khoản Nhận Tiền';
+  
+  // Find matching select option
+  const sel = document.getElementById('adminBankSelect');
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value.startsWith(acc.bank_id + '|')) {
+      sel.selectedIndex = i;
+      break;
+    }
+  }
+
+  document.getElementById('adminBankAccNumber').value = acc.account_number || '';
+  document.getElementById('adminBankBranch').value = acc.branch || '';
+  document.getElementById('adminBankAccountName').value = acc.account_name || '';
+  document.getElementById('adminBankIsDefault').checked = !!acc.is_default;
+  document.getElementById('adminBankAccountModal').style.display = 'flex';
+}
+
+window.setPrimaryBankAccount = async function(accId) {
+  try {
+    const res = await fetch(`${API_BASE}/admin/bank-accounts/${accId}/set-active`, { method: 'POST' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Đã đặt làm tài khoản nhận tiền chính (VietQR 24/7)!', 'success');
+      await loadAdminPayments();
+    } else {
+      showToast(data.error || 'Lỗi cập nhật tài khoản chính!', 'error');
+    }
+  } catch (e) {
+    showToast('Lỗi kết nối máy chủ!', 'error');
+  }
+};
+
+window.deleteBankAccount = async function(accId) {
+  if (!confirm('Bạn có chắc chắn muốn xóa tài khoản ngân hàng này?')) return;
+  try {
+    const res = await fetch(`${API_BASE}/admin/bank-accounts/${accId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Đã xóa tài khoản ngân hàng!', 'success');
+      await loadAdminPayments();
+    } else {
+      showToast(data.error || 'Lỗi khi xóa tài khoản!', 'error');
+    }
+  } catch (e) {
+    showToast('Lỗi kết nối máy chủ!', 'error');
+  }
+};
+
+function openAddPaymentCodeModal() {
+  document.getElementById('adminCodeId').value = '';
+  document.getElementById('adminCodeModalTitle').textContent = 'Tạo Mã Thanh Toán & Ưu Đãi Mới';
+  document.getElementById('adminCodeStr').value = '';
+  document.getElementById('adminCodeType').value = 'fixed';
+  document.getElementById('adminCodeValue').value = '';
+  document.getElementById('adminCodeMaxDiscount').value = '';
+  document.getElementById('adminCodeMinOrder').value = '0';
+  document.getElementById('wrapAdminCodeMaxDiscount').style.display = 'none';
+  document.getElementById('lblAdminCodeValue').innerHTML = 'Mức giảm (VNĐ) <span style="color:#ef4444;">*</span>:';
+  
+  // Set default expiry to next month
+  const d = new Date();
+  d.setMonth(d.getMonth() + 2);
+  document.getElementById('adminCodeExpires').value = d.toISOString().split('T')[0];
+  document.getElementById('adminCodeIsActive').checked = true;
+  document.getElementById('adminCodeDesc').value = '';
+  document.getElementById('adminPaymentCodeModal').style.display = 'flex';
+}
+
+window.togglePaymentCode = async function(codeId) {
+  try {
+    const res = await fetch(`${API_BASE}/admin/payment-codes/${codeId}/toggle`, { method: 'POST' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast(data.message || 'Đã cập nhật trạng thái mã!', 'success');
+      await loadAdminPayments();
+    } else {
+      showToast(data.error || 'Lỗi cập nhật mã!', 'error');
+    }
+  } catch (e) {
+    showToast('Lỗi kết nối máy chủ!', 'error');
+  }
+};
+
+window.deletePaymentCode = async function(codeId) {
+  if (!confirm('Bạn có chắc chắn muốn xóa mã thanh toán này?')) return;
+  try {
+    const res = await fetch(`${API_BASE}/admin/payment-codes/${codeId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      showToast('Đã xóa mã thanh toán!', 'success');
+      await loadAdminPayments();
+    } else {
+      showToast(data.error || 'Lỗi khi xóa mã!', 'error');
+    }
+  } catch (e) {
+    showToast('Lỗi kết nối máy chủ!', 'error');
+  }
+};

@@ -1,0 +1,64 @@
+{
+  "bank_accounts": [
+    {
+      "id": "acc_mb_01",
+      "bank_id": "MB",
+      "bank_name": "MB Bank (Ngân hàng Quân Đội)",
+      "account_number": "0909123456",
+      "account_name": "K/H STORE OFFICIAL",
+      "branch": "Chi nhánh Đồng Nai",
+      "is_active": true,
+      "is_default": true,
+      "created_at": "2026-10-19"
+    },
+    {
+      "id": "acc_vcb_02",
+      "bank_id": "VCB",
+      "bank_name": "Vietcombank (Ngoại Thương)",
+      "account_number": "1012345678",
+      "account_name": "K/H STORE OFFICIAL",
+      "branch": "Chi nhánh Biên Hòa",
+      "is_active": true,
+      "is_default": false,
+      "created_at": "2026-10-19"
+    }
+  ],
+  "payment_codes": [
+    {
+      "id": "code_khtrian",
+      "code": "KHTRIAN100K",
+      "discount_type": "fixed",
+      "discount_value": 100000,
+      "min_order_amount": 500000,
+      "max_discount": 100000,
+      "expires_at": "2026-12-31",
+      "is_active": true,
+      "usage_count": 0,
+      "description": "Mã tri ân khách hàng - Giảm 100.000 ₫ cho đơn từ 500.000 ₫"
+    },
+    {
+      "id": "code_khvip",
+      "code": "KHVIP5",
+      "discount_type": "percent",
+      "discount_value": 5,
+      "min_order_amount": 1000000,
+      "max_discount": 500000,
+      "expires_at": "2026-12-31",
+      "is_active": true,
+      "usage_count": 0,
+      "description": "Ưu đãi khách hàng VIP - Giảm 5% tối đa 500.000 ₫ cho đơn từ 1.000.000 ₫"
+    },
+    {
+      "id": "code_freeship",
+      "code": "FREESHIP",
+      "discount_type": "fixed",
+      "discount_value": 30000,
+      "min_order_amount": 0,
+      "max_discount": 30000,
+      "expires_at": "2026-12-31",
+      "is_active": true,
+      "usage_count": 0,
+      "description": "Hỗ trợ phí vận chuyển hỏa tốc toàn quốc"
+    }
+  ]
+}

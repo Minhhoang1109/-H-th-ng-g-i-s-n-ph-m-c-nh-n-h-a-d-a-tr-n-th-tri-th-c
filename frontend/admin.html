@@ -185,6 +185,7 @@
       <button class="admin-tab-btn active" data-admin-view="canvas">🌐 Khám Phá Đồ Thị 2D (Vis.js Canvas)</button>
       <button class="admin-tab-btn" data-admin-view="products">📦 Quản Lý Danh Mục Sản Phẩm (CRUD)</button>
       <button class="admin-tab-btn" data-admin-view="users">👥 Quản Lý Người Dùng & Hồ Sơ KG</button>
+      <button class="admin-tab-btn" data-admin-view="payments">💳 Quản Lý Thanh Toán & Ngân Hàng</button>
     </div>
 
     <!-- ADMIN VIEW 1: VIS.JS GRAPH CANVAS -->
@@ -264,6 +265,68 @@
         </div>
         <div class="admin-users-grid" id="adminUsersList"></div>
       </div>
+    </div>
+
+    <!-- ADMIN VIEW 4: PAYMENT SETTINGS & BANK ACCOUNTS -->
+    <div id="adminViewPayments" class="admin-view-pane" style="display:none;">
+      
+      <!-- Part 1: Receiving Bank Accounts -->
+      <div class="admin-table-card" style="padding:20px; margin-bottom:24px;">
+        <div class="admin-section-header" style="margin-bottom:16px;">
+          <div>
+            <h3 style="margin:0 0 4px; font-size:17px; font-weight:800; color:#0f172a;">🏦 Danh Sách Tài Khoản Nhận Tiền Thanh Toán (VietQR 24/7)</h3>
+            <p style="margin:0; font-size:12px; color:#64748b;">Hệ thống sẽ dùng tài khoản đang kích hoạt mặc định để tự động tạo mã VietQR cho khách hàng khi thanh toán.</p>
+          </div>
+          <button class="btn btn-ebay-primary" id="btnOpenAddBankAccountModal">➕ Thêm Tài Khoản Ngân Hàng</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="styled-table" id="adminBankAccountsTable">
+            <thead>
+              <tr>
+                <th>Ngân Hàng</th>
+                <th>Số Tài Khoản</th>
+                <th>Tên Chủ Tài Khoản</th>
+                <th>Chi Nhánh</th>
+                <th>Mã VietQR Demo</th>
+                <th>Trạng Thái Nhận Tiền</th>
+                <th>Hành Động</th>
+              </tr>
+            </thead>
+            <tbody id="adminBankAccountsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Part 2: Payment / Promo Codes -->
+      <div class="admin-table-card" style="padding:20px;">
+        <div class="admin-section-header" style="margin-bottom:16px;">
+          <div>
+            <h3 style="margin:0 0 4px; font-size:17px; font-weight:800; color:#0f172a;">🎟️ Danh Sách Mã Thanh Toán & Mã Ưu Đãi (Vouchers)</h3>
+            <p style="margin:0; font-size:12px; color:#64748b;">Khách hàng có thể nhập các mã này tại trang thanh toán để được khấu trừ tiền đơn hàng tức thì.</p>
+          </div>
+          <button class="btn btn-ebay-primary" id="btnOpenAddPaymentCodeModal">➕ Tạo Mã Thanh Toán Mới</button>
+        </div>
+
+        <div class="table-responsive">
+          <table class="styled-table" id="adminPaymentCodesTable">
+            <thead>
+              <tr>
+                <th>Mã Thanh Toán</th>
+                <th>Mức Giảm</th>
+                <th>Đơn Tối Thiểu</th>
+                <th>Mô Tả Ưu Đãi</th>
+                <th>Hạn Sử Dụng</th>
+                <th>Lượt Dùng</th>
+                <th>Trạng Thái</th>
+                <th>Hành Động</th>
+              </tr>
+            </thead>
+            <tbody id="adminPaymentCodesTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
 
   </main>
@@ -402,9 +465,142 @@
     </div>
   </div>
 
+  <!-- ==================== ADMIN ADD/EDIT BANK ACCOUNT MODAL ==================== -->
+  <div class="modal-backdrop" id="adminBankAccountModal" style="display:none; z-index:1070;">
+    <div class="modal-dialog ebay-modal" style="max-width: 540px;">
+      <button class="modal-close-btn" id="btnCloseAdminBankModal">×</button>
+      <div class="modal-header">
+        <span class="modal-badge-ebay" id="adminBankModalBadge">TÀI KHOẢN THANH TOÁN</span>
+        <h3 id="adminBankModalTitle" style="margin:4px 0 0; font-size:18px;">Thêm Tài Khoản Nhận Tiền Mới</h3>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <form id="adminBankAccountForm">
+          <input type="hidden" id="adminBankAccId" />
+
+          <div style="margin-bottom:12px;">
+            <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Ngân hàng thụ hưởng <span style="color:#ef4444;">*</span>:</label>
+            <select id="adminBankSelect" class="styled-select w-100" required>
+              <option value="MB|MB Bank (Ngân hàng Quân Đội)">MB Bank (Ngân hàng Quân Đội)</option>
+              <option value="VCB|Vietcombank (Ngoại Thương)">Vietcombank (Ngoại Thương)</option>
+              <option value="TCB|Techcombank (Kỹ Thương)">Techcombank (Kỹ Thương)</option>
+              <option value="CTG|VietinBank (Công Thương)">VietinBank (Công Thương)</option>
+              <option value="BIDV|BIDV (Đầu Tư & Phát Triển)">BIDV (Đầu Tư & Phát Triển)</option>
+              <option value="ACB|ACB (Á Châu)">ACB (Á Châu)</option>
+              <option value="VPB|VPBank (Việt Nam Thịnh Vượng)">VPBank (Việt Nam Thịnh Vượng)</option>
+              <option value="TPB|TPBank (Tiên Phong)">TPBank (Tiên Phong)</option>
+              <option value="STB|Sacombank (Sài Gòn Thương Tín)">Sacombank (Sài Gòn Thương Tín)</option>
+              <option value="HDB|HDBank (Phát Triển TP.HCM)">HDBank (Phát Triển TP.HCM)</option>
+              <option value="VIB|VIB (Quốc Tế)">VIB (Quốc Tế)</option>
+              <option value="MSB|MSB (Hàng Hải)">MSB (Hàng Hải)</option>
+              <option value="OCB|OCB (Phương Đông)">OCB (Phương Đông)</option>
+              <option value="SHB|SHB (Sài Gòn - Hà Nội)">SHB (Sài Gòn - Hà Nội)</option>
+            </select>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Số tài khoản <span style="color:#ef4444;">*</span>:</label>
+              <input type="text" id="adminBankAccNumber" class="styled-input w-100" placeholder="Ví dụ: 0909123456" required />
+            </div>
+            <div>
+              <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Chi nhánh ngân hàng:</label>
+              <input type="text" id="adminBankBranch" class="styled-input w-100" placeholder="Ví dụ: Chi nhánh Đồng Nai" />
+            </div>
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Tên chủ tài khoản (In hoa không dấu) <span style="color:#ef4444;">*</span>:</label>
+            <input type="text" id="adminBankAccountName" class="styled-input w-100" placeholder="Ví dụ: KH STORE OFFICIAL" style="text-transform:uppercase;" required />
+          </div>
+
+          <div style="margin-bottom:16px; background:#eff6ff; padding:12px; border-radius:6px; border:1px solid #bfdbfe;">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:700; color:#1e40af;">
+              <input type="checkbox" id="adminBankIsDefault" checked />
+              <span>Đặt làm tài khoản nhận tiền chính (Ưu tiên sinh mã VietQR)</span>
+            </label>
+            <p style="margin:4px 0 0 24px; font-size:11px; color:#3b82f6;">Khách hàng thanh toán qua VietQR sẽ tự động quét mã của tài khoản này.</p>
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+            <button type="button" class="btn btn-ebay-secondary" id="btnCancelAdminBankModal">Hủy</button>
+            <button type="submit" class="btn btn-ebay-primary" id="btnSaveAdminBankModal">💾 Lưu Tài Khoản</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ADMIN ADD/EDIT PAYMENT CODE MODAL ==================== -->
+  <div class="modal-backdrop" id="adminPaymentCodeModal" style="display:none; z-index:1070;">
+    <div class="modal-dialog ebay-modal" style="max-width: 540px;">
+      <button class="modal-close-btn" id="btnCloseAdminCodeModal">×</button>
+      <div class="modal-header">
+        <span class="modal-badge-ebay" style="background:#fef3c7; color:#b45309;" id="adminCodeModalBadge">MÃ THANH TOÁN & ƯU ĐÃI</span>
+        <h3 id="adminCodeModalTitle" style="margin:4px 0 0; font-size:18px;">Tạo Mã Thanh Toán Mới</h3>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <form id="adminPaymentCodeForm">
+          <input type="hidden" id="adminCodeId" />
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Mã thanh toán (Code) <span style="color:#ef4444;">*</span>:</label>
+              <input type="text" id="adminCodeStr" class="styled-input w-100" placeholder="Ví dụ: KHTRIAN100K" style="text-transform:uppercase; font-family:monospace; font-weight:800;" required />
+            </div>
+            <div>
+              <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Loại giảm giá <span style="color:#ef4444;">*</span>:</label>
+              <select id="adminCodeType" class="styled-select w-100" required>
+                <option value="fixed">Số tiền cố định (VNĐ)</option>
+                <option value="percent">Phần trăm (%)</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label class="form-label" id="lblAdminCodeValue" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Mức giảm (VNĐ) <span style="color:#ef4444;">*</span>:</label>
+              <input type="number" id="adminCodeValue" class="styled-input w-100" placeholder="Ví dụ: 100000" min="1" required />
+            </div>
+            <div id="wrapAdminCodeMaxDiscount" style="display:none;">
+              <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Giảm tối đa (VNĐ):</label>
+              <input type="number" id="adminCodeMaxDiscount" class="styled-input w-100" placeholder="Ví dụ: 500000" min="0" />
+            </div>
+            <div id="wrapAdminCodeMinOrder">
+              <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Đơn tối thiểu (VNĐ):</label>
+              <input type="number" id="adminCodeMinOrder" class="styled-input w-100" placeholder="Ví dụ: 500000" min="0" value="0" />
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+            <div>
+              <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Ngày hết hạn:</label>
+              <input type="date" id="adminCodeExpires" class="styled-input w-100" />
+            </div>
+            <div style="display:flex; align-items:center; padding-top:20px;">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:700; color:#166534;">
+                <input type="checkbox" id="adminCodeIsActive" checked />
+                <span>Kích hoạt mã ngay</span>
+              </label>
+            </div>
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <label class="form-label" style="font-weight:700; font-size:12px; margin-bottom:4px; display:block;">Mô tả ưu đãi / Ghi chú:</label>
+            <input type="text" id="adminCodeDesc" class="styled-input w-100" placeholder="Ví dụ: Tri ân khách hàng tháng 10..." />
+          </div>
+
+          <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+            <button type="button" class="btn btn-ebay-secondary" id="btnCancelAdminCodeModal">Hủy</button>
+            <button type="submit" class="btn btn-ebay-primary" id="btnSaveAdminCodeModal">💾 Lưu Mã Thanh Toán</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="admin.js"></script>
+  <script src="admin.js?v=khpay1"></script>
 </body>
 </html>

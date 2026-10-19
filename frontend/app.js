@@ -1890,9 +1890,57 @@ function renderCartList() {
 let currentCheckoutState = {
   orderId: '',
   transferCode: '',
+  subtotal: 0,
+  discountAmount: 0,
   totalAmount: 0,
+  appliedCode: null,
+  activeBank: {
+    bank_id: 'MB',
+    bank_name: 'MB Bank (Ngân hàng Quân Đội)',
+    account_number: '0909123456',
+    account_name: 'K/H STORE OFFICIAL',
+    branch: 'Chi nhánh Đồng Nai'
+  },
   paymentMethod: 'Chuyển khoản Ngân hàng (VietQR 24/7)'
 };
+
+function updateCheckoutBankDisplay() {
+  const bank = currentCheckoutState.activeBank || {
+    bank_id: 'MB',
+    bank_name: 'MB Bank (Ngân hàng Quân Đội)',
+    account_number: '0909123456',
+    account_name: 'K/H STORE OFFICIAL',
+    branch: 'Chi nhánh Đồng Nai'
+  };
+
+  const badgeEl = document.getElementById('checkoutBankBadge');
+  if (badgeEl) badgeEl.textContent = `${bank.bank_id} BANK`;
+
+  const subEl = document.getElementById('checkoutBankNameSub');
+  if (subEl) subEl.textContent = `${bank.bank_name || ''} ${bank.branch ? '(' + bank.branch + ')' : ''}`;
+
+  const ownerEl = document.getElementById('checkoutBankOwner');
+  if (ownerEl) ownerEl.textContent = bank.account_name || 'K/H STORE OFFICIAL';
+
+  const accEl = document.getElementById('checkoutBankAcc');
+  if (accEl) accEl.textContent = bank.account_number || '0909123456';
+
+  const bankAmountEl = document.getElementById('checkoutBankAmount');
+  if (bankAmountEl) bankAmountEl.textContent = formatPrice(currentCheckoutState.totalAmount);
+
+  const transferCodeEl = document.getElementById('checkoutTransferCode');
+  if (transferCodeEl) transferCodeEl.textContent = currentCheckoutState.transferCode;
+
+  // VietQR URL
+  const qrImg = document.getElementById('checkoutQrImg');
+  if (qrImg) {
+    const encodedMemo = encodeURIComponent(currentCheckoutState.transferCode);
+    const encodedOwner = encodeURIComponent(bank.account_name || 'KH STORE OFFICIAL');
+    const bankId = bank.bank_id || 'MB';
+    const accNum = bank.account_number || '0909123456';
+    qrImg.src = `https://img.vietqr.io/image/${bankId}-${accNum}-compact2.png?amount=${currentCheckoutState.totalAmount}&addInfo=${encodedMemo}&accountName=${encodedOwner}`;
+  }
+}
 
 window.copyText = function(text, successMsg = 'Đã sao chép vào bộ nhớ tạm!') {
   if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -1916,7 +1964,7 @@ function fallbackCopyText(text, successMsg) {
   try {
     document.execCommand('copy');
     showToast(successMsg, 'success');
-  } catch (e) {
+  } catch (err) {
     showToast('Không thể sao chép tự động, vui lòng copy thủ công!', 'warning');
   }
   document.body.removeChild(ta);
@@ -1938,6 +1986,20 @@ function openCheckoutModal() {
   const transferCode = `KHSTORE ${orderId}`;
   currentCheckoutState.orderId = orderId;
   currentCheckoutState.transferCode = transferCode;
+  currentCheckoutState.appliedCode = null;
+  currentCheckoutState.discountAmount = 0;
+
+  // Reset voucher UI
+  const voucherInput = document.getElementById('checkoutVoucherInput');
+  const voucherMsg = document.getElementById('checkoutVoucherMsg');
+  const btnApplyVoucher = document.getElementById('btnApplyVoucher');
+  const btnRemoveVoucher = document.getElementById('btnRemoveVoucher');
+  const discountRow = document.getElementById('checkoutDiscountRow');
+  if (voucherInput) { voucherInput.value = ''; voucherInput.disabled = false; }
+  if (voucherMsg) voucherMsg.innerHTML = '';
+  if (btnApplyVoucher) btnApplyVoucher.disabled = false;
+  if (btnRemoveVoucher) btnRemoveVoucher.style.display = 'none';
+  if (discountRow) discountRow.style.display = 'none';
 
   // 3. Pre-fill user delivery information
   const user = appState.currentUser;
@@ -1977,6 +2039,7 @@ function openCheckoutModal() {
     }).join('');
   }
 
+  currentCheckoutState.subtotal = total;
   currentCheckoutState.totalAmount = total;
 
   // 5. Update summary breakdown
@@ -1989,20 +2052,19 @@ function openCheckoutModal() {
   const summaryCodeEl = document.getElementById('checkoutSummaryTransferCode');
   if (summaryCodeEl) summaryCodeEl.textContent = orderId;
 
-  // 6. Update Bank Transfer Box details
-  const bankAmountEl = document.getElementById('checkoutBankAmount');
-  if (bankAmountEl) bankAmountEl.textContent = formatPrice(total);
-  const transferCodeEl = document.getElementById('checkoutTransferCode');
-  if (transferCodeEl) transferCodeEl.textContent = transferCode;
+  // 6. Fetch live active bank settings from server and update Bank Transfer Box + QR
+  updateCheckoutBankDisplay();
+  fetch(`${API_BASE}/payment-settings`)
+    .then(r => r.json())
+    .then(data => {
+      if (data && data.success && data.active_bank_account) {
+        currentCheckoutState.activeBank = data.active_bank_account;
+        updateCheckoutBankDisplay();
+      }
+    })
+    .catch(err => console.warn('Không thể nạp thông tin ngân hàng thanh toán:', err));
 
-  // 7. Update VietQR image
-  const qrImg = document.getElementById('checkoutQrImg');
-  if (qrImg) {
-    const encodedMemo = encodeURIComponent(transferCode);
-    qrImg.src = `https://img.vietqr.io/image/MB-0909123456-compact2.png?amount=${total}&addInfo=${encodedMemo}&accountName=KH%20STORE%20OFFICIAL`;
-  }
-
-  // 8. Reset payment method to banking
+  // 7. Reset payment method to banking
   const optBanking = document.getElementById('optPaymentTransfer');
   const optCod = document.getElementById('optPaymentCod');
   const radioBanking = document.querySelector('input[name="checkout_payment_method"][value="banking"]');
@@ -2015,7 +2077,7 @@ function openCheckoutModal() {
   if (codBox) codBox.style.display = 'none';
   currentCheckoutState.paymentMethod = 'Chuyển khoản Ngân hàng (VietQR 24/7)';
 
-  // 9. Open modal
+  // 8. Open modal
   const checkoutModal = document.getElementById('checkoutModal');
   if (checkoutModal) checkoutModal.style.display = 'flex';
 }
@@ -2042,7 +2104,9 @@ function setupCheckout() {
 
   // Copy buttons
   document.getElementById('btnCopyBankAcc')?.addEventListener('click', () => {
-    copyText('0909123456', 'Đã sao chép Số tài khoản MB Bank: 0909123456');
+    const acc = currentCheckoutState.activeBank?.account_number || '0909123456';
+    const bName = currentCheckoutState.activeBank?.bank_id || 'MB';
+    copyText(acc, `Đã sao chép Số tài khoản ${bName}: ${acc}`);
   });
 
   document.getElementById('btnCopyBankAmount')?.addEventListener('click', () => {
@@ -2051,6 +2115,78 @@ function setupCheckout() {
 
   document.getElementById('btnCopyTransferCode')?.addEventListener('click', () => {
     copyText(currentCheckoutState.transferCode, `Đã sao chép Mã chuyển khoản: ${currentCheckoutState.transferCode}`);
+  });
+
+  // Voucher apply & remove listeners
+  const btnApplyVoucher = document.getElementById('btnApplyVoucher');
+  const btnRemoveVoucher = document.getElementById('btnRemoveVoucher');
+  const voucherInput = document.getElementById('checkoutVoucherInput');
+  const voucherMsg = document.getElementById('checkoutVoucherMsg');
+  const discountRow = document.getElementById('checkoutDiscountRow');
+  const discountAmountEl = document.getElementById('checkoutDiscountAmount');
+  const finalTotalEl = document.getElementById('checkoutFinalTotalPrice');
+
+  btnApplyVoucher?.addEventListener('click', async () => {
+    const code = voucherInput?.value.trim().toUpperCase();
+    if (!code) {
+      if (voucherMsg) voucherMsg.innerHTML = '<span style="color:#dc2626;">⚠️ Vui lòng nhập mã ưu đãi trước khi áp dụng!</span>';
+      return;
+    }
+    btnApplyVoucher.disabled = true;
+    btnApplyVoucher.textContent = '...';
+
+    try {
+      const res = await fetch(`${API_BASE}/payment-code/apply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: code, total: currentCheckoutState.subtotal })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        currentCheckoutState.appliedCode = data.code;
+        currentCheckoutState.discountAmount = data.discount_amount;
+        currentCheckoutState.totalAmount = data.final_total;
+
+        if (discountRow) discountRow.style.display = 'flex';
+        if (discountAmountEl) discountAmountEl.textContent = `- ${formatPrice(data.discount_amount)}`;
+        if (finalTotalEl) finalTotalEl.textContent = formatPrice(data.final_total);
+
+        updateCheckoutBankDisplay();
+
+        if (voucherMsg) voucherMsg.innerHTML = `<span style="color:#16a34a; font-weight:600;">✓ ${data.message}</span>`;
+        if (voucherInput) voucherInput.disabled = true;
+        if (btnRemoveVoucher) btnRemoveVoucher.style.display = 'inline-block';
+        showToast(`Áp dụng mã ${data.code} thành công!`, 'success');
+      } else {
+        if (voucherMsg) voucherMsg.innerHTML = `<span style="color:#dc2626; font-weight:600;">✕ ${data.message || 'Mã ưu đãi không hợp lệ!'}</span>`;
+        showToast(data.message || 'Mã ưu đãi không hợp lệ!', 'error');
+      }
+    } catch (err) {
+      if (voucherMsg) voucherMsg.innerHTML = '<span style="color:#dc2626;">✕ Không thể kiểm tra mã, vui lòng thử lại!</span>';
+    } finally {
+      btnApplyVoucher.disabled = currentCheckoutState.appliedCode ? true : false;
+      btnApplyVoucher.textContent = 'Áp Dụng';
+    }
+  });
+
+  btnRemoveVoucher?.addEventListener('click', () => {
+    currentCheckoutState.appliedCode = null;
+    currentCheckoutState.discountAmount = 0;
+    currentCheckoutState.totalAmount = currentCheckoutState.subtotal;
+
+    if (discountRow) discountRow.style.display = 'none';
+    if (finalTotalEl) finalTotalEl.textContent = formatPrice(currentCheckoutState.totalAmount);
+    updateCheckoutBankDisplay();
+
+    if (voucherInput) {
+      voucherInput.disabled = false;
+      voucherInput.value = '';
+    }
+    if (voucherMsg) voucherMsg.innerHTML = '';
+    if (btnApplyVoucher) btnApplyVoucher.disabled = false;
+    btnRemoveVoucher.style.display = 'none';
+    showToast('Đã hủy áp dụng mã ưu đãi.', 'info');
   });
 
   // Payment method radio toggling
@@ -2122,6 +2258,9 @@ function setupCheckout() {
           items: appState.cart,
           customer: customerInfo,
           total: currentCheckoutState.totalAmount,
+          subtotal: currentCheckoutState.subtotal,
+          discount_amount: currentCheckoutState.discountAmount,
+          applied_code: currentCheckoutState.appliedCode,
           payment_method: currentCheckoutState.paymentMethod,
           order_id: currentCheckoutState.orderId,
           transfer_code: currentCheckoutState.transferCode,

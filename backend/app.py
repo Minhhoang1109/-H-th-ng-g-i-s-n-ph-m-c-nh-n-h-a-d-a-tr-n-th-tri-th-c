@@ -14,12 +14,14 @@ from flask_cors import CORS
 from backend.graph_service import GraphService
 from backend.recommender import get_recommendations, get_guest_recommendations
 from backend.chatbot_service import ChatbotService
+from backend.payment_service import PaymentService
 
 app = Flask(__name__, static_folder='../frontend', static_url_path='')
 CORS(app)
 
 graph_service = GraphService()
 chatbot_service = ChatbotService(graph_service)
+payment_service = PaymentService()
 
 @app.route('/')
 def serve_index():
@@ -414,11 +416,91 @@ def chatbot_create_order():
         transfer_code=transfer_code,
         note=note
     )
+    applied_code = data.get('applied_code')
+    if applied_code:
+        try:
+            payment_service.record_code_usage(applied_code)
+        except Exception:
+            pass
+
     return jsonify({
         'success': True,
         'message': f'Đơn hàng {order["id"]} đã được xử lý thành công!',
         'order': order
     })
+
+# ========================================================
+# PAYMENT SETTINGS, BANK ACCOUNTS & PAYMENT CODES
+# ========================================================
+@app.route('/api/payment-settings', methods=['GET'])
+def get_payment_settings():
+    try:
+        settings = payment_service.get_settings()
+        return jsonify({'success': True, **settings})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/payment-code/apply', methods=['POST'])
+def apply_payment_code():
+    data = request.json or {}
+    code = data.get('code', '')
+    total = float(data.get('total', 0))
+    result = payment_service.validate_payment_code(code, total)
+    if result.get('valid'):
+        return jsonify({'success': True, **result})
+    else:
+        return jsonify({'success': False, 'message': result.get('message', 'Mã không hợp lệ!')}), 400
+
+@app.route('/api/admin/bank-accounts', methods=['POST'])
+def save_bank_account():
+    data = request.json or {}
+    try:
+        account = payment_service.add_or_update_bank_account(data)
+        return jsonify({'success': True, 'account': account, 'message': 'Đã lưu tài khoản ngân hàng thành công!'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/admin/bank-accounts/<acc_id>/set-active', methods=['PUT', 'POST'])
+def set_active_bank_account(acc_id):
+    try:
+        active_account = payment_service.set_active_bank_account(acc_id)
+        return jsonify({'success': True, 'account': active_account, 'message': 'Đã đặt làm tài khoản nhận tiền chính!'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/admin/bank-accounts/<acc_id>', methods=['DELETE'])
+def delete_bank_account(acc_id):
+    try:
+        payment_service.delete_bank_account(acc_id)
+        return jsonify({'success': True, 'message': 'Đã xóa tài khoản ngân hàng!'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/admin/payment-codes', methods=['POST'])
+def save_payment_code():
+    data = request.json or {}
+    try:
+        code_item = payment_service.add_or_update_payment_code(data)
+        return jsonify({'success': True, 'code': code_item, 'message': 'Đã lưu mã thanh toán thành công!'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/admin/payment-codes/<code_id>/toggle', methods=['PUT', 'POST'])
+def toggle_payment_code(code_id):
+    try:
+        code_item = payment_service.toggle_payment_code(code_id)
+        status_text = 'kích hoạt' if code_item.get('is_active') else 'tạm dừng'
+        return jsonify({'success': True, 'code': code_item, 'message': f'Đã {status_text} mã {code_item.get("code")}!'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/admin/payment-codes/<code_id>', methods=['DELETE'])
+def delete_payment_code(code_id):
+    try:
+        payment_service.delete_payment_code(code_id)
+        return jsonify({'success': True, 'message': 'Đã xóa mã thanh toán!'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
 
 if __name__ == '__main__':
     print('Khoi dong Knowledge Graph Recommendation Engine tai http://127.0.0.1:5000')
