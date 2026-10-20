@@ -899,13 +899,29 @@
         <p class="onboarding-sub">Sản phẩm trong giỏ tạo liên kết <code>purchased</code> / <code>wants</code> trên Đồ thị Tri thức.</p>
       </div>
       <div class="modal-body">
+        <!-- Cart Selection Toolbar -->
+        <div class="cart-toolbar" id="cartToolbar" style="display:flex; justify-content:space-between; align-items:center; padding:9px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; margin-bottom:12px;">
+          <label style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:#334155; cursor:pointer; user-select:none; margin:0;">
+            <input type="checkbox" id="cartSelectAll" style="width:17px; height:17px; accent-color:#0053a0; cursor:pointer;" checked />
+            <span>Chọn tất cả (<span id="cartSelectAllCount">0</span>)</span>
+          </label>
+          <button type="button" id="btnRemoveSelectedCart" style="border:none; background:transparent; color:#ef4444; font-size:12px; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:4px; padding:4px 8px; border-radius:4px;" title="Xóa các mục đã chọn">
+            🗑️ Xóa đã chọn
+          </button>
+        </div>
+
         <div id="cartListContainer" class="cart-items-wrap"></div>
         <div class="cart-total-summary" id="cartTotalSummary" style="margin-top:16px; padding-top:14px; border-top:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center;">
-          <span style="font-weight:700; font-size:15px;">Tổng cộng:</span>
-          <span id="cartTotalPrice" style="font-weight:800; font-size:18px; color:#e53238;">0 ₫</span>
+          <div>
+            <div style="font-weight:700; font-size:14px; color:#1e293b;">Tổng thanh toán:</div>
+            <div id="cartSelectedSummaryLabel" style="font-size:12px; color:#64748b; margin-top:2px;">(0 sản phẩm được chọn)</div>
+          </div>
+          <div style="text-align:right;">
+            <span id="cartTotalPrice" style="font-weight:800; font-size:18px; color:#e53238;">0 ₫</span>
+          </div>
         </div>
         <button class="btn btn-ebay-primary w-100 btn-lg" id="btnCheckoutDemo" style="margin-top:16px;">
-          💳 Tiến Hành Thanh Toán (Giao Hàng & Mã Chuyển Khoản)
+          💳 Tiến Hành Thanh Toán (<span id="btnCheckoutSelectedCount">0</span> món)
         </button>
       </div>
     </div>
@@ -1434,6 +1450,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=khpay1"></script>
+  <script src="app.js?v=khcartsel1"></script>
 </body>
 </html>

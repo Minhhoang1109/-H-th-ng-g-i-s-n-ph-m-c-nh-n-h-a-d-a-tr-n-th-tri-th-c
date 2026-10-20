@@ -638,7 +638,37 @@
       "login_count": 1,
       "survey_completed": false,
       "wishlist": [],
-      "color": "#3b82f6"
+      "color": "#3b82f6",
+      "orders": [
+        {
+          "id": "DH-IMTGE2",
+          "transfer_code": "KHSTORE DH-IMTGE2",
+          "user_id": "u_văn mười",
+          "items": [
+            {
+              "id": "p_ssdsamsung",
+              "name": "Ổ Cứng SSD Samsung 990 Pro 2TB PCIe 4.0 NVMe",
+              "price": 4790000,
+              "image": "https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?w=400",
+              "quantity": 1
+            }
+          ],
+          "customer": {
+            "name": "Nguyễn Văn Mười",
+            "phone": "0123456789",
+            "email": "vanmuoi@gmail.com",
+            "city": "Đồng Nai",
+            "address": "hương phước, phước tân, Đồng Nai",
+            "note": "",
+            "bank_tx_id": ""
+          },
+          "total": 4790000,
+          "payment_method": "Chuyển khoản Ngân hàng (VietQR 24/7)",
+          "note": "",
+          "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
+          "timestamp": "Vừa xong"
+        }
+      ]
     },
     {
       "id": "p_macbookpro16_m3max",
@@ -2988,6 +3018,20 @@
       "label": "wants",
       "source": "u_văn mười",
       "target": "p_macbookm3"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u_văn mười",
+      "target": "p_ssdsamsung"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u_văn mười",
+      "target": "p_ssdsamsung"
     },
     {
       "type": "belongs_to",
