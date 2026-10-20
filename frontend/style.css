@@ -3831,3 +3831,312 @@ body {
 
 
 
+
+/* --- TOP BAR USER CARD & ACCOUNT DROPDOWN (MOVED FROM HERO) --- */
+.top-user-account-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.top-user-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #0f172a;
+  color: #fff;
+  border: 1px solid #334155;
+  border-radius: 20px;
+  padding: 3px 12px 3px 5px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.top-user-card-btn:hover, .top-user-card-btn.active {
+  background: #1e293b;
+  border-color: #38bdf8;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.25);
+}
+
+.top-user-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #38bdf8;
+  flex-shrink: 0;
+  background: #1e293b;
+}
+
+.top-user-info {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+}
+
+.top-user-name-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.top-user-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f8fafc;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-user-chevron {
+  font-size: 9px;
+  color: #94a3b8;
+  transition: transform 0.2s ease;
+}
+
+.top-user-card-btn.active .top-user-chevron {
+  transform: rotate(180deg);
+}
+
+.top-user-role {
+  font-size: 10px;
+  color: #38bdf8;
+  font-weight: 500;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Guest Card in Top Bar */
+.guest-top-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 20px;
+  padding: 3px 10px 3px 5px;
+}
+
+.guest-avatar-circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border: 1.5px solid #94a3b8;
+}
+
+/* User Account Dropdown Popover */
+.user-dropdown-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 320px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0,0,0,0.06);
+  border: 1px solid #e2e8f0;
+  z-index: 1050;
+  padding: 14px;
+  animation: popoverFadeIn 0.2s ease-out;
+}
+
+@keyframes popoverFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.user-popover-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 10px;
+}
+
+.popover-avatar-img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #0053a0;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.popover-meta {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.popover-meta b {
+  font-size: 14px;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.popover-role-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 1px 8px;
+  border-radius: 10px;
+  width: fit-content;
+}
+
+.popover-sub-meta {
+  font-size: 11px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-popover-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 10px 0;
+}
+
+.user-popover-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.popover-link-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  width: 100%;
+}
+
+.popover-link-item:hover {
+  background: #f8fafc;
+}
+
+.popover-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.popover-link-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.popover-link-text b {
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.popover-link-text span {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.popover-admin-link {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.popover-admin-link:hover {
+  background: #dbeafe;
+}
+
+.popover-switch-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  display: block;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn-popover-logout {
+  width: 100%;
+  padding: 8px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.btn-popover-logout:hover {
+  background: #fee2e2;
+  border-color: #ef4444;
+}
+
+/* Hero Store Trust Badges (Replaces moved card on the right of hero) */
+.hero-store-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: var(--radius-md);
+  padding: 14px 18px;
+  min-width: 260px;
+}
+
+.hero-store-badge-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.h-badge-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.hero-store-badge-item b {
+  font-size: 13px;
+  color: #f8fafc;
+  display: block;
+}
+
+.hero-store-badge-item span {
+  font-size: 11px;
+  color: #94a3b8;
+  display: block;
+}

@@ -233,7 +233,59 @@ function setupAuth() {
     showToast('Đã đăng xuất! Chuyển sang chế độ Khách vãng lai.', 'info');
   });
 
-  btnOpenProfile?.addEventListener('click', openProfileDrawer);
+  // Top bar user card dropdown popover toggle
+  const userCardTrigger = document.getElementById('userCardTrigger');
+  const userDropdownPopover = document.getElementById('userDropdownPopover');
+
+  userCardTrigger?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isShowing = userDropdownPopover && userDropdownPopover.style.display === 'block';
+    if (userDropdownPopover) {
+      userDropdownPopover.style.display = isShowing ? 'none' : 'block';
+    }
+    userCardTrigger.classList.toggle('active', !isShowing);
+  });
+
+  // Close popover when clicking anywhere outside
+  document.addEventListener('click', (e) => {
+    if (userDropdownPopover && !userDropdownPopover.contains(e.target) && !userCardTrigger?.contains(e.target)) {
+      userDropdownPopover.style.display = 'none';
+      userCardTrigger?.classList.remove('active');
+    }
+  });
+
+  // Close popover on switching user account
+  document.getElementById('userSelect')?.addEventListener('change', () => {
+    if (userDropdownPopover) userDropdownPopover.style.display = 'none';
+    userCardTrigger?.classList.remove('active');
+  });
+
+  // Wire up popover buttons
+  document.getElementById('btnMenuWishlist')?.addEventListener('click', () => {
+    if (userDropdownPopover) userDropdownPopover.style.display = 'none';
+    userCardTrigger?.classList.remove('active');
+    const wishlistModal = document.getElementById('wishlistModal');
+    if (wishlistModal) {
+      wishlistModal.style.display = 'flex';
+      if (appState.currentUser && appState.currentUser.wishlist_need) {
+        const input = document.getElementById('wishlistKeywordInput');
+        if (input) input.value = appState.currentUser.wishlist_need;
+      }
+    }
+  });
+
+  document.getElementById('btnMenuFavorites')?.addEventListener('click', () => {
+    if (userDropdownPopover) userDropdownPopover.style.display = 'none';
+    userCardTrigger?.classList.remove('active');
+    openFavoritesModal();
+  });
+
+  btnOpenProfile?.addEventListener('click', () => {
+    if (userDropdownPopover) userDropdownPopover.style.display = 'none';
+    userCardTrigger?.classList.remove('active');
+    openProfileDrawer();
+  });
+
   document.getElementById('btnCloseProfileModal')?.addEventListener('click', () => {
     document.getElementById('profileModal').style.display = 'none';
   });
@@ -382,14 +434,29 @@ function updateAuthUI() {
   if (appState.currentUser && !appState.isGuest) {
     authStatusHeader.style.display = 'flex';
     guestStatusHeader.style.display = 'none';
-    topGreetingUser.textContent = appState.currentUser.name || appState.currentUser.full_name || appState.currentUser.username;
+    if (topGreetingUser) topGreetingUser.textContent = appState.currentUser.name || appState.currentUser.full_name || appState.currentUser.username;
     if (userSelect) userSelect.value = appState.currentUser.id;
 
-    document.getElementById('userName').textContent = appState.currentUser.name || appState.currentUser.full_name;
-    document.getElementById('userRole').textContent = appState.currentUser.role || 'Thành viên K/H Store';
-    if (appState.currentUser.avatar) {
-      document.getElementById('userAvatar').src = appState.currentUser.avatar;
-    }
+    const displayName = appState.currentUser.name || appState.currentUser.full_name || appState.currentUser.username;
+    const displayRole = appState.currentUser.role || (isAdmin ? 'Quản trị viên (Admin)' : 'Thành viên K/H Store');
+    const displayAvatar = appState.currentUser.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${appState.currentUser.username || appState.currentUser.id}`;
+
+    const userNameEl = document.getElementById('userName');
+    const userRoleEl = document.getElementById('userRole');
+    const userAvatarEl = document.getElementById('userAvatar');
+    if (userNameEl) userNameEl.textContent = displayName;
+    if (userRoleEl) userRoleEl.textContent = displayRole;
+    if (userAvatarEl) userAvatarEl.src = displayAvatar;
+
+    // Also update popover preview info
+    const popoverAvatar = document.getElementById('popoverAvatar');
+    const popoverName = document.getElementById('popoverName');
+    const popoverRole = document.getElementById('popoverRole');
+    const popoverMeta = document.getElementById('popoverMeta');
+    if (popoverAvatar) popoverAvatar.src = displayAvatar;
+    if (popoverName) popoverName.textContent = displayName;
+    if (popoverRole) popoverRole.textContent = displayRole;
+    if (popoverMeta) popoverMeta.textContent = appState.currentUser.email ? appState.currentUser.email : (isAdmin ? 'Admin Quyền Cao Nhất' : `ID: ${appState.currentUser.id}`);
 
     if (appState.currentUser.wishlist_need) {
       returningUserBanner.style.display = 'block';

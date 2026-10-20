@@ -23,27 +23,95 @@
   <div class="top-utility-bar">
     <div class="top-utility-inner">
       <div class="top-util-left">
-        <!-- Dynamic User Greeting / Auth Status -->
-        <div id="authStatusHeader" class="auth-status-wrap">
-          <span class="user-greeting">Xin chào, <b id="topGreetingUser">Alice Nguyễn</b>!</span>
-          <button id="btnOpenProfile" class="btn-auth-text" title="Xem hồ sơ">👤 Hồ sơ</button>
-          <span class="divider">|</span>
-          <button id="btnLogout" class="btn-auth-text" title="Đăng xuất tài khoản">Đăng xuất 🚪</button>
+        <!-- 1. Logged-in User Account Card (Image 2 moved to Image 1's position) -->
+        <div id="authStatusHeader" class="top-user-account-container" style="position:relative;">
+          <div class="top-user-card-btn" id="userCardTrigger" title="Nhấp để mở menu tài khoản & thiết lập">
+            <img id="userAvatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" alt="Avatar" class="top-user-avatar" />
+            <div class="top-user-info">
+              <div class="top-user-name-row">
+                <span class="top-user-name" id="userName">Alice Nguyễn</span>
+                <span class="top-user-chevron" id="topUserChevron">▼</span>
+              </div>
+              <span class="top-user-role" id="userRole">Tín đồ công nghệ Apple</span>
+            </div>
+          </div>
+
+          <!-- Dropdown Popover containing all user functions -->
+          <div class="user-dropdown-popover" id="userDropdownPopover" style="display:none;">
+            <div class="user-popover-header">
+              <img id="popoverAvatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" class="popover-avatar-img" alt="Avatar" />
+              <div class="popover-meta">
+                <b id="popoverName">Alice Nguyễn</b>
+                <span id="popoverRole" class="popover-role-badge">Tín đồ công nghệ</span>
+                <span id="popoverMeta" class="popover-sub-meta">Thành viên K/H Store</span>
+              </div>
+            </div>
+
+            <div class="user-popover-divider"></div>
+
+            <div class="user-popover-links">
+              <button type="button" class="popover-link-item" id="btnOpenProfile">
+                <span class="popover-icon">👤</span>
+                <div class="popover-link-text">
+                  <b>Hồ sơ người dùng</b>
+                  <span>Xem thông tin & chỉnh sửa hồ sơ</span>
+                </div>
+              </button>
+
+              <button type="button" class="popover-link-item" id="btnMenuWishlist">
+                <span class="popover-icon">🎯</span>
+                <div class="popover-link-text">
+                  <b>Nhu cầu mong muốn</b>
+                  <span>Cập nhật thiết bị săn đón</span>
+                </div>
+              </button>
+
+              <button type="button" class="popover-link-item" id="btnMenuFavorites">
+                <span class="popover-icon">❤️</span>
+                <div class="popover-link-text">
+                  <b>Sản phẩm yêu thích</b>
+                  <span>Xem danh sách đã lưu</span>
+                </div>
+              </button>
+
+              <a href="/admin" id="headerAdminLink" class="popover-link-item popover-admin-link" style="display:none; text-decoration:none;" title="Truy cập Trang Quản Trị Hệ Thống">
+                <span class="popover-icon">🛠️</span>
+                <div class="popover-link-text">
+                  <b>Trang Quản Trị Hệ Thống</b>
+                  <span>Quản lý sản phẩm, ngân hàng & mã thanh toán</span>
+                </div>
+              </a>
+            </div>
+
+            <div class="user-popover-divider"></div>
+
+            <div class="user-popover-switch-sec">
+              <label for="userSelect" class="popover-switch-label">🔄 Đổi nhanh tài khoản mẫu:</label>
+              <select id="userSelect" class="styled-select w-100" style="font-size:12px; height:32px;"></select>
+            </div>
+
+            <div class="user-popover-divider"></div>
+
+            <button type="button" class="btn-popover-logout" id="btnLogout">
+              🚪 Đăng xuất khỏi tài khoản
+            </button>
+          </div>
         </div>
-        <div id="guestStatusHeader" class="auth-status-wrap" style="display:none;">
-          <span class="user-greeting">Xin chào quý khách (Khách vãng lai)!</span>
-          <button id="btnOpenLoginModal" class="btn-auth-link">Đăng nhập</button>
-          <span>hoặc</span>
-          <button id="btnOpenRegisterModal" class="btn-auth-link">Đăng ký</button>
+
+        <!-- 2. Guest Status in Top Bar (shown when guest) -->
+        <div id="guestStatusHeader" class="auth-status-wrap guest-top-wrap" style="display:none; align-items:center; gap:10px;">
+          <div class="guest-top-card-btn">
+            <div class="guest-avatar-circle">👤</div>
+            <div class="top-user-info">
+              <span class="top-user-name" style="font-size:13px; font-weight:700; color:#1e293b;">Khách vãng lai</span>
+              <span class="top-user-role" style="font-size:10px; color:#64748b;">Chưa đăng nhập</span>
+            </div>
+          </div>
+          <div class="guest-btn-group" style="display:flex; gap:6px;">
+            <button id="btnOpenLoginModal" class="btn btn-sm btn-ebay-primary" style="padding:4px 12px; font-size:12px;">Đăng nhập</button>
+            <button id="btnOpenRegisterModal" class="btn btn-sm btn-ebay-outline" style="padding:4px 12px; font-size:12px;">Đăng ký</button>
+          </div>
         </div>
-        <span class="divider">|</span>
-        <div class="user-switch-inline">
-          <label for="userSelect">Đổi nhanh tài khoản:</label>
-          <select id="userSelect" class="header-user-select"></select>
-        </div>
-        <span class="divider">|</span>
-        <!-- Dedicated Link to Separate Admin Page (Only visible to Admin) -->
-        <a href="/admin" id="headerAdminLink" class="btn-admin-badge" style="display:none; text-decoration:none;" title="Truy cập Trang Quản Trị Hệ Thống">🛠️ Trang Quản Trị</a>
       </div>
       <div class="top-util-right">
         <span class="util-link" id="btnOpenWishlistQuick">🎯 Nhu cầu mong muốn</span>
@@ -147,12 +215,27 @@
             <button class="btn btn-ebay-outline" id="btnHeroWishlist">🎯 Ghi nhận Thiết bị Mong muốn</button>
           </div>
         </div>
-        <div class="hero-user-card" id="userProfileCard">
-          <img id="userAvatar" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150" alt="Avatar" class="user-avatar-img" />
-          <div class="user-meta">
-            <h4 id="userName">Alice Nguyễn</h4>
-            <span class="user-role-tag" id="userRole">Tín đồ công nghệ Apple</span>
-            <div class="user-stats-mini" id="userInteractions"></div>
+        <div class="hero-store-badges">
+          <div class="hero-store-badge-item">
+            <span class="h-badge-icon">🛡️</span>
+            <div>
+              <b>Chính Hãng 100%</b>
+              <span>Cam kết chất lượng K/H Store</span>
+            </div>
+          </div>
+          <div class="hero-store-badge-item">
+            <span class="h-badge-icon">⚡</span>
+            <div>
+              <b>Gợi Ý Thông Minh</b>
+              <span>Đồ thị Tri thức KG cá nhân hóa</span>
+            </div>
+          </div>
+          <div class="hero-store-badge-item">
+            <span class="h-badge-icon">🔄</span>
+            <div>
+              <b>Đổi Trả 30 Ngày</b>
+              <span>Hỗ trợ bảo hành & đồng kiểm</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1384,6 +1467,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=khcleanhdr1"></script>
+  <script src="app.js?v=khtopcard1"></script>
 </body>
 </html>
