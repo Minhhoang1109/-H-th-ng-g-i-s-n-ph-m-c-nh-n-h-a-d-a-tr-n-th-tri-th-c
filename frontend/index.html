@@ -1273,14 +1273,33 @@
 
           <!-- A. AVATAR SECTION -->
           <div class="edit-section-card">
-            <label class="edit-field-label">📸 Ảnh đại diện (Avatar):</label>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <label class="edit-field-label" style="margin:0;">📸 Ảnh đại diện (Avatar):</label>
+              <span style="font-size:11px; color:#64748b;">Hỗ trợ tải ảnh từ máy (PNG, JPG, WEBP...) hoặc URL</span>
+            </div>
             <div class="edit-avatar-picker-row">
-              <div class="edit-avatar-preview-box">
+              <div class="edit-avatar-preview-box" id="avatarPreviewClickBox" style="position:relative; cursor:pointer;" title="Nhấp vào đây để chọn ảnh từ máy tính / điện thoại">
                 <img id="editProfileAvatarPreview" src="" alt="Preview" class="edit-avatar-img-preview" />
                 <span class="edit-avatar-preview-badge">Xem trước</span>
+                <div class="avatar-hover-overlay">
+                  <span>📷 Chọn ảnh</span>
+                </div>
               </div>
-              <div style="flex:1;">
-                <input type="url" id="editProfileAvatarInput" class="styled-input" placeholder="Dán link ảnh đại diện (URL https://...)" style="width:100%; margin-bottom:8px;" />
+              <div style="flex:1; min-width:0;">
+                <!-- Upload from device action -->
+                <div style="display:flex; gap:8px; margin-bottom:8px; align-items:center; flex-wrap:wrap;">
+                  <input type="file" id="editProfileAvatarFileInput" accept="image/png,image/jpeg,image/jpg,image/webp,image/gif" style="display:none;" />
+                  <button type="button" class="btn btn-sm btn-ebay-primary" id="btnUploadAvatarFile" style="white-space:nowrap; display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 14px; font-weight:700; font-size:12px; border-radius:6px;" title="Chọn ảnh từ máy tính hoặc điện thoại">
+                    📁 Tải ảnh từ thiết bị
+                  </button>
+                  <span id="avatarUploadStatus" style="font-size:12px; color:#16a34a; font-weight:600; display:none;"></span>
+                </div>
+
+                <!-- Direct URL input -->
+                <div style="margin-bottom:8px;">
+                  <input type="url" id="editProfileAvatarInput" class="styled-input" placeholder="Hoặc dán link ảnh đại diện (URL https://...)" style="width:100%; font-size:12px; height:32px;" />
+                </div>
+
                 <div style="font-size:11px; color:#64748b; margin-bottom:6px;">Hoặc bấm chọn nhanh 1 trong các avatar mẫu phong cách công nghệ:</div>
                 <div class="avatar-presets-grid" id="avatarPresetsGrid"></div>
               </div>
@@ -1467,6 +1486,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=khtopcard1"></script>
+  <script src="app.js?v=khavatarup1"></script>
 </body>
 </html>

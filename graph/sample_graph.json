@@ -918,10 +918,10 @@
       "type": "User",
       "name": "nguyen trong vang",
       "username": "nguyen trong vang",
-      "email": "nguyen trong vang@gmail.com",
+      "email": "nguyentrongvang@gmail.com",
       "role": "Lập trình viên & IT",
       "password_hash": "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
-      "avatar": "https://api.dicebear.com/7.x/bottts/svg?seed=nguyen trong vang",
+      "avatar": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTv7xiZa44Gh9jW-lBlRytbG962uf53Ew1-YpHjuZ-SZw&s=10",
       "login_count": 1,
       "survey_completed": true,
       "wishlist": [],
@@ -999,7 +999,10 @@
           "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
           "timestamp": "Vừa xong"
         }
-      ]
+      ],
+      "full_name": "nguyen trong vang",
+      "phone": "",
+      "bio": ""
     }
   ],
   "edges": [

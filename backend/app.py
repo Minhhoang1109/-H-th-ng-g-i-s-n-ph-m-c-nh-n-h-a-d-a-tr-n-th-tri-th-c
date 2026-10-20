@@ -11,6 +11,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
+import base64
+import time
+from werkzeug.utils import secure_filename
 from backend.graph_service import GraphService
 from backend.recommender import get_recommendations, get_guest_recommendations
 from backend.chatbot_service import ChatbotService
@@ -136,6 +139,67 @@ def update_user_profile(user_id=None):
         return jsonify({'success': False, 'error': str(ve)}), 400
     except Exception as e:
         return jsonify({'success': False, 'error': f'Lỗi cập nhật hồ sơ: {str(e)}'}), 500
+
+# --- AVATAR UPLOAD ENDPOINT ---
+UPLOAD_AVATARS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend', 'uploads', 'avatars')
+os.makedirs(UPLOAD_AVATARS_DIR, exist_ok=True)
+ALLOWED_AVATAR_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'}
+
+@app.route('/api/upload-avatar', methods=['POST'])
+def upload_avatar():
+    try:
+        user_id = request.form.get('user_id') or 'user'
+        filename = None
+
+        # 1. Handle multipart/form-data file upload
+        if 'file' in request.files or 'avatar' in request.files:
+            file = request.files.get('file') or request.files.get('avatar')
+            if file and file.filename != '':
+                orig_name = secure_filename(file.filename)
+                ext = orig_name.rsplit('.', 1)[-1].lower() if '.' in orig_name else 'png'
+                if ext not in ALLOWED_AVATAR_EXTENSIONS:
+                    ext = 'png'
+                clean_uid = "".join([c for c in user_id if c.isalnum() or c in ('_', '-')]) or 'user'
+                filename = f"avatar_{clean_uid}_{int(time.time())}.{ext}"
+                file_path = os.path.join(UPLOAD_AVATARS_DIR, filename)
+                file.save(file_path)
+
+        # 2. Handle JSON base64 / data URL payload
+        if not filename and request.is_json:
+            data = request.json or {}
+            user_id = data.get('user_id') or user_id
+            data_url = data.get('data_url') or data.get('avatar_base64') or data.get('image')
+            if data_url and 'base64,' in data_url:
+                header, b64_str = data_url.split('base64,', 1)
+                ext = 'png'
+                if 'jpeg' in header or 'jpg' in header:
+                    ext = 'jpg'
+                elif 'webp' in header:
+                    ext = 'webp'
+                elif 'gif' in header:
+                    ext = 'gif'
+                elif 'svg' in header:
+                    ext = 'svg'
+
+                clean_uid = "".join([c for c in user_id if c.isalnum() or c in ('_', '-')]) or 'user'
+                filename = f"avatar_{clean_uid}_{int(time.time())}.{ext}"
+                file_path = os.path.join(UPLOAD_AVATARS_DIR, filename)
+                with open(file_path, 'wb') as f:
+                    f.write(base64.b64decode(b64_str))
+
+        if filename:
+            avatar_url = f"/uploads/avatars/{filename}"
+            return jsonify({
+                'success': True,
+                'url': avatar_url,
+                'filename': filename,
+                'message': 'Tải ảnh đại diện lên thành công!'
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Không tìm thấy file ảnh hoặc dữ liệu ảnh hợp lệ!'}), 400
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': f'Lỗi khi xử lý ảnh đại diện: {str(e)}'}), 500
 
 @app.route('/api/user/wishlist', methods=['POST'])
 def save_user_wishlist():

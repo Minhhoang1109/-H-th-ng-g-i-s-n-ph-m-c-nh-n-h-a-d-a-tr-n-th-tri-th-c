@@ -310,6 +310,88 @@ function setupAuth() {
     if (val && prev) prev.src = val;
   });
 
+  // Avatar upload from device
+  const fileInput = document.getElementById('editProfileAvatarFileInput');
+  const btnUploadAvatar = document.getElementById('btnUploadAvatarFile');
+  const avatarPreviewClickBox = document.getElementById('avatarPreviewClickBox');
+  const avatarUploadStatus = document.getElementById('avatarUploadStatus');
+
+  btnUploadAvatar?.addEventListener('click', () => fileInput?.click());
+  avatarPreviewClickBox?.addEventListener('click', () => fileInput?.click());
+
+  fileInput?.addEventListener('change', async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Vui lòng chọn file hình ảnh hợp lệ (PNG, JPG, WEBP, GIF)!', 'warning');
+      return;
+    }
+
+    if (btnUploadAvatar) {
+      btnUploadAvatar.disabled = true;
+      btnUploadAvatar.innerHTML = '⏳ Đang tải ảnh...';
+    }
+    if (avatarUploadStatus) {
+      avatarUploadStatus.style.display = 'inline';
+      avatarUploadStatus.style.color = '#2563eb';
+      avatarUploadStatus.textContent = '⏳ Đang xử lý ảnh...';
+    }
+
+    try {
+      // 1. Client-side canvas resize (max 400x400)
+      const resizedDataUrl = await resizeImageToMax(file, 400, 400);
+
+      // Instant preview
+      const previewEl = document.getElementById('editProfileAvatarPreview');
+      if (previewEl) previewEl.src = resizedDataUrl;
+
+      // 2. Upload to server
+      const currentUid = appState.currentUser ? appState.currentUser.id : 'user';
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('user_id', currentUid);
+
+      const res = await fetch(`${API_BASE}/upload-avatar`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+
+      const avatarInput = document.getElementById('editProfileAvatarInput');
+      if (res.ok && data.success && data.url) {
+        if (avatarInput) avatarInput.value = data.url;
+        if (previewEl) previewEl.src = data.url;
+        if (avatarUploadStatus) {
+          avatarUploadStatus.style.color = '#16a34a';
+          avatarUploadStatus.textContent = '✓ Đã tải ảnh lên thành công!';
+        }
+        showToast('Tải ảnh đại diện từ thiết bị thành công! Nhấn "Lưu Thay Đổi" để cập nhật.', 'success');
+      } else {
+        // Fallback to compressed base64
+        if (avatarInput) avatarInput.value = resizedDataUrl;
+        if (avatarUploadStatus) {
+          avatarUploadStatus.style.color = '#16a34a';
+          avatarUploadStatus.textContent = '✓ Đã nhận ảnh từ thiết bị!';
+        }
+        showToast('Đã nhận ảnh đại diện từ thiết bị!', 'success');
+      }
+    } catch (err) {
+      console.error('Lỗi khi tải ảnh đại diện:', err);
+      showToast('Có lỗi khi xử lý file ảnh, vui lòng thử lại!', 'error');
+      if (avatarUploadStatus) {
+        avatarUploadStatus.style.color = '#dc2626';
+        avatarUploadStatus.textContent = '✕ Lỗi tải ảnh!';
+      }
+    } finally {
+      if (btnUploadAvatar) {
+        btnUploadAvatar.disabled = false;
+        btnUploadAvatar.innerHTML = '📁 Tải ảnh từ thiết bị';
+      }
+      fileInput.value = '';
+    }
+  });
+
   document.getElementById('btnProfileRetakeSurvey')?.addEventListener('click', () => {
     document.getElementById('profileModal').style.display = 'none';
     document.getElementById('onboardingSurveyModal').style.display = 'flex';
@@ -1257,6 +1339,8 @@ function openEditProfileModal(focusField = null) {
   const avatarUrl = user.avatar || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.username || user.id}`;
   if (avatarInput) avatarInput.value = user.avatar || '';
   if (avatarPreview) avatarPreview.src = avatarUrl;
+  const avatarUploadStatus = document.getElementById('avatarUploadStatus');
+  if (avatarUploadStatus) avatarUploadStatus.style.display = 'none';
 
   let targetNeed = user.last_target_need || user.wishlist_need;
   if (!targetNeed && user.wishlist && user.wishlist.length > 0) {
@@ -2931,3 +3015,41 @@ function escapeHtml(str) {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
+
+function resizeImageToMax(file, maxWidth = 400, maxHeight = 400) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.9);
+        resolve(dataUrl);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
