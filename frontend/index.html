@@ -48,14 +48,6 @@
       <div class="top-util-right">
         <span class="util-link" id="btnOpenWishlistQuick">🎯 Nhu cầu mong muốn</span>
         <span class="util-link" id="btnOpenFavoritesModal" style="cursor:pointer;">❤️ Yêu thích (<span id="favoritesCountBadge">0</span>)</span>
-        <div class="algo-quick-select">
-          <label for="algoSelect">⚙️ Thuật toán:</label>
-          <select id="algoSelect" class="header-algo-select">
-            <option value="hybrid">Hybrid (PPR + Meta-path)</option>
-            <option value="ppr">Personalized PageRank</option>
-            <option value="metapath">Meta-path Traversal</option>
-          </select>
-        </div>
         <span class="cart-icon" id="btnOpenCartModal" style="cursor:pointer;">🛒 Giỏ hàng (<span id="cartCountBadge">0</span>)</span>
       </div>
     </div>
@@ -102,10 +94,6 @@
         <button id="btnSearch" class="btn-ebay-search">Tìm kiếm</button>
       </div>
 
-      <!-- Metrics Pill -->
-      <div class="header-advanced-link">
-        <span id="headerMetricsBadge" class="metrics-pill">Đồ thị: Đang tải...</span>
-      </div>
     </div>
   </header>
 
@@ -116,8 +104,6 @@
         <li class="nav-item active" data-tab="recommendations"><span>✨ Dành riêng cho bạn (Gợi ý)</span></li>
         <li class="nav-item" id="navItemGraphExplorer" data-tab="graph-explorer" style="display: none;"><span>🌐 Khám Phá Đồ Thị Tri Thức 2D</span></li>
         <li class="nav-item" data-tab="survey"><span>📋 Khảo sát Nhu cầu Chi tiết</span></li>
-        <li class="nav-item" data-tab="cold-start"><span>❄️ Thử nghiệm Khởi động lạnh</span></li>
-        <li class="nav-item" data-tab="analytics"><span>📊 Thống kê Đồ thị & Thuật toán</span></li>
       </ul>
     </div>
   </nav>
@@ -360,45 +346,6 @@
       </div>
     </section>
 
-    <!-- TAB 3: COLD START -->
-    <section id="tab-cold-start" class="tab-content">
-      <div class="coldstart-wrapper">
-        <div class="survey-hero">
-          <h2>❄️ Thử Nghiệm Gợi Ý Khởi Động Lạnh (Cold-Start Problem)</h2>
-          <p>Mô phỏng trường hợp người dùng hoàn toàn mới hoặc khách vãng lai (Guest) chưa có lịch sử mua hàng, hệ thống sử dụng thuật toán lan truyền trên Đồ thị Tri thức để gợi ý tức thì.</p>
-        </div>
-        <div class="coldstart-card">
-          <h3>Tạo hồ sơ người dùng mẫu chưa từng mua sắm:</h3>
-          <div class="form-row-2col" style="margin-top:14px;">
-            <div class="form-col">
-              <label class="form-label">Chọn nhóm sở thích mô phỏng:</label>
-              <select id="coldStartPersonaSelect" class="styled-select w-100">
-                <option value="gamer">Game thủ Esport & Streamer</option>
-                <option value="developer">Lập trình viên Fullstack / AI</option>
-                <option value="designer">Nhà thiết kế Đồ họa 3D</option>
-                <option value="office">Nhân viên Văn phòng Mỏng nhẹ</option>
-              </select>
-            </div>
-            <div class="form-col">
-              <label class="form-label">Ngân sách giả định:</label>
-              <select id="coldStartBudgetSelect" class="styled-select w-100">
-                <option value="all">Mọi mức giá</option>
-                <option value="5m_15m">5.000.000 ₫ – 15.000.000 ₫</option>
-                <option value="above_30m">Trên 30.000.000 ₫</option>
-              </select>
-            </div>
-          </div>
-          <button class="btn btn-ebay-primary" id="btnRunColdStart" style="margin-top:16px;">
-            ⚡ Chạy Khởi Động Lạnh & Xem Đề Xuất
-          </button>
-        </div>
-        <div class="coldstart-results-wrap" id="coldStartResults" style="display:none; margin-top:24px;">
-          <h3 class="section-title">Kết quả Đề xuất Khởi động lạnh từ KG:</h3>
-          <div class="products-grid" id="coldStartGrid"></div>
-        </div>
-      </div>
-    </section>
-
     <!-- TAB: GRAPH EXPLORER FOR USERS -->
     <section id="tab-graph-explorer" class="tab-content">
       <div class="analytics-wrapper">
@@ -437,19 +384,6 @@
             <p class="hint">Nhấp vào bất kỳ vòng tròn nào trên mạng lưới để xem chi tiết thuộc tính và các liên kết tri thức liên quan.</p>
             <div id="userVisNodeDetailContent"></div>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 4: ANALYTICS -->
-    <section id="tab-analytics" class="tab-content">
-      <div class="analytics-wrapper">
-        <div class="survey-hero">
-          <h2>📊 Thống Kê Đồ Thị Tri Thức & Đánh Giá Thuật Toán</h2>
-          <p>Báo cáo thông số Topology của đồ thị và so sánh định lượng giữa Personalized PageRank, Meta-path Traversal và mô hình Hybrid.</p>
-        </div>
-        <div class="metrics-dashboard-grid" id="analyticsDashboard">
-          <!-- Injected by JS -->
         </div>
       </div>
     </section>
@@ -1450,6 +1384,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=khcartsel1"></script>
+  <script src="app.js?v=khcleanhdr1"></script>
 </body>
 </html>
