@@ -226,10 +226,15 @@ def save_user_wishlist():
 def recommendations():
     user_id = request.args.get('user_id')
     algorithm = request.args.get('algorithm', 'hybrid')
+    category = request.args.get('category', 'all')
+    try:
+        max_results = int(request.args.get('top_k', request.args.get('max_results', 40)))
+    except:
+        max_results = 40
     if not user_id:
         return jsonify({'success': False, 'error': 'Missing user_id parameter'}), 400
 
-    recs = get_recommendations(graph_service, user_id, algorithm=algorithm)
+    recs = get_recommendations(graph_service, user_id, algorithm=algorithm, max_results=max_results, category=category)
     user = graph_service.get_user(user_id)
     return jsonify({
         'success': True,
@@ -240,13 +245,19 @@ def recommendations():
 
 @app.route('/api/recommendations/guest', methods=['GET'])
 def guest_recommendations():
-    purpose = request.args.get('purpose', 't_laptrinh')
+    purpose = request.args.get('purpose', 'all')
     category = request.args.get('category', 'all')
-    recs = get_guest_recommendations(graph_service, purpose=purpose, category=category)
+    algorithm = request.args.get('algorithm', 'hybrid')
+    try:
+        max_results = int(request.args.get('top_k', request.args.get('max_results', 40)))
+    except:
+        max_results = 40
+    recs = get_guest_recommendations(graph_service, purpose=purpose, algorithm=algorithm, max_results=max_results, category=category)
     return jsonify({
         'success': True,
         'is_guest': True,
         'matched_purpose': purpose,
+        'algorithm': algorithm,
         'recommendations': recs
     })
 

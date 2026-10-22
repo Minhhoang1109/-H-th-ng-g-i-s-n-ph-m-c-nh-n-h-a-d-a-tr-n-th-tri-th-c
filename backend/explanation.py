@@ -9,12 +9,12 @@ Multi-Dimensional Explainable AI (XAI) Engine:
 
 def generate_detailed_explanation(graph_service, user_id, product_id, path=None, score=0.85):
     graph = graph_service.graph
-    prod_attrs = graph.nodes.get(product_id, {})
+    prod_attrs = graph_service.get_product(product_id) or graph.nodes.get(product_id, {})
     prod_name = prod_attrs.get("name", product_id)
-    prod_cat = prod_attrs.get("category", "Thiết bị")
-    prod_brand = prod_attrs.get("brand", "Chính hãng")
-    prod_specs = prod_attrs.get("specs", [])
-    prod_purposes = prod_attrs.get("purposes", [])
+    prod_cat = prod_attrs.get("category") or (prod_attrs.get("categories", ["Thiết bị"])[0] if prod_attrs.get("categories") else "Thiết bị")
+    prod_brand = prod_attrs.get("brand") or (prod_attrs.get("brands", ["Chính hãng"])[0] if prod_attrs.get("brands") else "Chính hãng")
+    prod_specs = prod_attrs.get("specs") or prod_attrs.get("tags") or []
+    prod_purposes = prod_attrs.get("purposes") or []
 
     purpose_names = {
         't_laptrinh': 'Lập trình & Kỹ thuật',
@@ -26,7 +26,7 @@ def generate_detailed_explanation(graph_service, user_id, product_id, path=None,
     }
 
     user_attrs = graph.nodes.get(user_id, {}) if user_id != 'guest' else {}
-    user_name = user_attrs.get("name", "Bạn")
+    user_name = user_attrs.get("name", "Khách vãng lai" if user_id == 'guest' else "Bạn")
 
     summary = f"Sản phẩm {prod_name} được tối ưu hóa dựa trên Đồ thị Tri thức."
     if path and len(path) >= 3:

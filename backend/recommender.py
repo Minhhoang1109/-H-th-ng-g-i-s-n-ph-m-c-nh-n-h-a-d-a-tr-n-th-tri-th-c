@@ -2,10 +2,10 @@ import networkx as nx
 import collections
 from backend.explanation import generate_detailed_explanation
 
-def get_recommendations(graph_service, user_id, algorithm="hybrid", max_results=8):
+def get_recommendations(graph_service, user_id, algorithm="hybrid", max_results=40, category=None):
     graph = graph_service.graph
     if user_id not in graph:
-        return get_guest_recommendations(graph_service, algorithm=algorithm, max_results=max_results)
+        return get_guest_recommendations(graph_service, algorithm=algorithm, max_results=max_results, category=category)
 
     interacted_products = set()
     for _, v, d in graph.out_edges(user_id, data=True):
@@ -25,12 +25,28 @@ def get_recommendations(graph_service, user_id, algorithm="hybrid", max_results=
         scores_map = _recommend_hybrid(graph_service, user_id, all_products, interacted_products)
 
     sorted_products = sorted(scores_map.items(), key=lambda x: x[1]["score"], reverse=True)
-    top_candidates = sorted_products[:max_results]
 
     results = []
-    for prod_id, info in top_candidates:
-        prod_data = graph.nodes.get(prod_id, {}).copy()
-        prod_data["id"] = prod_id
+    for prod_id, info in sorted_products:
+        prod_data = graph_service.get_product(prod_id)
+        if not prod_data:
+            prod_data = graph.nodes.get(prod_id, {}).copy()
+            prod_data["id"] = prod_id
+        if "category" not in prod_data:
+            cats = prod_data.get("categories", [])
+            prod_data["category"] = cats[0] if cats else ""
+        if "brand" not in prod_data:
+            brands = prod_data.get("brands", [])
+            prod_data["brand"] = brands[0] if brands else ""
+        if "specs" not in prod_data:
+            prod_data["specs"] = prod_data.get("tags", [])
+
+        if category and category != 'all':
+            p_cat = prod_data.get("category")
+            p_cats = prod_data.get("categories", [])
+            if p_cat != category and category not in p_cats:
+                continue
+
         prod_data["score"] = round(info["score"], 3)
         prod_data["algorithm"] = algorithm
         prod_data["best_path"] = info.get("best_path", [])
@@ -39,10 +55,12 @@ def get_recommendations(graph_service, user_id, algorithm="hybrid", max_results=
             graph_service, user_id, prod_id, info.get("best_path", []), prod_data["score"]
         )
         results.append(prod_data)
+        if len(results) >= max_results:
+            break
 
     return results
 
-def get_guest_recommendations(graph_service, purpose='all', algorithm='hybrid', max_results=8):
+def get_guest_recommendations(graph_service, purpose='all', algorithm='hybrid', max_results=40, category='all'):
     graph = graph_service.graph
     all_products = [
         node_id for node_id, attrs in graph.nodes(data=True)
@@ -53,15 +71,24 @@ def get_guest_recommendations(graph_service, purpose='all', algorithm='hybrid', 
     matched_users = []
 
     if purpose and purpose != 'all':
+        purpose_tag = purpose if purpose.startswith("t_") else f"t_{purpose}"
         for u, v, d in graph.edges(data=True):
-            if d.get("relation") == "has_purpose" and v == purpose:
-                matched_users.append(u)
+            edge_type = d.get("type") or d.get("relation") or ""
+            if edge_type in ("prefers_tag", "has_purpose", "has_tag") and (v == purpose or v == purpose_tag):
+                if graph.nodes.get(u, {}).get("type") == "User":
+                    matched_users.append(u)
+
+        for p in all_products:
+            for _, v, d in graph.out_edges(p, data=True):
+                edge_type = d.get("type") or d.get("relation") or ""
+                if edge_type == "has_tag" and (v == purpose or v == purpose_tag):
+                    scores[p] += 2.0
 
     if not matched_users:
-        matched_users = [n for n, d in graph.nodes(data=True) if d.get("type") == "User"][:3]
+        matched_users = [n for n, d in graph.nodes(data=True) if d.get("type") == "User"][:5]
 
-    for uid in matched_users:
-        user_recs = get_recommendations(graph_service, uid, algorithm=algorithm, max_results=max_results)
+    for uid in matched_users[:5]:
+        user_recs = get_recommendations(graph_service, uid, algorithm=algorithm, max_results=50)
         for r in user_recs:
             scores[r["id"]] += r.get("score", 0.5)
 
@@ -70,18 +97,38 @@ def get_guest_recommendations(graph_service, purpose='all', algorithm='hybrid', 
             rating = graph.nodes.get(p, {}).get("rating", 4.5)
             scores[p] = rating / 5.0
 
-    sorted_prods = sorted(scores.items(), key=lambda x: x[1], reverse=True)[:max_results]
+    sorted_prods = sorted(scores.items(), key=lambda x: x[1], reverse=True)
     
     results = []
+    normalizer = max(1.0, len(matched_users) if matched_users else 1.0)
     for prod_id, score in sorted_prods:
-        prod_data = graph.nodes.get(prod_id, {}).copy()
-        prod_data["id"] = prod_id
-        prod_data["score"] = round(min(0.95, score / max(1.0, len(matched_users))), 3)
+        prod_data = graph_service.get_product(prod_id)
+        if not prod_data:
+            prod_data = graph.nodes.get(prod_id, {}).copy()
+            prod_data["id"] = prod_id
+        if "category" not in prod_data:
+            cats = prod_data.get("categories", [])
+            prod_data["category"] = cats[0] if cats else ""
+        if "brand" not in prod_data:
+            brands = prod_data.get("brands", [])
+            prod_data["brand"] = brands[0] if brands else ""
+        if "specs" not in prod_data:
+            prod_data["specs"] = prod_data.get("tags", [])
+
+        if category and category != 'all':
+            p_cat = prod_data.get("category")
+            p_cats = prod_data.get("categories", [])
+            if p_cat != category and category not in p_cats:
+                continue
+
+        prod_data["score"] = round(min(0.98, max(0.50, (score / normalizer) * 0.85 + 0.1)), 3)
         prod_data["algorithm"] = f"Guest-Cluster-{algorithm}"
         prod_data["explanation"] = generate_detailed_explanation(
             graph_service, "guest", prod_id, ["Khách vãng lai", prod_data.get("brand", "Thiết bị"), prod_data.get("name", prod_id)], prod_data["score"]
         )
         results.append(prod_data)
+        if len(results) >= max_results:
+            break
 
     return results
 

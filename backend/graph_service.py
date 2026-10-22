@@ -397,6 +397,13 @@ class GraphService:
                 for _, v, d in self.graph.out_edges(product_id, data=True)
                 if d.get("type") == "bought_together" and v in self.graph
             ]
+            prod["category"] = prod["categories"][0] if prod["categories"] else ""
+            prod["brand"] = prod["brands"][0] if prod["brands"] else ""
+            prod["specs"] = prod.get("specs") or prod["tags"]
+            prod["purposes"] = [
+                v for _, v, d in self.graph.out_edges(product_id, data=True)
+                if (d.get("type") == "has_tag" or d.get("relation") == "has_tag") and v.startswith("t_")
+            ]
             return prod
         return None
 

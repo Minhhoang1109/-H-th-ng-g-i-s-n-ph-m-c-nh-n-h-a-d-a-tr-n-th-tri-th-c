@@ -815,19 +815,26 @@ async function loadRecommendations() {
 
   try {
     let url = '';
+    const purpose = encodeURIComponent(appState.selectedPurpose || 'all');
+    const algo = encodeURIComponent(appState.selectedAlgorithm || 'hybrid');
     if (appState.isGuest) {
-      url = `${API_BASE}/recommendations/guest?purpose=${appState.selectedPurpose}&algorithm=${appState.selectedAlgorithm}`;
+      url = `${API_BASE}/recommendations/guest?purpose=${purpose}&algorithm=${algo}&top_k=40`;
     } else {
-      const uid = appState.currentUser ? appState.currentUser.id : appState.selectedUserId;
-      url = `${API_BASE}/recommendations?user_id=${uid}&algorithm=${appState.selectedAlgorithm}&top_k=24`;
+      const uid = appState.currentUser ? appState.currentUser.id : (appState.selectedUserId || 'u_minh');
+      url = `${API_BASE}/recommendations?user_id=${encodeURIComponent(uid)}&algorithm=${algo}&top_k=40`;
     }
 
     const res = await fetch(url);
-    const recs = await res.json();
-    appState.recommendations = Array.isArray(recs) ? recs : (recs.recommendations || []);
+    if (!res.ok) {
+      throw new Error(`Server returned status ${res.status}`);
+    }
+    const data = await res.json();
+    const recs = Array.isArray(data) ? data : (data.recommendations || []);
+    appState.recommendations = recs;
 
     filterAndRenderProducts();
   } catch (err) {
+    console.error('Lỗi tải gợi ý:', err);
     grid.innerHTML = '<div class="loading-box"><p>Không thể kết nối đến máy chủ Đồ thị Tri thức.</p></div>';
   }
 }
@@ -845,7 +852,21 @@ function filterAndRenderProducts() {
   }
 
   if (appState.selectedCategory && appState.selectedCategory !== 'all') {
-    list = list.filter(p => p.category === appState.selectedCategory);
+    list = list.filter(p => {
+      const pCat = p.category || (Array.isArray(p.categories) ? p.categories[0] : '');
+      const pCats = Array.isArray(p.categories) ? p.categories : [pCat];
+      return pCat === appState.selectedCategory || pCats.includes(appState.selectedCategory);
+    });
+  }
+
+  // Lọc theo thương hiệu được chọn trên sidebar
+  const checkedBrands = Array.from(document.querySelectorAll('input[name="sidebar_brand"]:checked')).map(cb => cb.value.trim());
+  if (checkedBrands.length > 0) {
+    list = list.filter(p => {
+      const pBrand = p.brand || (Array.isArray(p.brands) ? p.brands[0] : '');
+      const pBrands = Array.isArray(p.brands) ? p.brands : [pBrand];
+      return checkedBrands.includes(pBrand) || pBrands.some(b => checkedBrands.includes(b));
+    });
   }
 
   if (appState.priceMin !== null && !isNaN(appState.priceMin)) {
@@ -1548,7 +1569,26 @@ function populateMetadataUI() {
         <input type="checkbox" name="sidebar_brand" value="${b}" /> ${b}
       </label>
     `).join('');
+
+    brandList.querySelectorAll('input[name="sidebar_brand"]').forEach(cb => {
+      cb.addEventListener('change', () => {
+        filterAndRenderProducts();
+      });
+    });
   }
+
+  // Sidebar purpose (KG Key) checkboxes
+  document.querySelectorAll('input[name="filter_purpose"]').forEach(cb => {
+    cb.addEventListener('change', async () => {
+      const checkedPurposes = Array.from(document.querySelectorAll('input[name="filter_purpose"]:checked')).map(c => c.value);
+      if (checkedPurposes.length > 0) {
+        appState.selectedPurpose = checkedPurposes[0];
+      } else {
+        appState.selectedPurpose = 'all';
+      }
+      await loadRecommendations();
+    });
+  });
 
   if (brands.length && onboardBrandList) {
     onboardBrandList.innerHTML = brands.map(b => `

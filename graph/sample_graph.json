@@ -935,12 +935,16 @@
           "c_audio"
         ],
         "brands": [
+          "b_apple",
           "b_samsung",
           "b_asus",
           "b_dell",
           "b_nvidia",
           "b_intel",
-          "b_logitech"
+          "b_corsair",
+          "b_logitech",
+          "b_sony",
+          "b_anker"
         ],
         "tags": [],
         "hardware_specs": {
@@ -4185,83 +4189,6 @@
       "target": "t_caocap"
     },
     {
-      "type": "prefers_category",
-      "weight": 2.8,
-      "label": "prefers_category",
-      "source": "u_nguyen trong vang",
-      "target": "c_phone"
-    },
-    {
-      "type": "prefers_category",
-      "weight": 2.8,
-      "label": "prefers_category",
-      "source": "u_nguyen trong vang",
-      "target": "c_laptop"
-    },
-    {
-      "type": "prefers_category",
-      "weight": 2.8,
-      "label": "prefers_category",
-      "source": "u_nguyen trong vang",
-      "target": "c_component"
-    },
-    {
-      "type": "prefers_category",
-      "weight": 2.8,
-      "label": "prefers_category",
-      "source": "u_nguyen trong vang",
-      "target": "c_accessory"
-    },
-    {
-      "type": "prefers_category",
-      "weight": 2.8,
-      "label": "prefers_category",
-      "source": "u_nguyen trong vang",
-      "target": "c_audio"
-    },
-    {
-      "type": "prefers_brand",
-      "weight": 3.2,
-      "label": "prefers_brand",
-      "source": "u_nguyen trong vang",
-      "target": "b_samsung"
-    },
-    {
-      "type": "prefers_brand",
-      "weight": 3.2,
-      "label": "prefers_brand",
-      "source": "u_nguyen trong vang",
-      "target": "b_asus"
-    },
-    {
-      "type": "prefers_brand",
-      "weight": 3.2,
-      "label": "prefers_brand",
-      "source": "u_nguyen trong vang",
-      "target": "b_dell"
-    },
-    {
-      "type": "prefers_brand",
-      "weight": 3.2,
-      "label": "prefers_brand",
-      "source": "u_nguyen trong vang",
-      "target": "b_nvidia"
-    },
-    {
-      "type": "prefers_brand",
-      "weight": 3.2,
-      "label": "prefers_brand",
-      "source": "u_nguyen trong vang",
-      "target": "b_intel"
-    },
-    {
-      "type": "prefers_brand",
-      "weight": 3.2,
-      "label": "prefers_brand",
-      "source": "u_nguyen trong vang",
-      "target": "b_logitech"
-    },
-    {
       "type": "purchased",
       "weight": 3.5,
       "label": "purchased",
@@ -4316,6 +4243,111 @@
       "label": "wants",
       "source": "u_nguyen trong vang",
       "target": "p_ankercharger"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_phone"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_laptop"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_component"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_accessory"
+    },
+    {
+      "type": "prefers_category",
+      "weight": 2.8,
+      "label": "thích danh mục",
+      "source": "u_nguyen trong vang",
+      "target": "c_audio"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_apple"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_samsung"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_asus"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_dell"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_nvidia"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_intel"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_corsair"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_logitech"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_sony"
+    },
+    {
+      "type": "prefers_brand",
+      "weight": 3.2,
+      "label": "chuộng thương hiệu",
+      "source": "u_nguyen trong vang",
+      "target": "b_anker"
     }
   ]
 }
