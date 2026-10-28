@@ -24,6 +24,7 @@ let appState = {
 document.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
   setup3FacetSearch();
+  setupMobileUI();
   setupAuth();
   setupWishlistModal();
   setupReviewModal();
@@ -80,6 +81,90 @@ function setupNavigation() {
       const navItem = document.querySelector(`.nav-item[data-tab="${target}"]`);
       if (navItem) navItem.click();
     });
+  });
+}
+
+// ========================================================
+// MOBILE RESPONSIVE UI & DRAWER NAVIGATION
+// ========================================================
+function setupMobileUI() {
+  const sidebar = document.getElementById('ebaySidebar');
+  const backdrop = document.getElementById('sidebarMobileBackdrop');
+  const btnToggle = document.getElementById('btnMobileFilterToggle');
+  const btnClose = document.getElementById('btnCloseMobileSidebar');
+  const btnApply = document.getElementById('btnApplyMobileFilters');
+  const btnShopByCat = document.getElementById('btnShopByCat');
+
+  const openMobileSidebar = () => {
+    if (sidebar) sidebar.classList.add('mobile-active');
+    if (backdrop) backdrop.classList.add('mobile-active');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeMobileSidebar = () => {
+    if (sidebar) sidebar.classList.remove('mobile-active');
+    if (backdrop) backdrop.classList.remove('mobile-active');
+    document.body.style.overflow = '';
+  };
+
+  btnToggle?.addEventListener('click', openMobileSidebar);
+  btnShopByCat?.addEventListener('click', () => {
+    if (window.innerWidth <= 900) {
+      openMobileSidebar();
+    }
+  });
+
+  btnClose?.addEventListener('click', closeMobileSidebar);
+  backdrop?.addEventListener('click', closeMobileSidebar);
+
+  btnApply?.addEventListener('click', () => {
+    closeMobileSidebar();
+    filterAndRenderProducts();
+    showToast('Đã cập nhật bộ lọc sản phẩm!', 'success');
+  });
+
+  // Mobile Bottom Navigation Bar Buttons
+  const btnMobHome = document.getElementById('btnMobNavHome');
+  const btnMobFilter = document.getElementById('btnMobNavFilter');
+  const btnMobCart = document.getElementById('btnMobNavCart');
+  const btnMobFav = document.getElementById('btnMobNavFav');
+  const btnMobAccount = document.getElementById('btnMobNavAccount');
+
+  btnMobHome?.addEventListener('click', () => {
+    document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+    btnMobHome.classList.add('active');
+    const recNavItem = document.querySelector('.nav-item[data-tab="recommendations"]');
+    if (recNavItem) recNavItem.click();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  btnMobFilter?.addEventListener('click', () => {
+    openMobileSidebar();
+  });
+
+  btnMobCart?.addEventListener('click', () => {
+    const btnOpenCart = document.getElementById('btnOpenCartModal');
+    if (btnOpenCart) btnOpenCart.click();
+  });
+
+  btnMobFav?.addEventListener('click', () => {
+    const btnOpenFav = document.getElementById('btnOpenFavoritesModal');
+    if (btnOpenFav) btnOpenFav.click();
+  });
+
+  btnMobAccount?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (appState.isGuest) {
+      const btnLogin = document.getElementById('btnOpenLoginModal');
+      if (btnLogin) btnLogin.click();
+    } else {
+      const trigger = document.getElementById('userCardTrigger');
+      if (trigger) trigger.click();
+      else {
+        const popover = document.getElementById('userDropdownPopover');
+        if (popover) popover.style.display = popover.style.display === 'none' ? 'block' : 'none';
+      }
+    }
   });
 }
 
@@ -1922,12 +2007,17 @@ function saveCartAndFavoritesToStorage() {
 
 function updateCartAndFavoritesBadges() {
   const favBadge = document.getElementById('favoritesCountBadge');
-  if (favBadge) favBadge.textContent = appState.favorites.length;
+  const mobFavBadge = document.getElementById('mobNavFavBadge');
+  const favCount = appState.favorites ? appState.favorites.length : 0;
+  if (favBadge) favBadge.textContent = favCount;
+  if (mobFavBadge) mobFavBadge.textContent = favCount;
+
   const cartBadge = document.getElementById('cartCountBadge');
-  if (cartBadge) {
-    const totalQty = appState.cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-    cartBadge.textContent = totalQty;
-  }
+  const mobCartBadge = document.getElementById('mobNavCartBadge');
+  const totalQty = (appState.cart || []).reduce((sum, item) => sum + (item.quantity || 1), 0);
+  if (cartBadge) cartBadge.textContent = totalQty;
+  if (mobCartBadge) mobCartBadge.textContent = totalQty;
+
   if (typeof updateChatbotCartBar === 'function') {
     updateChatbotCartBar();
   }

@@ -242,8 +242,16 @@
 
       <!-- Marketplace Layout: Sidebar Filters + Products Grid -->
       <div class="marketplace-body">
-        <!-- Left Sidebar Filters -->
-        <aside class="ebay-sidebar">
+        <!-- Backdrop overlay for mobile sidebar -->
+        <div class="sidebar-mobile-backdrop" id="sidebarMobileBackdrop"></div>
+
+        <!-- Left Sidebar Filters (Desktop fixed, Mobile slide drawer) -->
+        <aside class="ebay-sidebar" id="ebaySidebar">
+          <div class="sidebar-mobile-header">
+            <h3>⚡ Bộ Lọc & Danh Mục</h3>
+            <button type="button" class="btn-sidebar-close" id="btnCloseMobileSidebar" title="Đóng bộ lọc">✕</button>
+          </div>
+
           <div class="sidebar-block">
             <h4 class="sidebar-title">Mục đích Sử dụng (KG Key)</h4>
             <div class="sidebar-checkbox-list" id="sidebarPurposeList">
@@ -276,6 +284,10 @@
             </div>
             <button class="btn btn-ebay-filter-apply" id="btnApplyPriceFilter">Áp dụng giá</button>
           </div>
+
+          <div class="sidebar-mobile-footer">
+            <button type="button" class="btn btn-ebay-primary w-100" id="btnApplyMobileFilters">✅ Áp Dụng Bộ Lọc</button>
+          </div>
         </aside>
 
         <!-- Product Grid Area -->
@@ -283,6 +295,9 @@
           <!-- Top Sort & View Row -->
           <div class="products-toolbar">
             <div class="toolbar-left">
+              <button type="button" class="btn btn-sm btn-ebay-outline btn-mobile-filter-toggle" id="btnMobileFilterToggle">
+                ⚡ Bộ lọc & Danh mục
+              </button>
               <span id="productCountLabel" class="result-count-text">Đang tải gợi ý từ Đồ thị Tri thức...</span>
               <span id="activePurposePill" class="active-purpose-tag" style="display:none;"></span>
             </div>
@@ -1486,6 +1501,36 @@
     </div>
   </footer>
 
-  <script src="app.js?v=khrecfix1"></script>
+  <!-- Mobile Bottom Navigation Bar (Dành riêng cho màn hình di động) -->
+  <nav class="mobile-bottom-nav" id="mobileBottomNav">
+    <button type="button" class="mobile-nav-btn active" data-action="home" id="btnMobNavHome" title="Trang chủ / Gợi ý">
+      <span class="mob-nav-icon">🛍️</span>
+      <span class="mob-nav-label">Gợi ý</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-action="filter" id="btnMobNavFilter" title="Bộ lọc & Danh mục">
+      <span class="mob-nav-icon">⚡</span>
+      <span class="mob-nav-label">Bộ lọc</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-action="cart" id="btnMobNavCart" title="Xem giỏ hàng">
+      <div class="mob-icon-wrap">
+        <span class="mob-nav-icon">🛒</span>
+        <span class="mob-nav-badge" id="mobNavCartBadge">0</span>
+      </div>
+      <span class="mob-nav-label">Giỏ hàng</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-action="favorites" id="btnMobNavFav" title="Sản phẩm yêu thích">
+      <div class="mob-icon-wrap">
+        <span class="mob-nav-icon">❤️</span>
+        <span class="mob-nav-badge" id="mobNavFavBadge">0</span>
+      </div>
+      <span class="mob-nav-label">Yêu thích</span>
+    </button>
+    <button type="button" class="mobile-nav-btn" data-action="account" id="btnMobNavAccount" title="Tài khoản cá nhân">
+      <span class="mob-nav-icon">👤</span>
+      <span class="mob-nav-label">Tài khoản</span>
+    </button>
+  </nav>
+
+  <script src="app.js?v=khmobile1"></script>
 </body>
 </html>
