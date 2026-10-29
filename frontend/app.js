@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
   setup3FacetSearch();
   setupMobileUI();
+  setupPWA();
   setupAuth();
   setupWishlistModal();
   setupReviewModal();
@@ -166,6 +167,125 @@ function setupMobileUI() {
       }
     }
   });
+}
+
+// ========================================================
+// PWA (PROGRESSIVE WEB APP) & MOBILE APP INSTALL LOGIC
+// ========================================================
+let deferredPwaPrompt = null;
+
+function setupPWA() {
+  // 1. Register Service Worker for offline capabilities & caching
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then((reg) => {
+          console.log('[PWA] Service Worker registered, scope:', reg.scope);
+        })
+        .catch((err) => {
+          console.warn('[PWA] Service Worker registration failed:', err);
+        });
+    });
+  }
+
+  // 2. Check if already installed / running in standalone mode
+  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (isStandalone) {
+    console.log('[PWA] Đang chạy dưới chế độ Ứng dụng Di động Standalone');
+    return;
+  }
+
+  const pwaBanner = document.getElementById('pwaInstallBanner');
+  const btnInstall = document.getElementById('btnPwaInstall');
+  const btnDismiss = document.getElementById('btnPwaDismiss');
+  const iosModal = document.getElementById('iosPwaModal');
+  const btnCloseIos = document.getElementById('btnCloseIosPwaModal');
+  const btnIosUnderstand = document.getElementById('btnIosPwaUnderstand');
+
+  // Detect iOS Safari
+  const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+
+  // Check dismissal timestamp
+  const lastDismissed = localStorage.getItem('kh_pwa_dismissed');
+  const now = Date.now();
+  const oneDay = 24 * 60 * 60 * 1000;
+
+  // Listen for beforeinstallprompt event (Android / Chromium)
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPwaPrompt = e;
+    if (!lastDismissed || (now - parseInt(lastDismissed, 10)) > oneDay) {
+      setTimeout(() => {
+        if (pwaBanner) pwaBanner.style.display = 'block';
+      }, 2500);
+    }
+  });
+
+  // For iOS, show banner if on mobile Safari
+  if (isIos && (!lastDismissed || (now - parseInt(lastDismissed, 10)) > oneDay)) {
+    setTimeout(() => {
+      if (pwaBanner) pwaBanner.style.display = 'block';
+    }, 3000);
+  }
+
+  // Handle Install button click
+  btnInstall?.addEventListener('click', async () => {
+    if (deferredPwaPrompt) {
+      deferredPwaPrompt.prompt();
+      const choiceResult = await deferredPwaPrompt.userChoice;
+      if (choiceResult && choiceResult.outcome === 'accepted') {
+        showToast('Đang tiến hành cài đặt ứng dụng K/H Store...', 'success');
+      }
+      deferredPwaPrompt = null;
+      if (pwaBanner) pwaBanner.style.display = 'none';
+    } else if (isIos) {
+      if (iosModal) iosModal.style.display = 'flex';
+      if (pwaBanner) pwaBanner.style.display = 'none';
+    } else {
+      showToast('Nhấn menu trình duyệt (⋮) và chọn "Cài đặt ứng dụng" (Install app).', 'info');
+    }
+  });
+
+  btnDismiss?.addEventListener('click', () => {
+    if (pwaBanner) pwaBanner.style.display = 'none';
+    localStorage.setItem('kh_pwa_dismissed', Date.now().toString());
+  });
+
+  const closeIosModal = () => {
+    if (iosModal) iosModal.style.display = 'none';
+  };
+  btnCloseIos?.addEventListener('click', closeIosModal);
+  btnIosUnderstand?.addEventListener('click', closeIosModal);
+  iosModal?.addEventListener('click', (e) => {
+    if (e.target === iosModal) closeIosModal();
+  });
+
+  // When app is installed successfully
+  window.addEventListener('appinstalled', () => {
+    deferredPwaPrompt = null;
+    if (pwaBanner) pwaBanner.style.display = 'none';
+    showToast('🎉 Đã cài đặt K/H Store thành công! Bạn có thể mở từ màn hình chính.', 'success');
+  });
+
+  // Handle URL shortcut params (e.g. ?action=cart or ?action=survey)
+  const urlParams = new URLSearchParams(window.location.search);
+  const action = urlParams.get('action');
+  if (action === 'cart') {
+    setTimeout(() => {
+      const btnOpenCart = document.getElementById('btnOpenCartModal');
+      if (btnOpenCart) btnOpenCart.click();
+    }, 600);
+  } else if (action === 'survey') {
+    setTimeout(() => {
+      const surveyTab = document.querySelector('.nav-item[data-tab="survey"]');
+      if (surveyTab) surveyTab.click();
+    }, 600);
+  } else if (action === 'chat') {
+    setTimeout(() => {
+      const chatTrigger = document.getElementById('chatbotFloatingBtn');
+      if (chatTrigger) chatTrigger.click();
+    }, 600);
+  }
 }
 
 // ========================================================

@@ -15,7 +15,16 @@
       document.write('<script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"><\\/script>');
     }
   </script>
-  <link rel="stylesheet" href="style.css?v=khcheckout1" />
+  <!-- PWA Web App Manifest & Mobile App Meta Tags -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0064d2" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="K/H Store" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png" />
+  <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
+  <link rel="stylesheet" href="style.css?v=khpwa1" />
 </head>
 <body>
 
@@ -1531,6 +1540,48 @@
     </button>
   </nav>
 
-  <script src="app.js?v=khmobile1"></script>
+  <!-- PWA Install Prompt Banner for Mobile Users -->
+  <div id="pwaInstallBanner" class="pwa-install-banner" style="display:none;">
+    <div class="pwa-banner-inner">
+      <img src="icons/icon-192.png" alt="App Icon" class="pwa-app-icon" />
+      <div class="pwa-info">
+        <b class="pwa-title">Cài đặt Ứng dụng K/H Store</b>
+        <p class="pwa-desc">Trải nghiệm mua sắm toàn màn hình, mượt mà và truy cập nhanh</p>
+      </div>
+      <div class="pwa-actions">
+        <button type="button" class="btn btn-sm btn-pwa-install" id="btnPwaInstall">📲 Cài Đặt</button>
+        <button type="button" class="btn-pwa-dismiss" id="btnPwaDismiss" title="Bỏ qua">✕</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- iOS Safari Install Instructions Modal -->
+  <div class="modal-backdrop" id="iosPwaModal" style="display:none;">
+    <div class="modal-dialog ebay-modal pwa-ios-modal-dialog">
+      <div class="modal-header">
+        <h3>📲 Cài Đặt K/H Store Cho iPhone / iPad</h3>
+        <button type="button" class="modal-close-btn" id="btnCloseIosPwaModal">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="ios-install-steps">
+          <div class="ios-step-item">
+            <span class="ios-step-num">1</span>
+            <p>Chạm vào biểu tượng <b>Chia sẻ (Share)</b> <span style="font-size:18px;">⎋</span> ở thanh dưới cùng của trình duyệt Safari.</p>
+          </div>
+          <div class="ios-step-item">
+            <span class="ios-step-num">2</span>
+            <p>Cuộn xuống và chọn <b>"Thêm vào Màn hình chính" (Add to Home Screen)</b> <span style="font-size:18px;">➕</span>.</p>
+          </div>
+          <div class="ios-step-item">
+            <span class="ios-step-num">3</span>
+            <p>Nhấn <b>"Thêm" (Add)</b> ở góc trên bên phải. Biểu tượng K/H Store sẽ xuất hiện trên màn hình chính như một ứng dụng thực thụ!</p>
+          </div>
+        </div>
+        <button type="button" class="btn btn-ebay-primary w-100" id="btnIosPwaUnderstand" style="margin-top:14px; font-weight:700;">Đã Hiểu</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js?v=khpwa1"></script>
 </body>
 </html>
