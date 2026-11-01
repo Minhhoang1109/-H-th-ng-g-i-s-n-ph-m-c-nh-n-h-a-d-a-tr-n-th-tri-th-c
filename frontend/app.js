@@ -129,7 +129,17 @@ function setupMobileUI() {
   const btnMobFilter = document.getElementById('btnMobNavFilter');
   const btnMobCart = document.getElementById('btnMobNavCart');
   const btnMobFav = document.getElementById('btnMobNavFav');
+  const btnMobInstall = document.getElementById('btnMobNavInstall');
   const btnMobAccount = document.getElementById('btnMobNavAccount');
+
+  btnMobInstall?.addEventListener('click', () => {
+    const btnPwa = document.getElementById('btnPwaInstall');
+    if (btnPwa) {
+      btnPwa.click();
+    } else {
+      triggerPwaInstall();
+    }
+  });
 
   btnMobHome?.addEventListener('click', () => {
     document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
@@ -210,23 +220,22 @@ function setupPWA() {
   const now = Date.now();
   const oneDay = 24 * 60 * 60 * 1000;
 
+  // Show install banner on mobile phones
+  const isMobileScreen = window.innerWidth <= 768;
+  if (isMobileScreen) {
+    setTimeout(() => {
+      if (pwaBanner && pwaBanner.style.display !== 'block') {
+        pwaBanner.style.display = 'block';
+      }
+    }, 1500);
+  }
+
   // Listen for beforeinstallprompt event (Android / Chromium)
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPwaPrompt = e;
-    if (!lastDismissed || (now - parseInt(lastDismissed, 10)) > oneDay) {
-      setTimeout(() => {
-        if (pwaBanner) pwaBanner.style.display = 'block';
-      }, 2500);
-    }
+    if (pwaBanner) pwaBanner.style.display = 'block';
   });
-
-  // For iOS, show banner if on mobile Safari
-  if (isIos && (!lastDismissed || (now - parseInt(lastDismissed, 10)) > oneDay)) {
-    setTimeout(() => {
-      if (pwaBanner) pwaBanner.style.display = 'block';
-    }, 3000);
-  }
 
   // Handle Install button click
   btnInstall?.addEventListener('click', async () => {
@@ -242,7 +251,30 @@ function setupPWA() {
       if (iosModal) iosModal.style.display = 'flex';
       if (pwaBanner) pwaBanner.style.display = 'none';
     } else {
-      showToast('Nhấn menu trình duyệt (⋮) và chọn "Cài đặt ứng dụng" (Install app).', 'info');
+      // Direct guide for Android / Chrome / Edge
+      if (iosModal) {
+        const header = iosModal.querySelector('.modal-header h3');
+        const steps = iosModal.querySelector('.ios-install-steps');
+        if (header) header.textContent = '📲 Cài Đặt K/H Store Cho Điện Thoại';
+        if (steps) {
+          steps.innerHTML = `
+            <div class="ios-step-item">
+              <span class="ios-step-num">1</span>
+              <p>Chạm vào biểu tượng <b>Menu trình duyệt (⋮ hoặc ⋯)</b> ở góc trên hoặc dưới màn hình.</p>
+            </div>
+            <div class="ios-step-item">
+              <span class="ios-step-num">2</span>
+              <p>Chọn <b>"Cài đặt ứng dụng"</b> (Install app) hoặc <b>"Thêm vào Màn hình chính"</b> (Add to Home screen).</p>
+            </div>
+            <div class="ios-step-item">
+              <span class="ios-step-num">3</span>
+              <p>Xác nhận <b>"Cài đặt"</b>. Biểu tượng K/H Store sẽ xuất hiện trên màn hình chính như app độc lập!</p>
+            </div>
+          `;
+        }
+        iosModal.style.display = 'flex';
+      }
+      if (pwaBanner) pwaBanner.style.display = 'none';
     }
   });
 
