@@ -729,6 +729,24 @@ function updateAuthUI() {
     headerAdminLink.style.display = isAdmin ? 'inline-flex' : 'none';
   }
 
+  // Quick access badge next to user account area
+  const topAdminQuickBadge = document.getElementById('topAdminQuickBadge');
+  if (topAdminQuickBadge) {
+    topAdminQuickBadge.style.display = isAdmin ? 'inline-flex' : 'none';
+  }
+
+  // Admin button on Mobile Bottom Navigation
+  const btnMobNavAdmin = document.getElementById('btnMobNavAdmin');
+  if (btnMobNavAdmin) {
+    btnMobNavAdmin.style.display = isAdmin ? 'flex' : 'none';
+  }
+
+  // Footer admin link
+  const footerAdminLi = document.getElementById('footerAdminLi');
+  if (footerAdminLi) {
+    footerAdminLi.style.display = isAdmin ? 'list-item' : 'none';
+  }
+
   // Khám phá Đồ thị Tri thức 2D: Chỉ hiển thị cho tài khoản có quyền Admin
   const navGraphExplorer = document.getElementById('navItemGraphExplorer') || document.querySelector('.nav-item[data-tab="graph-explorer"]');
   if (navGraphExplorer) {

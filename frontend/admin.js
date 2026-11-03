@@ -12,6 +12,24 @@ let adminState = {
 };
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // Check admin authorization
+  const sessionStr = localStorage.getItem('kh_recsys_session');
+  let isAuthorizedAdmin = false;
+  if (sessionStr) {
+    try {
+      const session = JSON.parse(sessionStr);
+      if (session && (session.is_admin || session.username === 'admin' || session.id === 'admin')) {
+        isAuthorizedAdmin = true;
+      }
+    } catch (e) {}
+  }
+
+  if (!isAuthorizedAdmin) {
+    alert('Truy cập bị từ chối! Bạn cần đăng nhập tài khoản có quyền Quản trị viên (Admin) để vào trang này.');
+    window.location.href = '/';
+    return;
+  }
+
   setupAdminTabs();
   setupProductForm();
   setupAdminUserModalEvents();

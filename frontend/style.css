@@ -58,6 +58,35 @@ body {
   gap: 12px;
 }
 
+/* Admin Quick Access Badge next to user card */
+.top-admin-badge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #f8fafc;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.top-admin-badge-btn:hover {
+  background: linear-gradient(135deg, #0f172a 0%, #0284c7 100%);
+  color: #fff;
+  border-color: #38bdf8;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(2, 132, 199, 0.25);
+}
+
+.admin-badge-icon {
+  font-size: 13px;
+}
+
 .auth-status-wrap {
   display: flex;
   align-items: center;

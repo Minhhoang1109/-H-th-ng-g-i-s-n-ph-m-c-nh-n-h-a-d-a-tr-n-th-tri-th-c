@@ -107,6 +107,12 @@
           </div>
         </div>
 
+        <!-- Admin Quick Access Badge (Only visible when logged in as Admin) -->
+        <a href="/admin" id="topAdminQuickBadge" class="top-admin-badge-btn" style="display:none; text-decoration:none;" title="Truy cập Trang Quản Trị Hệ Thống">
+          <span class="admin-badge-icon">🛠️</span>
+          <span class="admin-badge-text">Quản Trị Viên</span>
+        </a>
+
         <!-- 2. Guest Status in Top Bar (shown when guest) -->
         <div id="guestStatusHeader" class="auth-status-wrap guest-top-wrap" style="display:none; align-items:center; gap:10px;">
           <div class="guest-top-card-btn">
@@ -1501,7 +1507,7 @@
           <li>Thuật toán: Personalized PageRank & Meta-Path</li>
           <li>Cơ sở tri thức: Electronics & PC Components</li>
           <li>Explainable AI (XAI) & KG Keys Explorer</li>
-          <li><a href="/admin" style="color:var(--ebay-blue); font-weight:600;">🛠️ Dành cho Quản Trị Viên (Admin)</a></li>
+          <li id="footerAdminLi" style="display:none;"><a href="/admin" id="footerAdminLink" style="color:var(--ebay-blue); font-weight:600;">🛠️ Dành cho Quản Trị Viên (Admin)</a></li>
         </ul>
       </div>
     </div>
@@ -1538,6 +1544,10 @@
       <span class="mob-nav-icon">📲</span>
       <span class="mob-nav-label">Cài App</span>
     </button>
+    <a href="/admin" class="mobile-nav-btn" id="btnMobNavAdmin" style="display:none; text-decoration:none;" title="Trang Quản Trị Hệ Thống">
+      <span class="mob-nav-icon">🛠️</span>
+      <span class="mob-nav-label">Admin</span>
+    </a>
     <button type="button" class="mobile-nav-btn" data-action="account" id="btnMobNavAccount" title="Tài khoản cá nhân">
       <span class="mob-nav-icon">👤</span>
       <span class="mob-nav-label">Tài khoản</span>
