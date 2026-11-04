@@ -1,10 +1,55 @@
 import os
 import re
 import json
+import urllib.request
+import urllib.error
 
 class ChatbotService:
     def __init__(self, graph_service):
         self.graph_service = graph_service
+        self.gemini_config = self._load_initial_gemini_config()
+
+    def _load_initial_gemini_config(self):
+        settings_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "graph", "payment_settings.json")
+        if os.path.exists(settings_path):
+            try:
+                with open(settings_path, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    return data.get("gemini_config", {})
+            except Exception:
+                pass
+        return {
+            "api_key": os.environ.get("GEMINI_API_KEY", ""),
+            "model": "gemini-1.5-flash",
+            "is_enabled": True,
+            "temperature": 0.7
+        }
+
+    def set_gemini_config(self, config):
+        if not self.gemini_config:
+            self.gemini_config = {}
+        self.gemini_config.update(config)
+
+    def test_gemini_api(self, api_key, model="gemini-1.5-flash"):
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key.strip()}"
+        payload = json.dumps({
+            "contents": [{"parts": [{"text": "Xin chào, phản hồi ngắn gọn xác nhận bạn là Gemini AI sẵn sàng hỗ trợ shop K/H Store."}]}]
+        }).encode("utf-8")
+        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                return True, text.strip()
+        except urllib.error.HTTPError as e:
+            try:
+                err_data = json.loads(e.read().decode("utf-8"))
+                msg = err_data.get("error", {}).get("message", str(e))
+            except:
+                msg = str(e)
+            return False, msg
+        except Exception as e:
+            return False, str(e)
 
     def process_message(self, message, user_id=None, cart=None, context=None):
         """
@@ -84,8 +129,112 @@ class ChatbotService:
         if any(w in text for w in ["bảo hành", "bao hanh", "đổi trả", "doi tra", "vận chuyển", "van chuyen", "ship", "freeship"]):
             return self._handle_policy_faq(text)
 
-        # 10. PRODUCT SEARCH / KG CONSULTATION (Mặc định: Phân tích nhu cầu & tìm kiếm trên Đồ thị)
+        # 10. PRODUCT SEARCH & CONSULTATION (Use Gemini AI if configured, otherwise Fallback to In-house KG Engine)
+        if self._is_gemini_available():
+            gemini_res = self._ask_gemini_kg(message, text, user, cart)
+            if gemini_res:
+                return gemini_res
+
         return self._search_products_kg(text, user)
+
+    def _is_gemini_available(self):
+        cfg = self.gemini_config or {}
+        return bool(cfg.get("is_enabled", True) and cfg.get("api_key", "").strip())
+
+    def _ask_gemini_kg(self, raw_message, clean_text, user, cart):
+        cfg = self.gemini_config or {}
+        api_key = cfg.get("api_key", "").strip()
+        model = cfg.get("model", "gemini-1.5-flash")
+        temp = cfg.get("temperature", 0.7)
+
+        products = self.graph_service.get_products()
+        user_name = user.get("name", "Khách hàng") if user else "Khách hàng"
+        user_need = user.get("last_target_need", "") if user else ""
+
+        # Build concise Knowledge Graph Context for Gemini
+        kg_items_summary = []
+        for p in products[:30]:
+            p_id = p.get("id")
+            p_name = p.get("name")
+            p_price = self._format_price(p.get("price", 0))
+            p_brand = p.get("brand") or (p.get("brands", [""])[0] if p.get("brands") else "")
+            p_cat = p.get("category") or (p.get("categories", [""])[0] if p.get("categories") else "")
+            p_tags = ", ".join(p.get("tags", [])[:3])
+            kg_items_summary.append(f"- ID: {p_id} | Tên: {p_name} | Giá: {p_price} | Hãng: {p_brand} | Danh mục: {p_cat} | Đặc tính KG: {p_tags}")
+
+        kg_context_str = "\n".join(kg_items_summary)
+
+        system_instruction = (
+            "Bạn là trợ lý tư vấn bán hàng thông minh K/H Store, sử dụng hệ thống Đồ thị Tri thức (KG-RecSys).\n"
+            "Nhiệm vụ của bạn: Trả lời câu hỏi của khách hàng thân thiện, súc tích, chuyên môn công nghệ cao bằng tiếng Việt.\n"
+            "QUY TẮC BẮT BUỘC:\n"
+            "1. Chỉ gợi ý và nhắc đến các sản phẩm có trong danh mục Đồ thị Tri thức được cung cấp bên dưới.\n"
+            "2. Trả về câu trả lời định dạng Markdown đẹp, dùng bullet points rõ ràng, nhấn mạnh ưu điểm cấu hình (CPU, RAM, GPU).\n"
+            "3. Cuối phản hồi, ĐẶC BIỆT chú thích dòng: '[RECOMMENDED_IDS: id1, id2]' chứa tối đa 3 mã ID sản phẩm khớp nhất để hệ thống hiển thị thẻ sản phẩm tương tác cho khách hàng."
+        )
+
+        user_prompt = (
+            f"Thông tin người dùng: {user_name}. Nhu cầu gần nhất trên KG: '{user_need}'.\n"
+            f"Sản phẩm trong giỏ hàng hiện tại: {len(cart)} món.\n\n"
+            f"Kho sản phẩm Đồ thị Tri thức của K/H Store:\n{kg_context_str}\n\n"
+            f"Khách hàng hỏi: \"{raw_message}\""
+        )
+
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        payload = json.dumps({
+            "system_instruction": {"parts": [{"text": system_instruction}]},
+            "contents": [{"parts": [{"text": user_prompt}]}],
+            "generationConfig": {
+                "temperature": temp,
+                "maxOutputTokens": 1000
+            }
+        }).encode("utf-8")
+
+        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+        try:
+            with urllib.request.urlopen(req, timeout=12) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                reply_text = data.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+                if not reply_text:
+                    return None
+
+                # Extract RECOMMENDED_IDS
+                matched_ids = []
+                id_match = re.search(r'\[RECOMMENDED_IDS:\s*([^\]]+)\]', reply_text, re.IGNORECASE)
+                if id_match:
+                    ids_str = id_match.group(1)
+                    matched_ids = [i.strip() for i in ids_str.split(",") if i.strip()]
+                    reply_text = re.sub(r'\[RECOMMENDED_IDS:\s*[^\]]+\]', '', reply_text).strip()
+
+                # Get product objects
+                rec_products = []
+                for mid in matched_ids:
+                    p_obj = self.graph_service.get_product(mid)
+                    if p_obj:
+                        rec_products.append(p_obj)
+
+                # Fallback products if none matched
+                if not rec_products:
+                    # Try keyword search from user query
+                    rec_products = [p for p in products if any(w in p.get("name", "").lower() for w in clean_text.split() if len(w) > 2)][:3]
+                if not rec_products:
+                    rec_products = self._get_featured_products()[:2]
+
+                reply_with_badge = f"✨ *(Phản hồi từ Google Gemini AI & Đồ thị Tri thức)*\n\n{reply_text}"
+
+                return {
+                    "reply": reply_with_badge,
+                    "products": rec_products[:3],
+                    "suggested_replies": [
+                        "🛒 Thêm vào giỏ hàng",
+                        "⚡ Chốt đơn ngay",
+                        "🔍 Xem cấu hình chi tiết",
+                        "➕ Tư vấn phụ kiện tương thích"
+                    ]
+                }
+        except Exception as e:
+            print(f"[Gemini Chatbot Error]: {e} -> Falling back to In-house KG engine")
+            return None
 
     # ----------------------------------------------------
     # HELPER INTENT LOGIC

@@ -87,6 +87,56 @@
           "payment_method": "COD (Thanh toán khi nhận hàng)",
           "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
           "timestamp": "Vừa xong"
+        },
+        {
+          "id": "DH-2C2FC9",
+          "transfer_code": "DH-2C2FC9",
+          "user_id": "u1",
+          "items": [
+            {
+              "id": "p_ramcorsair",
+              "name": "RAM Corsair Vengeance RGB 32GB (2x16GB) DDR5 6000MHz",
+              "price": 3450000,
+              "image": "https://images.unsplash.com/photo-1562976540-1502c2145186?w=400",
+              "brand": "Corsair",
+              "quantity": 1
+            },
+            {
+              "id": "p_tannhiet_corsair_h150i",
+              "name": "Tản nhiệt nước AIO Corsair iCUE LINK H150i LCD RGB 360mm",
+              "price": 6890000,
+              "image": "https://images.unsplash.com/photo-1587202372634-32705e3bf49c?w=400",
+              "brand": "Corsair",
+              "quantity": 1
+            },
+            {
+              "id": "p_rtx4090_rog",
+              "name": "p_rtx4090_rog",
+              "price": 0,
+              "image": "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200",
+              "brand": "K/H Store",
+              "quantity": 1
+            },
+            {
+              "id": "p_sonywh1000",
+              "name": "Tai Nghe Chụp Tai Sony WH-1000XM5 Chống Ồn",
+              "price": 7890000,
+              "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
+              "brand": "Sony",
+              "quantity": 1
+            }
+          ],
+          "customer": {
+            "name": "Alice Nguyễn (Tech Pro)",
+            "phone": "0912345678",
+            "email": "kh@example.com",
+            "address": "Số 10, Đường Huỳnh Văn Nghệ, P. Bửu Long, TP. Biên Hòa, Đồng Nai"
+          },
+          "total": 18230000,
+          "payment_method": "COD (Thanh toán khi nhận hàng)",
+          "note": "",
+          "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
+          "timestamp": "Vừa xong"
         }
       ]
     },
@@ -579,7 +629,7 @@
       "password_hash": "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918",
       "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150",
       "color": "#3b82f6",
-      "login_count": 6,
+      "login_count": 8,
       "survey_completed": true,
       "wishlist": [
         {
@@ -624,7 +674,54 @@
       },
       "full_name": "admin",
       "phone": "",
-      "bio": ""
+      "bio": "",
+      "orders": [
+        {
+          "id": "DH-004WDM",
+          "transfer_code": "KHSTORE DH-004WDM",
+          "user_id": "admin",
+          "items": [
+            {
+              "id": "p_galaxy_zfold6",
+              "name": "Samsung Galaxy Z Fold6 512GB AI Edition",
+              "price": 43990000,
+              "image": "https://images.unsplash.com/photo-1610945265064-0e34e5519bbf?w=400",
+              "brand": "Samsung",
+              "quantity": 1
+            },
+            {
+              "id": "p_galaxy_s24_plus",
+              "name": "Samsung Galaxy S24 Plus 256GB Galaxy AI",
+              "price": 21990000,
+              "image": "https://images.unsplash.com/photo-1580910051074-3eb694886505?w=400",
+              "brand": "Samsung",
+              "quantity": 1
+            },
+            {
+              "id": "p_dell_ultrasharp_u3224kb",
+              "name": "Màn hình Đồ họa Dell UltraSharp 32 inch 6K UHD IPS Black",
+              "price": 62900000,
+              "image": "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=400",
+              "brand": "Dell",
+              "quantity": 1
+            }
+          ],
+          "customer": {
+            "name": "admin",
+            "phone": "123456789",
+            "email": "admin@khstore.vn",
+            "city": "Đồng Nai",
+            "address": "hương phước, phước tân, Đồng Nai",
+            "note": "",
+            "bank_tx_id": ""
+          },
+          "total": 128880000,
+          "payment_method": "COD (Thanh toán khi nhận hàng)",
+          "note": "",
+          "status": "Đã tiếp nhận (Đang chuẩn bị hàng)",
+          "timestamp": "Vừa xong"
+        }
+      ]
     },
     {
       "id": "u_văn mười",
@@ -1438,6 +1535,13 @@
       "target": "p_ramcorsair"
     },
     {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u1",
+      "target": "p_ramcorsair"
+    },
+    {
       "type": "wants",
       "weight": 4.0,
       "label": "wants",
@@ -1494,6 +1598,13 @@
       "target": "p_rtx4090_rog"
     },
     {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u1",
+      "target": "p_rtx4090_rog"
+    },
+    {
       "type": "wants",
       "weight": 4.0,
       "label": "wants",
@@ -1504,6 +1615,13 @@
       "type": "wants",
       "weight": 4.0,
       "label": "wants",
+      "source": "u1",
+      "target": "p_tannhiet_corsair_h150i"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
       "source": "u1",
       "target": "p_tannhiet_corsair_h150i"
     },
@@ -1548,6 +1666,20 @@
       "label": "purchased",
       "source": "u1",
       "target": "p_macbookpro16"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "u1",
+      "target": "p_sonywh1000"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "u1",
+      "target": "p_sonywh1000"
     },
     {
       "type": "purchased",
@@ -2985,6 +3117,76 @@
       "target": "p_dellmonitor"
     },
     {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_galaxy_zfold6"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "admin",
+      "target": "p_galaxy_zfold6"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_galaxy_s24_plus"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "admin",
+      "target": "p_galaxy_s24_plus"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_dell_ultrasharp_u3224kb"
+    },
+    {
+      "type": "purchased",
+      "weight": 3.5,
+      "label": "purchased",
+      "source": "admin",
+      "target": "p_dell_ultrasharp_u3224kb"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_ramcorsair"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_tannhiet_corsair_h150i"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_mxmaster3s"
+    },
+    {
+      "type": "wants",
+      "weight": 4.0,
+      "label": "wants",
+      "source": "admin",
+      "target": "p_asus_rog_swift_oled"
+    },
+    {
       "type": "likes",
       "weight": 2.5,
       "label": "likes",
@@ -4247,105 +4449,105 @@
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_phone"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_laptop"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_component"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_accessory"
     },
     {
       "type": "prefers_category",
       "weight": 2.8,
-      "label": "thích danh mục",
+      "label": "prefers_category",
       "source": "u_nguyen trong vang",
       "target": "c_audio"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_apple"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_samsung"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_asus"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_dell"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_nvidia"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_intel"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_corsair"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_logitech"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_sony"
     },
     {
       "type": "prefers_brand",
       "weight": 3.2,
-      "label": "chuộng thương hiệu",
+      "label": "prefers_brand",
       "source": "u_nguyen trong vang",
       "target": "b_anker"
     }

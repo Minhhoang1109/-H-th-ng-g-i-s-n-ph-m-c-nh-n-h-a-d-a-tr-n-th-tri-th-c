@@ -582,6 +582,52 @@ def delete_payment_code(code_id):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 400
 
+# ========================================================
+# GEMINI AI CONFIGURATION & TESTING
+# ========================================================
+@app.route('/api/admin/gemini-config', methods=['GET'])
+def get_gemini_config():
+    try:
+        cfg = payment_service.settings.get("gemini_config", {})
+        # Return masked key for security
+        raw_key = cfg.get("api_key", "")
+        masked_key = (raw_key[:6] + "..." + raw_key[-4:]) if len(raw_key) > 10 else raw_key
+        return jsonify({
+            'success': True,
+            'config': {
+                **cfg,
+                'is_configured': bool(raw_key),
+                'masked_key': masked_key
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/admin/gemini-config', methods=['POST'])
+def save_gemini_config():
+    data = request.json or {}
+    try:
+        cfg = payment_service.update_gemini_config(data)
+        # Update running chatbot service config
+        chatbot_service.set_gemini_config(cfg)
+        return jsonify({'success': True, 'message': 'Đã lưu cấu hình Google Gemini AI thành công!', 'config': cfg})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 400
+
+@app.route('/api/admin/gemini-test', methods=['POST'])
+def test_gemini_connection():
+    data = request.json or {}
+    test_key = data.get("api_key") or payment_service.settings.get("gemini_config", {}).get("api_key", "")
+    model = data.get("model") or payment_service.settings.get("gemini_config", {}).get("model", "gemini-1.5-flash")
+    if not test_key:
+        return jsonify({'success': False, 'message': 'Chưa nhập API Key Gemini!'}), 400
+
+    success, message = chatbot_service.test_gemini_api(test_key, model)
+    if success:
+        return jsonify({'success': True, 'message': f'Kết nối Google Gemini ({model}) thành công! Phản hồi: {message}'})
+    else:
+        return jsonify({'success': False, 'message': f'Lỗi kết nối Gemini: {message}'}), 400
+
 if __name__ == '__main__':
     print('Khoi dong Knowledge Graph Recommendation Engine tai http://127.0.0.1:5000')
     app.run(host='0.0.0.0', port=5000, debug=False)

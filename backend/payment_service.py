@@ -103,8 +103,33 @@ class PaymentService:
         return {
             "bank_accounts": self.settings.get("bank_accounts", []),
             "payment_codes": self.settings.get("payment_codes", []),
+            "gemini_config": self.settings.get("gemini_config", {
+                "api_key": "",
+                "model": "gemini-1.5-flash",
+                "is_enabled": True,
+                "temperature": 0.7
+            }),
             "active_bank_account": active_account
         }
+
+    def update_gemini_config(self, config_data):
+        cfg = self.settings.setdefault("gemini_config", {})
+        if "api_key" in config_data:
+            key_val = config_data["api_key"].strip()
+            # If the user sends back the masked key, preserve existing key; otherwise update
+            if not ("..." in key_val and len(key_val) < 25):
+                cfg["api_key"] = key_val
+        if "model" in config_data:
+            cfg["model"] = config_data["model"].strip() or "gemini-1.5-flash"
+        if "is_enabled" in config_data:
+            cfg["is_enabled"] = bool(config_data["is_enabled"])
+        if "temperature" in config_data:
+            try:
+                cfg["temperature"] = float(config_data["temperature"])
+            except:
+                pass
+        self._save_settings()
+        return cfg
 
     def get_active_bank_account(self):
         accounts = self.settings.get("bank_accounts", [])

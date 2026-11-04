@@ -118,6 +118,32 @@
       gap: 10px;
       align-items: center;
     }
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .25s;
+      border-radius: 28px;
+    }
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .25s;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+    input:checked + .toggle-slider {
+      background-color: #10b981;
+    }
+    input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
   </style>
 </head>
 <body style="background:#f1f5f9;">
@@ -186,6 +212,7 @@
       <button class="admin-tab-btn" data-admin-view="products">📦 Quản Lý Danh Mục Sản Phẩm (CRUD)</button>
       <button class="admin-tab-btn" data-admin-view="users">👥 Quản Lý Người Dùng & Hồ Sơ KG</button>
       <button class="admin-tab-btn" data-admin-view="payments">💳 Quản Lý Thanh Toán & Ngân Hàng</button>
+      <button class="admin-tab-btn" data-admin-view="gemini">🤖 Cấu Hình Trợ Lý Gemini AI</button>
     </div>
 
     <!-- ADMIN VIEW 1: VIS.JS GRAPH CANVAS -->
@@ -329,6 +356,99 @@
 
     </div>
 
+    <!-- ADMIN VIEW 5: GEMINI AI ASSISTANT CONFIGURATION -->
+    <div id="adminViewGemini" class="admin-view-pane" style="display:none;">
+      <div class="admin-table-card" style="padding:24px; max-width:850px; margin:0 auto 24px;">
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; border-bottom:1px solid #e2e8f0; padding-bottom:18px; margin-bottom:20px; gap:16px;">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <span style="font-size:24px;">🤖</span>
+              <h3 style="margin:0; font-size:19px; font-weight:800; color:#0f172a;">Cấu Hình Trợ Lý Chatbot Google Gemini AI</h3>
+            </div>
+            <p style="margin:6px 0 0; font-size:13px; color:#64748b; line-height:1.5;">
+              Kết nối mô hình trí tuệ nhân tạo Gemini (Google DeepMind) kết hợp Đồ thị Tri thức (GraphRAG). Khi kích hoạt, Chatbot sẽ tư vấn thông minh, phân tích sâu thông số kỹ thuật và đề xuất chuẩn xác sản phẩm từ cơ sở tri thức của K/H Store.
+            </p>
+          </div>
+          <span id="geminiStatusBadge" style="padding:6px 12px; border-radius:20px; font-size:12px; font-weight:700; white-space:nowrap; background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1;">Đang kiểm tra...</span>
+        </div>
+
+        <form id="adminGeminiForm">
+          <!-- Active switch -->
+          <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:16px 20px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between;">
+            <div>
+              <div style="font-weight:700; font-size:14px; color:#1e293b;">Bật tính năng AI Gemini cho Chatbot</div>
+              <div style="font-size:12px; color:#64748b; margin-top:2px;">Nếu tắt hoặc API Key không hợp lệ, hệ thống sẽ tự động dùng bộ máy suy luận KG nội bộ (In-house Engine).</div>
+            </div>
+            <label style="position:relative; display:inline-block; width:52px; height:28px; cursor:pointer; margin:0;">
+              <input type="checkbox" id="geminiIsEnabled" style="opacity:0; width:0; height:0;">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+
+          <!-- API Key Input -->
+          <div style="margin-bottom:20px;">
+            <label style="display:block; font-weight:700; font-size:13px; color:#1e293b; margin-bottom:6px;">
+              Google Gemini API Token / Key <span style="color:#ef4444;">*</span>
+            </label>
+            <div style="position:relative;">
+              <input type="password" id="geminiApiKey" class="styled-input w-100" style="padding-right:90px; font-family:monospace;" placeholder="AIzaSy..." autocomplete="off" />
+              <button type="button" id="btnToggleGeminiKeyVisibility" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; color:#64748b; font-size:12px; cursor:pointer; padding:4px 8px; font-weight:600;">
+                👁️ Hiện
+              </button>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; flex-wrap:wrap; gap:6px;">
+              <span style="font-size:12px; color:#64748b;">Khóa bảo mật cá nhân từ Google AI Studio (miễn phí)</span>
+              <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" style="font-size:12px; color:#3b82f6; text-decoration:none; font-weight:600;">
+                🔗 Lấy API Key miễn phí tại Google AI Studio ↗
+              </a>
+            </div>
+          </div>
+
+          <!-- Model Selection & Temperature -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px;">
+            <div>
+              <label style="display:block; font-weight:700; font-size:13px; color:#1e293b; margin-bottom:6px;">
+                Mô hình Gemini (Model)
+              </label>
+              <select id="geminiModel" class="styled-select w-100">
+                <option value="gemini-1.5-flash">gemini-1.5-flash (Khuyên dùng - Nhanh, chuẩn & Miễn phí)</option>
+                <option value="gemini-1.5-pro">gemini-1.5-pro (Suy luận phức tạp, ngữ cảnh lớn)</option>
+                <option value="gemini-2.0-flash">gemini-2.0-flash (Thế hệ mới nhất)</option>
+              </select>
+            </div>
+            <div>
+              <label style="display:block; font-weight:700; font-size:13px; color:#1e293b; margin-bottom:6px;">
+                Độ sáng tạo (Temperature): <span id="valGeminiTemp" style="font-weight:800; color:#3b82f6;">0.7</span>
+              </label>
+              <input type="range" id="geminiTemperature" min="0" max="1" step="0.1" value="0.7" style="width:100%; height:38px; cursor:pointer;" />
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div style="display:flex; gap:12px; align-items:center; margin-top:10px;">
+            <button type="submit" class="btn btn-ebay-primary" style="flex:1; padding:12px; font-weight:700;">
+              💾 Lưu Cấu Hình AI
+            </button>
+            <button type="button" id="btnTestGeminiConnection" class="btn btn-ebay-outline" style="padding:12px 20px; font-weight:700; display:flex; align-items:center; gap:6px;">
+              ⚡ Kiểm Tra Kết Nối API
+            </button>
+          </div>
+
+          <!-- Test Result Box -->
+          <div id="geminiTestFeedback" style="display:none; margin-top:16px; padding:12px 16px; border-radius:8px; font-size:13px; line-height:1.5;"></div>
+        </form>
+
+        <!-- Information / Architecture Box -->
+        <div style="margin-top:24px; padding:16px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:10px; font-size:12.5px; color:#1e40af; line-height:1.6;">
+          <strong>💡 Cơ chế hoạt động GraphRAG (Knowledge Graph + Gemini):</strong>
+          <ul style="margin:6px 0 0; padding-left:18px;">
+            <li>Khi khách hàng hỏi về cấu hình, tư vấn mua máy hoặc so sánh linh kiện, ngữ cảnh từ Đồ thị Tri thức (sản phẩm, giá, specs, chip, mục đích sử dụng) và giỏ hàng của khách hàng sẽ được nhúng tự động vào prompt của Gemini.</li>
+            <li>Gemini vừa đóng vai trò chuyên gia tư vấn công nghệ ân cần, vừa chèn mã sản phẩm chính xác dạng thẻ tương tác <code>[RECOMMENDED_IDS: ...]</code> để khách hàng có thể bấm xem chi tiết hoặc thêm vào giỏ hàng ngay trong khung chat!</li>
+            <li>Cơ chế <strong>Hybrid Fallback</strong> tự động: nếu API gặp sự cố hoặc hết quota, bot sẽ dùng ngay bộ máy KG quy tắc để trả lời mà không làm gián đoạn trải nghiệm của khách.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </main>
 
   <!-- ==================== ADMIN ADD/EDIT PRODUCT MODAL ==================== -->

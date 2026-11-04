@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupProductForm();
   setupAdminUserModalEvents();
   setupPaymentManagement();
+  setupGeminiAdmin();
   
   document.getElementById('btnAdminLogout')?.addEventListener('click', () => {
     localStorage.removeItem('kh_recsys_session');
@@ -78,6 +79,8 @@ function setupAdminTabs() {
         }
       } else if (view === 'payments') {
         loadAdminPayments();
+      } else if (view === 'gemini') {
+        loadGeminiConfig();
       }
     });
   });

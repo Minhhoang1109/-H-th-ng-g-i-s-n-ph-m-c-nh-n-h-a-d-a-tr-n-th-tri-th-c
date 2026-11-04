@@ -72,6 +72,25 @@
       "usage_count": 0,
       "description": "Mã ưu đãi NANNANANAANHDOMIXI",
       "created_at": "2026-10-20"
+    },
+    {
+      "id": "code_trian10%_eca1",
+      "code": "TRIAN10%",
+      "discount_type": "percent",
+      "discount_value": 10.0,
+      "min_order_amount": 0.0,
+      "max_discount": 50000000.0,
+      "expires_at": "2026-12-23",
+      "is_active": true,
+      "usage_count": 0,
+      "description": "Mã ưu đãi TRIAN10%",
+      "created_at": "2026-10-23"
     }
-  ]
+  ],
+  "gemini_config": {
+    "api_key": "",
+    "model": "gemini-1.5-flash",
+    "is_enabled": true,
+    "temperature": 0.7
+  }
 }
