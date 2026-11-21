@@ -532,6 +532,12 @@
             <button type="submit" class="btn btn-ebay-primary w-100 btn-lg" style="margin-top:22px;">
               Đăng Nhập Ngay 🚀
             </button>
+            <div id="loginSavedAccountsWrap" style="margin-top:20px; padding-top:16px; border-top:1px dashed #e2e8f0; display:none;">
+              <div style="font-size:12px; font-weight:700; color:#64748b; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                <span>⭐</span> Tài khoản đã lưu trên thiết bị:
+              </div>
+              <div id="loginSavedAccountsList" style="display:flex; flex-direction:column; gap:6px;"></div>
+            </div>
           </form>
         </div>
 
@@ -570,6 +576,29 @@
             </button>
           </form>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL XÁC NHẬN LƯU THÔNG TIN ĐĂNG NHẬP (KHI ĐĂNG XUẤT HOẶC ĐỔI TÀI KHOẢN) -->
+  <div class="modal-backdrop" id="confirmSaveSessionModal" style="display:none; z-index:20500;">
+    <div class="modal-dialog ebay-modal" style="max-width:460px; text-align:center; padding:28px 24px; border-radius:16px; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+      <button class="modal-close-btn" id="btnCloseConfirmSaveModal">×</button>
+      <div style="font-size:46px; margin-bottom:12px;" id="confirmSaveIcon">💾</div>
+      <h3 id="confirmSaveTitle" style="font-size:19px; font-weight:800; color:#0f172a; margin:0 0 10px;">Lưu Thông Tin Đăng Nhập?</h3>
+      <div id="confirmSaveMessage" style="font-size:13.5px; color:#475569; line-height:1.6; margin:0 0 22px;">
+        Bạn có muốn lưu lại thông tin tài khoản này trên thiết bị không?
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button type="button" class="btn btn-ebay-primary w-100" id="btnConfirmSaveYes" style="padding:12px; font-weight:800; border-radius:8px; font-size:14px;">
+          💾 Có, Lưu Thông Tin Tài Khoản
+        </button>
+        <button type="button" class="btn btn-ebay-outline w-100" id="btnConfirmSaveNo" style="padding:11px; font-weight:700; border-radius:8px; font-size:13px; color:#dc2626; border-color:#fca5a5; background:#fef2f2;">
+          🚫 Không Lưu (Xóa Khỏi Danh Sách Đã Lưu)
+        </button>
+        <button type="button" class="btn btn-sm btn-ghost w-100" id="btnConfirmSaveCancel" style="padding:8px; color:#64748b; font-weight:600; font-size:13px;">
+          ✕ Hủy Bỏ
+        </button>
       </div>
     </div>
   </div>
@@ -975,7 +1004,7 @@
   </div>
 
   <!-- 8.1 CHECKOUT & DELIVERY INFO + TRANSFER QR MODAL -->
-  <div class="modal-backdrop" id="checkoutModal" style="display:none; z-index:1065;">
+  <div class="modal-backdrop" id="checkoutModal" style="display:none; z-index:20000;">
     <div class="modal-dialog ebay-modal checkout-modal-dialog">
       <button class="modal-close-btn" id="btnCloseCheckoutModal">×</button>
       

@@ -4,8 +4,8 @@ const API_BASE = '/api';
 let appState = {
   users: [],
   currentUser: null,
-  isGuest: false,
-  selectedUserId: 'u1',
+  isGuest: true,
+  selectedUserId: null,
   selectedAlgorithm: 'hybrid',
   selectedCategory: 'all',
   selectedPurpose: 'all',
@@ -416,6 +416,7 @@ function setupAuth() {
       if (res.ok && data.success) {
         authModal.style.display = 'none';
         showToast(data.message || 'Đăng nhập thành công!', 'success');
+        saveAccountToStorage(data.user);
         handleLoginSuccess(data.user);
       } else {
         showToast(data.error || 'Sai tên đăng nhập hoặc mật khẩu!', 'error');
@@ -452,22 +453,128 @@ function setupAuth() {
     }
   });
 
-  // Quick switch dropdown
+  // Quick switch dropdown with confirm save
   userSelect?.addEventListener('change', async (e) => {
-    const uid = e.target.value;
-    const user = appState.users.find(u => u.id === uid);
-    if (user) {
-      handleLoginSuccess(user, false);
+    const newUid = e.target.value;
+    if (userDropdownPopover) userDropdownPopover.style.display = 'none';
+    userCardTrigger?.classList.remove('active');
+
+    if (!newUid || (appState.currentUser && newUid === appState.currentUser.id)) return;
+
+    const oldUser = appState.currentUser;
+    const newUser = appState.users.find(u => u.id === newUid);
+    if (!newUser) return;
+
+    if (oldUser) {
+      showConfirmSaveModal({
+        icon: '🔄',
+        title: 'Xác Nhận Đổi Tài Khoản',
+        message: `Bạn đang muốn chuyển sang tài khoản <b>${newUser.name || newUser.username}</b>.<br><br>Bạn có muốn <b>lưu lại thông tin tài khoản hiện tại (${oldUser.name || oldUser.username})</b> vào danh sách tài khoản đã lưu trên thiết bị không?`,
+        yesBtnText: '💾 Có, Lưu Tài Khoản Cũ',
+        noBtnText: '🚫 Không Lưu Tài Khoản Cũ',
+        onYes: () => {
+          saveAccountToStorage(oldUser);
+          handleLoginSuccess(newUser, false);
+          showToast(`Đã lưu tài khoản "${oldUser.name}" và chuyển sang "${newUser.name}"! 🚀`, 'success');
+        },
+        onNo: () => {
+          removeAccountFromStorage(oldUser.id);
+          handleLoginSuccess(newUser, false);
+          showToast(`Đã chuyển sang "${newUser.name}" (không lưu thông tin "${oldUser.name}").`, 'info');
+        },
+        onCancel: () => {
+          if (userSelect && oldUser) userSelect.value = oldUser.id;
+        }
+      });
+    } else {
+      // Đang là khách vãng lai chuyển sang tài khoản mới
+      handleLoginSuccess(newUser, false);
     }
   });
 
   btnLogout?.addEventListener('click', () => {
-    localStorage.removeItem('kh_recsys_session');
-    appState.currentUser = null;
-    appState.isGuest = true;
-    updateAuthUI();
-    loadRecommendations();
-    showToast('Đã đăng xuất! Chuyển sang chế độ Khách vãng lai.', 'info');
+    if (userDropdownPopover) userDropdownPopover.style.display = 'none';
+    userCardTrigger?.classList.remove('active');
+
+    const user = appState.currentUser;
+    if (!user) {
+      appState.currentUser = null;
+      appState.selectedUserId = null;
+      appState.isGuest = true;
+      updateAuthUI();
+      renderUserSelectOptions();
+      return;
+    }
+
+    showConfirmSaveModal({
+      icon: '🚪',
+      title: 'Xác Nhận Đăng Xuất',
+      message: `Bạn có muốn <b>lưu lại thông tin đăng nhập của tài khoản ${user.name || user.username}</b> trên thiết bị này không?<br><br><span style="font-size:12.5px; color:#64748b; line-height:1.6; display:inline-block;">• <b>Chọn Có:</b> Thông tin tài khoản sẽ được lưu trong mục Đổi nhanh tài khoản để bạn có thể chọn lại bất cứ lúc nào.<br>• <b>Chọn Không:</b> Tài khoản sẽ được xóa hoàn toàn khỏi danh sách đã lưu.</span>`,
+      yesBtnText: '💾 Có, Lưu & Đăng Xuất',
+      noBtnText: '🚫 Không Lưu & Đăng Xuất',
+      onYes: () => {
+        saveAccountToStorage(user);
+        localStorage.removeItem('kh_recsys_session');
+        appState.currentUser = null;
+        appState.selectedUserId = null;
+        appState.isGuest = true;
+        updateAuthUI();
+        renderUserSelectOptions();
+        loadRecommendations();
+        showToast(`Đã lưu thông tin "${user.name}" và chuyển sang Khách vãng lai. 🚪`, 'success');
+      },
+      onNo: () => {
+        removeAccountFromStorage(user.id);
+        localStorage.removeItem('kh_recsys_session');
+        appState.currentUser = null;
+        appState.selectedUserId = null;
+        appState.isGuest = true;
+        updateAuthUI();
+        renderUserSelectOptions();
+        loadRecommendations();
+        showToast('Đã đăng xuất và xóa thông tin tài khoản khỏi thiết bị.', 'info');
+      },
+      onCancel: () => {}
+    });
+  });
+
+  // Confirm Save Modal listeners
+  const confirmSaveModal = document.getElementById('confirmSaveSessionModal');
+  const btnCloseConfirmSave = document.getElementById('btnCloseConfirmSaveModal');
+  const btnConfirmSaveYes = document.getElementById('btnConfirmSaveYes');
+  const btnConfirmSaveNo = document.getElementById('btnConfirmSaveNo');
+  const btnConfirmSaveCancel = document.getElementById('btnConfirmSaveCancel');
+
+  btnConfirmSaveYes?.addEventListener('click', () => {
+    const cb = currentConfirmSaveCallbacks?.onYes;
+    closeConfirmSaveModal();
+    if (cb) cb();
+  });
+
+  btnConfirmSaveNo?.addEventListener('click', () => {
+    const cb = currentConfirmSaveCallbacks?.onNo;
+    closeConfirmSaveModal();
+    if (cb) cb();
+  });
+
+  btnConfirmSaveCancel?.addEventListener('click', () => {
+    const cb = currentConfirmSaveCallbacks?.onCancel;
+    closeConfirmSaveModal();
+    if (cb) cb();
+  });
+
+  btnCloseConfirmSave?.addEventListener('click', () => {
+    const cb = currentConfirmSaveCallbacks?.onCancel;
+    closeConfirmSaveModal();
+    if (cb) cb();
+  });
+
+  confirmSaveModal?.addEventListener('click', (e) => {
+    if (e.target === confirmSaveModal) {
+      const cb = currentConfirmSaveCallbacks?.onCancel;
+      closeConfirmSaveModal();
+      if (cb) cb();
+    }
   });
 
   // Top bar user card dropdown popover toggle
@@ -489,12 +596,6 @@ function setupAuth() {
       userDropdownPopover.style.display = 'none';
       userCardTrigger?.classList.remove('active');
     }
-  });
-
-  // Close popover on switching user account
-  document.getElementById('userSelect')?.addEventListener('change', () => {
-    if (userDropdownPopover) userDropdownPopover.style.display = 'none';
-    userCardTrigger?.classList.remove('active');
   });
 
   // Wire up popover buttons
@@ -661,7 +762,45 @@ function openAuthModal(mode = 'login') {
   } else {
     document.getElementById('tabRegisterBtn').click();
   }
+  renderSavedAccountsInLoginModal();
 }
+
+function renderSavedAccountsInLoginModal() {
+  const wrap = document.getElementById('loginSavedAccountsWrap');
+  const list = document.getElementById('loginSavedAccountsList');
+  if (!wrap || !list) return;
+
+  const accounts = getSavedAccounts();
+  if (!accounts || accounts.length === 0) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  wrap.style.display = 'block';
+  list.innerHTML = accounts.map(a => `
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:16px;">👤</span>
+        <div style="text-align:left;">
+          <div style="font-size:12.5px; font-weight:700; color:#1e293b;">${a.name}</div>
+          <div style="font-size:11px; color:#64748b;">${a.username} • ${a.role || 'Thành viên'}</div>
+        </div>
+      </div>
+      <button type="button" class="btn btn-sm btn-ebay-primary" style="padding:4px 10px; font-size:11.5px; font-weight:700;" onclick="loginAsSavedAccount('${a.id}')">
+        Chọn ➔
+      </button>
+    </div>
+  `).join('');
+}
+
+window.loginAsSavedAccount = function(userId) {
+  const user = appState.users.find(u => u.id === userId);
+  if (user) {
+    document.getElementById('authModal').style.display = 'none';
+    handleLoginSuccess(user, false);
+    showToast(`Đăng nhập thành công với tài khoản "${user.name}"! 🚀`, 'success');
+  }
+};
 
 function handleLoginSuccess(user, isFirstRegister = false) {
   appState.currentUser = user;
@@ -680,12 +819,124 @@ function handleLoginSuccess(user, isFirstRegister = false) {
   }
 
   updateAuthUI();
+  renderUserSelectOptions();
   loadRecommendations();
 
   // Khảo sát chỉ xuất hiện DUY NHẤT 1 lần ngay sau khi vừa Đăng ký tài khoản
   if (isFirstRegister) {
     document.getElementById('onboardingSurveyModal').style.display = 'flex';
   }
+}
+
+// ========================================================
+// SAVED ACCOUNTS & CONFIRM SAVE MODAL
+// ========================================================
+let currentConfirmSaveCallbacks = null;
+
+function getSavedAccounts() {
+  try {
+    const raw = localStorage.getItem('kh_saved_accounts');
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveAccountToStorage(user) {
+  if (!user || !user.id) return;
+  let accounts = getSavedAccounts();
+  const existingIdx = accounts.findIndex(a => a.id === user.id);
+  const accountInfo = {
+    id: user.id,
+    name: user.name || user.full_name || user.username,
+    username: user.username,
+    role: user.role,
+    avatar: user.avatar,
+    is_admin: !!(user.is_admin || user.username === 'admin' || user.id === 'admin'),
+    saved_at: new Date().toISOString()
+  };
+  if (existingIdx >= 0) {
+    accounts[existingIdx] = accountInfo;
+  } else {
+    accounts.push(accountInfo);
+  }
+  localStorage.setItem('kh_saved_accounts', JSON.stringify(accounts));
+  renderUserSelectOptions();
+}
+
+function removeAccountFromStorage(userId) {
+  if (!userId) return;
+  let accounts = getSavedAccounts();
+  accounts = accounts.filter(a => a.id !== userId);
+  localStorage.setItem('kh_saved_accounts', JSON.stringify(accounts));
+  renderUserSelectOptions();
+}
+
+function renderUserSelectOptions() {
+  const select = document.getElementById('userSelect');
+  if (!select) return;
+
+  const savedAccounts = getSavedAccounts();
+  const savedIds = new Set(savedAccounts.map(a => a.id));
+
+  let html = '';
+
+  // Nếu đang là khách vãng lai, hiển thị option Khách vãng lai
+  if (appState.isGuest || !appState.currentUser) {
+    html += '<option value="" disabled selected>👤 Khách vãng lai (Chưa đăng nhập)</option>';
+  }
+
+  // 1. Nhóm tài khoản ĐÃ LƯU TRÊN THIẾT BỊ
+  if (savedAccounts.length > 0) {
+    html += '<optgroup label="⭐ TÀI KHOẢN ĐÃ LƯU TRÊN THIẾT BỊ">';
+    savedAccounts.forEach(sa => {
+      const isCur = appState.currentUser && appState.currentUser.id === sa.id;
+      html += `<option value="${sa.id}" ${isCur ? 'selected' : ''}>⭐ ${sa.name} (${sa.role || 'User'})${isCur ? ' - [Đang chọn]' : ' (Đã lưu)'}</option>`;
+    });
+    html += '</optgroup>';
+  }
+
+  // 2. Nhóm tài khoản mẫu khác từ hệ thống
+  const otherUsers = (appState.users || []).filter(u => !savedIds.has(u.id));
+  if (otherUsers.length > 0) {
+    html += '<optgroup label="📋 DANH SÁCH TÀI KHOẢN MẪU KHÁC">';
+    otherUsers.forEach(u => {
+      const isCur = appState.currentUser && appState.currentUser.id === u.id;
+      html += `<option value="${u.id}" ${isCur ? 'selected' : ''}>${u.name || u.full_name || u.username} (${u.role || 'User'})${isCur ? ' - [Đang chọn]' : ''}</option>`;
+    });
+    html += '</optgroup>';
+  }
+
+  select.innerHTML = html;
+  if (appState.currentUser && !appState.isGuest) {
+    select.value = appState.currentUser.id;
+  }
+}
+
+function showConfirmSaveModal({ icon = '💾', title = 'Lưu Thông Tin Đăng Nhập?', message = '', yesBtnText = '💾 Có, Lưu Thông Tin', noBtnText = '🚫 Không Lưu', onYes, onNo, onCancel }) {
+  const modal = document.getElementById('confirmSaveSessionModal');
+  if (!modal) return;
+
+  const iconEl = document.getElementById('confirmSaveIcon');
+  const titleEl = document.getElementById('confirmSaveTitle');
+  const msgEl = document.getElementById('confirmSaveMessage');
+  const btnYes = document.getElementById('btnConfirmSaveYes');
+  const btnNo = document.getElementById('btnConfirmSaveNo');
+
+  if (iconEl) iconEl.textContent = icon;
+  if (titleEl) titleEl.textContent = title;
+  if (msgEl) msgEl.innerHTML = message;
+  if (btnYes) btnYes.innerHTML = yesBtnText;
+  if (btnNo) btnNo.innerHTML = noBtnText;
+
+  currentConfirmSaveCallbacks = { onYes, onNo, onCancel };
+  modal.style.display = 'flex';
+}
+
+function closeConfirmSaveModal() {
+  const modal = document.getElementById('confirmSaveSessionModal');
+  if (modal) modal.style.display = 'none';
+  currentConfirmSaveCallbacks = null;
 }
 
 function restoreSessionOrGuest() {
@@ -699,20 +950,18 @@ function restoreSessionOrGuest() {
         appState.selectedUserId = user.id;
         appState.isGuest = false;
         updateAuthUI();
+        renderUserSelectOptions();
         return;
       }
     } catch (e) {}
   }
-  if (appState.users.length > 0) {
-    // Default to first regular user if guest
-    const defaultUser = appState.users.find(u => !u.is_admin && u.username !== 'admin') || appState.users[0];
-    appState.currentUser = defaultUser;
-    appState.selectedUserId = defaultUser.id;
-    appState.isGuest = false;
-  } else {
-    appState.isGuest = true;
-  }
+  
+  // LẦN ĐẦU TIÊN VÀO ỨNG DỤNG HOẶC KHÔNG CÓ PHIÊN ĐÃ LƯU: LUÔN LÀ KHÁCH VÃNG LAI
+  appState.currentUser = null;
+  appState.selectedUserId = null;
+  appState.isGuest = true;
   updateAuthUI();
+  renderUserSelectOptions();
 }
 
 function updateAuthUI() {
@@ -1195,7 +1444,10 @@ function filterAndRenderProducts() {
 // DETAILED EXPLANATION MODAL & KG KEYS TABLE
 // ========================================================
 window.openExplanationModal = function(productId) {
-  const prod = appState.recommendations.find(p => p.id === productId);
+  let prod = (appState.recommendations || []).find(p => p.id === productId);
+  if (!prod && window._chatbotProductsMap) {
+    prod = window._chatbotProductsMap.get(productId);
+  }
   if (!prod) return;
 
   const modal = document.getElementById('explanationModal');
@@ -1741,10 +1993,7 @@ async function loadUsers() {
     const res = await fetch(`${API_BASE}/users`);
     const data = await res.json();
     appState.users = data.users || data || [];
-    const select = document.getElementById('userSelect');
-    if (select) {
-      select.innerHTML = appState.users.map(u => `<option value="${u.id}">${u.name || u.full_name || u.username} (${u.role || 'User'})</option>`).join('');
-    }
+    renderUserSelectOptions();
   } catch (err) {}
 }
 
@@ -2222,7 +2471,10 @@ window.toggleFavoriteProduct = async function(productId, event) {
 
 window.toggleCartProduct = async function(productId, event) {
   if (event) event.stopPropagation();
-  const prod = appState.recommendations.find(p => p.id === productId);
+  let prod = (appState.recommendations || []).find(p => p.id === productId);
+  if (!prod && window._chatbotProductsMap) {
+    prod = window._chatbotProductsMap.get(productId);
+  }
   if (!prod) return;
 
   const existing = appState.cart.find(item => item.id === productId);
@@ -2584,8 +2836,14 @@ function openCheckoutModal() {
     return;
   }
 
-  // Get only selected items
-  const selectedItems = getSelectedCartItems();
+  // Get only selected items (auto select all if none selected)
+  let selectedItems = getSelectedCartItems();
+  if (!selectedItems || selectedItems.length === 0) {
+    if (appState.cart && appState.cart.length > 0) {
+      appState.selectedCartItemIds = new Set(appState.cart.map(i => i.id));
+      selectedItems = getSelectedCartItems();
+    }
+  }
   if (!selectedItems || selectedItems.length === 0) {
     showToast('Vui lòng chọn ít nhất 1 sản phẩm trong giỏ hàng để thanh toán!', 'warning');
     return;
@@ -2693,9 +2951,12 @@ function openCheckoutModal() {
   if (codBox) codBox.style.display = 'none';
   currentCheckoutState.paymentMethod = 'Chuyển khoản Ngân hàng (VietQR 24/7)';
 
-  // 8. Open modal
+  // 8. Open modal with highest z-index
   const checkoutModal = document.getElementById('checkoutModal');
-  if (checkoutModal) checkoutModal.style.display = 'flex';
+  if (checkoutModal) {
+    checkoutModal.style.zIndex = '20000';
+    checkoutModal.style.display = 'flex';
+  }
 }
 
 function setupCheckout() {
@@ -3105,6 +3366,10 @@ function appendBotMessage(text, products = [], pills = [], order = null) {
 
   let productsHtml = '';
   if (products && products.length > 0) {
+    if (!window._chatbotProductsMap) window._chatbotProductsMap = new Map();
+    products.forEach(p => {
+      if (p && p.id) window._chatbotProductsMap.set(p.id, p);
+    });
     productsHtml = `
       <div class="chat-products-list">
         ${products.map(p => `
@@ -3149,10 +3414,22 @@ function appendBotMessage(text, products = [], pills = [], order = null) {
     `;
   }
 
+  let checkoutActionHtml = '';
+  if (formattedText.includes('TỰ ĐỘNG HÓA QUY TRÌNH CHỐT ĐƠN') || formattedText.includes('Hệ thống đã chuẩn bị đơn hàng')) {
+    checkoutActionHtml = `
+      <div style="margin-top:12px;">
+        <button type="button" class="btn btn-ebay-primary w-100" style="padding:10px 14px; font-weight:800; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="closeChatbot(); openCheckoutModal();">
+          💳 Điền Thông Tin Giao Hàng & Mã QR Chuyển Khoản
+        </button>
+      </div>
+    `;
+  }
+
   row.innerHTML = `
     <div class="chat-bot-avatar">🤖</div>
     <div class="chat-bubble chat-bubble-bot">
       <div>${formattedText}</div>
+      ${checkoutActionHtml}
       ${productsHtml}
       ${orderHtml}
     </div>
@@ -3267,16 +3544,53 @@ function handleBotAutomatedAction(action) {
     loadRecommendations();
   } else if (action.type === 'view_cart') {
     updateChatbotCartBar();
+  } else if (action.type === 'ready_to_checkout' || action.type === 'checkout') {
+    closeChatbot();
+    openCheckoutModal();
   }
 }
 
 window.botAddProductToCart = function(productId) {
-  const prod = appState.recommendations.find(p => p.id === productId) || { id: productId };
+  let prod = (appState.recommendations || []).find(p => p.id === productId);
+  if (!prod && window._chatbotProductsMap) {
+    prod = window._chatbotProductsMap.get(productId);
+  }
+  if (!prod) prod = { id: productId, name: productId, price: 0 };
+
+  const existing = appState.cart.find(it => it.id === productId);
+  if (existing) {
+    existing.quantity = (existing.quantity || 1) + 1;
+    showToast(`Đã tăng số lượng "${prod.name}" trong giỏ hàng (x${existing.quantity})! 🛒`, 'success');
+  } else {
+    appState.cart.push({
+      id: prod.id,
+      name: prod.name || productId,
+      price: prod.price || 0,
+      image: prod.image || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200',
+      brand: prod.brand || (prod.brands ? prod.brands[0] : 'K/H Store'),
+      quantity: 1
+    });
+    if (!appState.selectedCartItemIds) appState.selectedCartItemIds = new Set();
+    appState.selectedCartItemIds.add(prod.id);
+    showToast(`Đã thêm "${prod.name}" vào giỏ hàng! 🛒`, 'success');
+  }
+
+  saveCartAndFavoritesToStorage();
+  updateCartAndFavoritesBadges();
+  updateChatbotCartBar();
+  filterAndRenderProducts();
+
+  // Send message to bot to confirm & suggest compatible accessories
   sendChatbotMessage(`Thêm ${prod.name || productId} vào giỏ hàng`);
 };
 
 window.botBuyNow = function(productId) {
-  const prod = appState.recommendations.find(p => p.id === productId) || { id: productId };
+  let prod = (appState.recommendations || []).find(p => p.id === productId);
+  if (!prod && window._chatbotProductsMap) {
+    prod = window._chatbotProductsMap.get(productId);
+  }
+  if (!prod) prod = { id: productId, name: productId, price: 0 };
+
   const existing = appState.cart.find(it => it.id === productId);
   if (existing) {
     existing.quantity = (existing.quantity || 1) + 1;
@@ -3286,18 +3600,31 @@ window.botBuyNow = function(productId) {
       name: prod.name || productId,
       price: prod.price || 0,
       image: prod.image || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200',
-      brand: prod.brand || 'K/H Store',
+      brand: prod.brand || (prod.brands ? prod.brands[0] : 'K/H Store'),
       quantity: 1
     });
   }
+  if (!appState.selectedCartItemIds) appState.selectedCartItemIds = new Set();
+  appState.selectedCartItemIds.add(prod.id);
+
   saveCartAndFavoritesToStorage();
   updateCartAndFavoritesBadges();
   updateChatbotCartBar();
-  sendChatbotMessage("Chốt đơn ngay");
+  filterAndRenderProducts();
+
+  // Đóng/thu nhỏ chatbot và mở trực tiếp popup Thông Tin Giao Hàng & Mã Chuyển Khoản (như ảnh 2)
+  closeChatbot();
+  openCheckoutModal();
+  showToast(`Đã chọn mua "${prod.name}". Vui lòng điền thông tin nhận hàng! 💳`, 'success');
 };
 
 function handleChatbotCheckoutClick() {
-  sendChatbotMessage("Chốt đơn ngay");
+  if (!appState.cart || appState.cart.length === 0) {
+    showToast('Giỏ hàng của bạn đang trống! Vui lòng chọn sản phẩm trước.', 'warning');
+    return;
+  }
+  closeChatbot();
+  openCheckoutModal();
 }
 
 function formatChatMarkdown(text) {

@@ -10,27 +10,32 @@ class ChatbotService:
         self.gemini_config = self._load_initial_gemini_config()
 
     def _load_initial_gemini_config(self):
+        cfg = {
+            "api_key": os.environ.get("GEMINI_API_KEY", ""),
+            "model": os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite"),
+            "is_enabled": True,
+            "temperature": 0.7
+        }
         settings_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "graph", "payment_settings.json")
         if os.path.exists(settings_path):
             try:
                 with open(settings_path, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    return data.get("gemini_config", {})
+                    saved_cfg = data.get("gemini_config", {})
+                    if saved_cfg:
+                        cfg.update(saved_cfg)
+                        if not cfg.get("api_key"):
+                            cfg["api_key"] = os.environ.get("GEMINI_API_KEY", "")
             except Exception:
                 pass
-        return {
-            "api_key": os.environ.get("GEMINI_API_KEY", ""),
-            "model": "gemini-1.5-flash",
-            "is_enabled": True,
-            "temperature": 0.7
-        }
+        return cfg
 
     def set_gemini_config(self, config):
         if not self.gemini_config:
             self.gemini_config = {}
         self.gemini_config.update(config)
 
-    def test_gemini_api(self, api_key, model="gemini-1.5-flash"):
+    def test_gemini_api(self, api_key, model="gemini-3.5-flash-lite"):
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key.strip()}"
         payload = json.dumps({
             "contents": [{"parts": [{"text": "Xin chào, phản hồi ngắn gọn xác nhận bạn là Gemini AI sẵn sàng hỗ trợ shop K/H Store."}]}]
@@ -96,11 +101,15 @@ class ChatbotService:
         if any(w in text for w in ["chốt đơn", "chot don", "dat hang", "đặt hàng", "thanh toán", "thanh toan", "checkout", "mua ngay"]):
             return self._handle_checkout(user, cart, text)
 
-        # 4. VIEW / CHECK CART
+        # 4. ADD SPECIFIC PRODUCT TO CART FROM CHAT (Phải kiểm tra trước Xem giỏ vì câu chứa 'vào giỏ hàng')
+        if text.startswith("thêm") or text.startswith("them") or "cho vào giỏ" in text or "mua cái này" in text:
+            return self._handle_add_to_cart_query(text, cart)
+
+        # 5. VIEW / CHECK CART
         if any(w in text for w in ["xem giỏ", "giỏ hàng", "gio hang", "trong giỏ", "tổng tiền", "tong tien"]):
             return self._handle_view_cart(cart)
 
-        # 5. CLEAR CART
+        # 6. CLEAR CART
         if any(w in text for w in ["xóa giỏ", "xoa gio", "làm trống giỏ", "xóa hết"]):
             return {
                 "reply": "🧹 Đã làm trống giỏ hàng theo yêu cầu của bạn. Bạn muốn tôi tư vấn sản phẩm mới nào không?",
@@ -113,13 +122,9 @@ class ChatbotService:
                 ]
             }
 
-        # 6. ORDER TRACKING / LỊCH SỬ ĐƠN
+        # 7. ORDER TRACKING / LỊCH SỬ ĐƠN
         if any(w in text for w in ["tra cứu đơn", "tra cuu don", "đơn hàng của tôi", "don hang cua toi", "lịch sử mua"]):
             return self._handle_order_tracking(user)
-
-        # 7. ADD SPECIFIC PRODUCT TO CART FROM CHAT
-        if text.startswith("thêm") or text.startswith("them") or "cho vào giỏ" in text or "mua cái này" in text:
-            return self._handle_add_to_cart_query(text, cart)
 
         # 8. COMPATIBILITY & ACCESSORIES RECOMMENDATION
         if any(w in text for w in ["phụ kiện", "phu kien", "tương thích", "tuong thich", "mua kèm", "mua kem"]):
@@ -144,7 +149,7 @@ class ChatbotService:
     def _ask_gemini_kg(self, raw_message, clean_text, user, cart):
         cfg = self.gemini_config or {}
         api_key = cfg.get("api_key", "").strip()
-        model = cfg.get("model", "gemini-1.5-flash")
+        model = cfg.get("model") or os.environ.get("GEMINI_MODEL", "gemini-3.5-flash-lite")
         temp = cfg.get("temperature", 0.7)
 
         products = self.graph_service.get_products()
@@ -180,7 +185,7 @@ class ChatbotService:
             f"Khách hàng hỏi: \"{raw_message}\""
         )
 
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key.strip()}"
         payload = json.dumps({
             "system_instruction": {"parts": [{"text": system_instruction}]},
             "contents": [{"parts": [{"text": user_prompt}]}],
@@ -403,6 +408,7 @@ class ChatbotService:
 
         # Clean search term
         clean_text = re.sub(r'^(thêm|them|cho vào giỏ|cho vao gio|mua)\s+', '', text).strip()
+        clean_text = re.sub(r'\s+(vào giỏ hàng|vao gio hang|vào giỏ|vao gio|nhé|nhe|vào)$', '', clean_text).strip()
 
         # Find best matching product
         for p in products:

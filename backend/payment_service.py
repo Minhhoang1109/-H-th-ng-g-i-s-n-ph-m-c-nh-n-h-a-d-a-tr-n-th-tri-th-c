@@ -105,7 +105,7 @@ class PaymentService:
             "payment_codes": self.settings.get("payment_codes", []),
             "gemini_config": self.settings.get("gemini_config", {
                 "api_key": "",
-                "model": "gemini-1.5-flash",
+                "model": "gemini-3.5-flash-lite",
                 "is_enabled": True,
                 "temperature": 0.7
             }),
@@ -120,7 +120,7 @@ class PaymentService:
             if not ("..." in key_val and len(key_val) < 25):
                 cfg["api_key"] = key_val
         if "model" in config_data:
-            cfg["model"] = config_data["model"].strip() or "gemini-1.5-flash"
+            cfg["model"] = config_data["model"].strip() or "gemini-3.5-flash-lite"
         if "is_enabled" in config_data:
             cfg["is_enabled"] = bool(config_data["is_enabled"])
         if "temperature" in config_data:
