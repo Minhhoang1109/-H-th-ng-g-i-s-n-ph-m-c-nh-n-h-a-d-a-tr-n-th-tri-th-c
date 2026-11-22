@@ -30,21 +30,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
-  setupAdminTabs();
-  setupProductForm();
-  setupAdminUserModalEvents();
-  setupPaymentManagement();
-  setupGeminiAdmin();
+  try { setupAdminTabs(); } catch (e) { console.error('setupAdminTabs error:', e); }
+  try { setupProductForm(); } catch (e) { console.error('setupProductForm error:', e); }
+  try { setupAdminUserModalEvents(); } catch (e) { console.error('setupAdminUserModalEvents error:', e); }
+  try { setupPaymentManagement(); } catch (e) { console.error('setupPaymentManagement error:', e); }
+  try { setupGeminiAdmin(); } catch (e) { console.error('setupGeminiAdmin error:', e); }
   
   document.getElementById('btnAdminLogout')?.addEventListener('click', () => {
     localStorage.removeItem('kh_recsys_session');
     window.location.href = '/';
   });
 
-  await loadMetrics();
-  await loadAdminProducts();
-  await loadAdminUsers();
-  await initAdminGraph();
+  try { await loadMetrics(); } catch (e) { console.error('loadMetrics error:', e); }
+  try { await loadAdminProducts(); } catch (e) { console.error('loadAdminProducts error:', e); }
+  try { await loadAdminUsers(); } catch (e) { console.error('loadAdminUsers error:', e); }
+  try { await initAdminGraph(); } catch (e) { console.error('initAdminGraph error:', e); }
 });
 
 function setupAdminTabs() {
@@ -989,3 +989,147 @@ window.deletePaymentCode = async function(codeId) {
     showToast('Lỗi kết nối máy chủ!', 'error');
   }
 };
+
+// ========================================================
+// GEMINI AI ASSISTANT CONFIGURATION
+// ========================================================
+function setupGeminiAdmin() {
+  const toggleBtn = document.getElementById('btnToggleGeminiKeyVisibility');
+  const keyInput = document.getElementById('geminiApiKey');
+  const tempSlider = document.getElementById('geminiTemperature');
+  const tempVal = document.getElementById('valGeminiTemp');
+  const form = document.getElementById('adminGeminiForm');
+  const btnTest = document.getElementById('btnTestGeminiConnection');
+
+  toggleBtn?.addEventListener('click', () => {
+    if (keyInput.type === 'password') {
+      keyInput.type = 'text';
+      toggleBtn.textContent = '🔒 Ẩn';
+    } else {
+      keyInput.type = 'password';
+      toggleBtn.textContent = '👁️ Hiện';
+    }
+  });
+
+  tempSlider?.addEventListener('input', (e) => {
+    if (tempVal) tempVal.textContent = e.target.value;
+  });
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const is_enabled = document.getElementById('geminiIsEnabled').checked;
+    const api_key = keyInput.value.trim();
+    const model = document.getElementById('geminiModel').value;
+    const temperature = parseFloat(tempSlider.value) || 0.7;
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/gemini-config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_enabled, api_key, model, temperature })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showToast('Đã lưu cấu hình Google Gemini AI thành công!', 'success');
+        await loadGeminiConfig();
+      } else {
+        showToast(data.error || 'Lỗi khi lưu cấu hình Gemini!', 'error');
+      }
+    } catch (err) {
+      showToast('Lỗi máy chủ khi lưu cấu hình Gemini!', 'error');
+    }
+  });
+
+  btnTest?.addEventListener('click', async () => {
+    const feedback = document.getElementById('geminiTestFeedback');
+    const api_key = keyInput.value.trim();
+    const model = document.getElementById('geminiModel').value;
+
+    if (feedback) {
+      feedback.style.display = 'block';
+      feedback.style.background = '#eff6ff';
+      feedback.style.color = '#1e40af';
+      feedback.style.border = '1px solid #bfdbfe';
+      feedback.innerHTML = '⏳ Đang kiểm tra kết nối với Google Gemini API...';
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/gemini-test`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key, model })
+      });
+      const data = await res.json();
+      if (feedback) {
+        if (data.success) {
+          feedback.style.background = '#f0fdf4';
+          feedback.style.color = '#166534';
+          feedback.style.border = '1px solid #bbf7d0';
+          feedback.innerHTML = `✅ <b>Kết nối thành công!</b> ${data.message || ''}`;
+        } else {
+          feedback.style.background = '#fef2f2';
+          feedback.style.color = '#991b1b';
+          feedback.style.border = '1px solid #fecaca';
+          feedback.innerHTML = `❌ <b>Kết nối thất bại:</b> ${data.message || 'Không thể phản hồi từ Gemini API.'}`;
+        }
+      }
+    } catch (err) {
+      if (feedback) {
+        feedback.style.background = '#fef2f2';
+        feedback.style.color = '#991b1b';
+        feedback.style.border = '1px solid #fecaca';
+        feedback.innerHTML = `❌ <b>Lỗi kết nối máy chủ:</b> ${err.message}`;
+      }
+    }
+  });
+
+  loadGeminiConfig();
+}
+
+async function loadGeminiConfig() {
+  const badge = document.getElementById('geminiStatusBadge');
+  try {
+    const res = await fetch(`${API_BASE}/admin/gemini-config`);
+    const data = await res.json();
+    if (data.success && data.config) {
+      const cfg = data.config;
+      const isEnabledCheckbox = document.getElementById('geminiIsEnabled');
+      const keyInput = document.getElementById('geminiApiKey');
+      const modelSelect = document.getElementById('geminiModel');
+      const tempSlider = document.getElementById('geminiTemperature');
+      const tempVal = document.getElementById('valGeminiTemp');
+
+      if (isEnabledCheckbox) isEnabledCheckbox.checked = cfg.is_enabled !== false;
+      if (keyInput && cfg.api_key) keyInput.value = cfg.api_key;
+      if (modelSelect && cfg.model) modelSelect.value = cfg.model;
+      if (tempSlider && cfg.temperature !== undefined) {
+        tempSlider.value = cfg.temperature;
+        if (tempVal) tempVal.textContent = cfg.temperature;
+      }
+
+      if (badge) {
+        if (cfg.is_configured && cfg.is_enabled !== false) {
+          badge.style.background = '#dcfce7';
+          badge.style.color = '#166534';
+          badge.style.borderColor = '#86efac';
+          badge.textContent = `● Đang hoạt động (${cfg.model || 'Gemini'})`;
+        } else if (!cfg.is_configured) {
+          badge.style.background = '#fef3c7';
+          badge.style.color = '#92400e';
+          badge.style.borderColor = '#fcd34d';
+          badge.textContent = '○ Chưa nhập API Key (Dùng KG Rules)';
+        } else {
+          badge.style.background = '#fee2e2';
+          badge.style.color = '#991b1b';
+          badge.style.borderColor = '#fca5a5';
+          badge.textContent = '○ Đang tạm tắt';
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Error loading Gemini config:', err);
+    if (badge) {
+      badge.textContent = 'Lỗi tải cấu hình';
+    }
+  }
+}
