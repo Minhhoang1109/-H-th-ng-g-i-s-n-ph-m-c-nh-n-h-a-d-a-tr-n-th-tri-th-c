@@ -1290,13 +1290,27 @@ body {
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.55);
-  backdrop-filter: blur(4px);
-  z-index: 1000;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  z-index: 30000 !important;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
+}
+
+body.modal-open {
+  overflow: hidden !important;
+}
+
+body.modal-open .mobile-bottom-nav,
+body.modal-open .pwa-install-banner,
+body.modal-open .chatbot-floating-trigger {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
 .ebay-modal {
@@ -4767,8 +4781,9 @@ body {
 
   /* Native Mobile Bottom Sheet for Modals */
   .modal-backdrop {
-    padding: 0;
-    align-items: flex-end;
+    padding: 0 !important;
+    align-items: flex-end !important;
+    z-index: 30000 !important;
   }
 
   .modal-dialog,
@@ -4783,25 +4798,67 @@ body {
   .pwa-ios-modal-dialog {
     max-width: 100% !important;
     width: 100% !important;
-    max-height: 92vh !important;
-    max-height: 92dvh !important;
-    border-radius: 20px 20px 0 0 !important;
+    max-height: 88vh !important;
+    max-height: 88dvh !important;
+    border-radius: 22px 22px 0 0 !important;
     margin: 0 !important;
-    overflow-y: auto !important;
-    -webkit-overflow-scrolling: touch;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.45) !important;
+    background: #ffffff !important;
+    border: none !important;
   }
 
+  .auth-tabs-nav,
   .modal-header {
-    padding: 14px 16px;
+    flex-shrink: 0;
     position: sticky;
     top: 0;
     background: #ffffff;
-    z-index: 5;
+    z-index: 10;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-light);
   }
 
-  .modal-body {
-    padding: 14px 16px;
-    overflow-x: hidden;
+  .auth-tab-btn {
+    padding: 12px 10px !important;
+    font-size: 14px !important;
+  }
+
+  .modal-body,
+  .auth-modal-body {
+    flex: 1 1 auto;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 18px 18px 56px 18px !important;
+    padding-bottom: calc(56px + env(safe-area-inset-bottom, 24px)) !important;
+  }
+
+  /* Form inputs & buttons touch targets in mobile modals */
+  .auth-modal-dialog .styled-input,
+  .auth-modal-dialog .styled-select {
+    font-size: 15px !important;
+    padding: 12px 14px !important;
+    min-height: 46px !important;
+  }
+
+  .auth-modal-dialog .btn-lg,
+  .ebay-modal .btn-lg {
+    min-height: 48px !important;
+    padding: 13px 20px !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    border-radius: 10px !important;
+    margin-bottom: 16px !important;
+  }
+
+  .form-row-2col,
+  .form-row-2 {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
   }
 
   /* Responsive table wrap in modals */
@@ -4816,7 +4873,18 @@ body {
   .modal-close-btn {
     top: 10px;
     right: 12px;
-    font-size: 24px;
+    font-size: 22px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    border: none;
+    cursor: pointer;
   }
 
   /* Checkout layout mobile adjustments */

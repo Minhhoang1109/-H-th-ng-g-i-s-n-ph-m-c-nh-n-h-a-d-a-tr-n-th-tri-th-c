@@ -24,7 +24,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
   <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png" />
   <link rel="icon" type="image/svg+xml" href="icons/icon.svg" />
-  <link rel="stylesheet" href="style.css?v=khpwa2" />
+  <link rel="stylesheet" href="style.css?v=khmob1" />
 </head>
 <body>
 
@@ -506,8 +506,9 @@
   <!-- ==================== MODALS ==================== -->
 
   <!-- 1. LOGIN / REGISTER MODAL -->
-  <div class="modal-backdrop" id="authModal" style="display:none;">
+  <div class="modal-backdrop" id="authModal" style="display:none; z-index:30000;">
     <div class="modal-dialog ebay-modal auth-modal-dialog">
+      <div class="bottom-sheet-drag-handle" style="width:38px; height:4px; background:#cbd5e1; border-radius:4px; margin:8px auto 2px; display:none;"></div>
       <button class="modal-close-btn" id="btnCloseAuthModal">×</button>
       <div class="auth-tabs-nav">
         <button class="auth-tab-btn active" id="tabLoginBtn" data-target="login">Đăng Nhập</button>
@@ -1625,6 +1626,6 @@
     </div>
   </div>
 
-  <script src="app.js?v=khpwa2"></script>
+  <script src="app.js?v=khmob1"></script>
 </body>
 </html>

@@ -177,6 +177,33 @@ function setupMobileUI() {
       }
     }
   });
+
+  setupModalObserver();
+}
+
+function setupModalObserver() {
+  const checkAnyModalOpen = () => {
+    const openModal = document.querySelector('.modal-backdrop:not([style*="display: none"]):not([style*="display:none"])');
+    if (openModal) {
+      document.body.classList.add('modal-open');
+    } else {
+      document.body.classList.remove('modal-open');
+    }
+  };
+
+  const observer = new MutationObserver(checkAnyModalOpen);
+  document.querySelectorAll('.modal-backdrop').forEach(m => {
+    observer.observe(m, { attributes: true, attributeFilter: ['style', 'class'] });
+  });
+
+  document.querySelectorAll('.modal-backdrop').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        modal.style.display = 'none';
+        checkAnyModalOpen();
+      }
+    });
+  });
 }
 
 // ========================================================
@@ -374,7 +401,16 @@ function setupAuth() {
 
   btnOpenLoginModal?.addEventListener('click', () => openAuthModal('login'));
   btnOpenRegisterModal?.addEventListener('click', () => openAuthModal('register'));
-  btnCloseAuthModal?.addEventListener('click', () => authModal.style.display = 'none');
+  btnCloseAuthModal?.addEventListener('click', () => {
+    authModal.style.display = 'none';
+    document.body.classList.remove('modal-open');
+  });
+  authModal?.addEventListener('click', (e) => {
+    if (e.target === authModal) {
+      authModal.style.display = 'none';
+      document.body.classList.remove('modal-open');
+    }
+  });
 
   tabLoginBtn?.addEventListener('click', () => {
     tabLoginBtn.classList.add('active');
@@ -757,6 +793,7 @@ function setupAuth() {
 function openAuthModal(mode = 'login') {
   const modal = document.getElementById('authModal');
   modal.style.display = 'flex';
+  document.body.classList.add('modal-open');
   if (mode === 'login') {
     document.getElementById('tabLoginBtn').click();
   } else {
@@ -803,6 +840,7 @@ window.loginAsSavedAccount = function(userId) {
 };
 
 function handleLoginSuccess(user, isFirstRegister = false) {
+  document.body.classList.remove('modal-open');
   appState.currentUser = user;
   appState.selectedUserId = user.id;
   appState.isGuest = false;
