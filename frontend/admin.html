@@ -144,6 +144,225 @@
     input:checked + .toggle-slider:before {
       transform: translateX(24px);
     }
+
+    /* ========================================================
+       COMPREHENSIVE MOBILE RESPONSIVE UI FOR ADMIN DASHBOARD
+       ======================================================== */
+    @media (max-width: 768px) {
+      .admin-wrapper {
+        padding: 14px 12px !important;
+      }
+
+      /* Navbar mobile */
+      .admin-navbar {
+        padding: 8px 0 !important;
+      }
+      .admin-nav-inner {
+        padding: 0 12px !important;
+        flex-wrap: wrap !important;
+        gap: 8px !important;
+      }
+      .admin-brand {
+        gap: 6px !important;
+      }
+      .admin-brand-badge {
+        font-size: 9.5px !important;
+        padding: 2px 5px !important;
+      }
+      .admin-nav-links {
+        gap: 8px !important;
+        width: 100% !important;
+        justify-content: space-between !important;
+      }
+      #adminGraphLiveStats {
+        display: none !important;
+      }
+      .btn-switch-store {
+        padding: 6px 10px !important;
+        font-size: 11.5px !important;
+      }
+
+      /* 2x2 Stats Summary Grid */
+      .admin-stats-summary-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 10px !important;
+        margin-bottom: 14px !important;
+      }
+      .admin-stat-card {
+        padding: 10px 12px !important;
+        gap: 8px !important;
+        border-radius: 10px !important;
+      }
+      .admin-stat-icon {
+        font-size: 20px !important;
+        width: 36px !important;
+        height: 36px !important;
+        border-radius: 8px !important;
+      }
+      .admin-stat-info h3 {
+        font-size: 16px !important;
+      }
+      .admin-stat-info p {
+        font-size: 10.5px !important;
+        line-height: 1.25 !important;
+      }
+
+      /* Horizontal Scrollable Pill Tabs */
+      .admin-tabs-nav {
+        display: flex !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        white-space: nowrap !important;
+        -webkit-overflow-scrolling: touch !important;
+        scrollbar-width: none !important;
+        padding: 4px 2px 10px 2px !important;
+        margin-bottom: 14px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+      }
+      .admin-tabs-nav::-webkit-scrollbar {
+        display: none !important;
+      }
+      .admin-tab-btn {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+        padding: 9px 15px !important;
+        font-size: 12.5px !important;
+        border-radius: 20px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+      }
+
+      /* Vis.js 2D Graph Canvas */
+      .graph-canvas-controls {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+        padding: 12px !important;
+      }
+      .canvas-filter-group {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 4px !important;
+        width: 100% !important;
+      }
+      .canvas-filter-group select {
+        width: 100% !important;
+        min-height: 40px !important;
+        font-size: 13px !important;
+      }
+      .graph-canvas-controls button {
+        width: 100% !important;
+        min-height: 40px !important;
+        padding: 9px 12px !important;
+        font-size: 13px !important;
+        justify-content: center !important;
+      }
+      .graph-canvas-container {
+        display: flex !important;
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: 0 !important;
+        border-radius: 0 0 10px 10px !important;
+      }
+      .vis-network-box {
+        height: 380px !important;
+        min-height: 340px !important;
+        width: 100% !important;
+      }
+      .vis-node-detail-panel {
+        border-left: none !important;
+        border-top: 1px solid #e2e8f0 !important;
+        max-height: 260px !important;
+        overflow-y: auto !important;
+        padding: 14px !important;
+      }
+
+      /* Admin Tables & Toolbars */
+      .admin-table-card {
+        padding: 14px 12px !important;
+        border-radius: 12px !important;
+      }
+      .admin-section-header {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 10px !important;
+      }
+      .admin-section-header .search-table-box {
+        width: 100% !important;
+        display: flex !important;
+        gap: 8px !important;
+      }
+      .admin-section-header .search-table-box input {
+        flex: 1 !important;
+        width: 100% !important;
+        min-height: 42px !important;
+        font-size: 13.5px !important;
+      }
+      .admin-section-header button {
+        width: 100% !important;
+        min-height: 44px !important;
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        justify-content: center !important;
+      }
+      .table-responsive {
+        width: 100% !important;
+        overflow-x: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        margin-top: 8px !important;
+        background: #ffffff !important;
+      }
+      .styled-table {
+        min-width: 680px !important;
+        white-space: nowrap !important;
+        font-size: 12.5px !important;
+      }
+      .styled-table th, .styled-table td {
+        padding: 10px 10px !important;
+      }
+
+      /* Gemini AI Admin Form on Mobile */
+      #adminGeminiForm .form-row-2col,
+      #adminGeminiForm div[style*="grid-template-columns:1fr 1fr"],
+      #adminGeminiForm div[style*="grid-template-columns: 1fr 1fr"] {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+      }
+      #adminGeminiForm div[style*="display:flex; gap:12px"],
+      #adminGeminiForm div[style*="display: flex; gap: 12px"] {
+        flex-direction: column !important;
+      }
+      #adminGeminiForm button {
+        width: 100% !important;
+        min-height: 46px !important;
+      }
+
+      /* Modals on Mobile as Bottom Sheet */
+      .modal-backdrop {
+        padding: 0 !important;
+        align-items: flex-end !important;
+        z-index: 30000 !important;
+      }
+      .modal-dialog.ebay-modal {
+        max-width: 100% !important;
+        width: 100% !important;
+        max-height: 88vh !important;
+        max-height: 88dvh !important;
+        border-radius: 22px 22px 0 0 !important;
+        margin: 0 !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+        box-shadow: 0 -10px 40px rgba(15, 23, 42, 0.45) !important;
+        padding-bottom: calc(40px + env(safe-area-inset-bottom, 24px)) !important;
+      }
+      .modal-dialog.ebay-modal div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+        gap: 10px !important;
+      }
+    }
   </style>
 </head>
 <body style="background:#f1f5f9;">
@@ -722,6 +941,6 @@
   <!-- Toast Notification -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="admin.js?v=khpay2"></script>
+  <script src="admin.js?v=khmob2"></script>
 </body>
 </html>
