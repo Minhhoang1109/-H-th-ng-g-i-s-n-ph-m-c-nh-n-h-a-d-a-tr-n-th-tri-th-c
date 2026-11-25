@@ -25,11 +25,62 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   if (!isAuthorizedAdmin) {
-    alert('Truy cập bị từ chối! Bạn cần đăng nhập tài khoản có quyền Quản trị viên (Admin) để vào trang này.');
-    window.location.href = '/';
+    setupAdminGateModal();
     return;
   }
 
+  await initAdminDashboard();
+});
+
+function setupAdminGateModal() {
+  const modal = document.getElementById('adminAuthGateModal');
+  if (!modal) {
+    window.location.href = '/';
+    return;
+  }
+  modal.style.display = 'flex';
+
+  const form = document.getElementById('adminGateLoginForm');
+  const btnQuick = document.getElementById('btnAdminGateQuickLogin');
+
+  const doLogin = async (username, password) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        localStorage.setItem('kh_recsys_session', JSON.stringify({
+          userId: data.user.id,
+          username: data.user.username,
+          is_admin: true
+        }));
+        modal.style.display = 'none';
+        showToast('Đăng nhập Quản Trị Viên thành công!', 'success');
+        await initAdminDashboard();
+      } else {
+        showToast(data.error || 'Sai tên đăng nhập hoặc mật khẩu!', 'error');
+      }
+    } catch (err) {
+      showToast('Lỗi kết nối máy chủ!', 'error');
+    }
+  };
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const u = document.getElementById('adminGateUsername')?.value.trim();
+    const p = document.getElementById('adminGatePassword')?.value.trim();
+    await doLogin(u, p);
+  });
+
+  btnQuick?.addEventListener('click', async () => {
+    await doLogin('admin', 'admin');
+  });
+}
+
+async function initAdminDashboard() {
   try { setupAdminTabs(); } catch (e) { console.error('setupAdminTabs error:', e); }
   try { setupProductForm(); } catch (e) { console.error('setupProductForm error:', e); }
   try { setupAdminUserModalEvents(); } catch (e) { console.error('setupAdminUserModalEvents error:', e); }
@@ -45,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   try { await loadAdminProducts(); } catch (e) { console.error('loadAdminProducts error:', e); }
   try { await loadAdminUsers(); } catch (e) { console.error('loadAdminUsers error:', e); }
   try { await initAdminGraph(); } catch (e) { console.error('initAdminGraph error:', e); }
-});
+}
 
 function setupAdminTabs() {
   document.querySelectorAll('.admin-tab-btn').forEach(btn => {

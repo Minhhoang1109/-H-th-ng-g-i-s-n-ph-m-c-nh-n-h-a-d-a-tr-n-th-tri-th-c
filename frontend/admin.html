@@ -15,7 +15,7 @@
       document.write('<script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"><\\/script>');
     }
   </script>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=khmob2" />
   <style>
     .admin-navbar {
       background: #1e293b;
@@ -938,9 +938,38 @@
     </div>
   </div>
 
+  <!-- ==================== ADMIN QUICK LOGIN GATE MODAL ==================== -->
+  <div class="modal-backdrop" id="adminAuthGateModal" style="display:none; z-index:40000; background:rgba(15, 23, 42, 0.85); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px);">
+    <div class="modal-dialog ebay-modal" style="max-width:440px; padding:28px 24px; border-radius:18px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.5);">
+      <div style="font-size:46px; margin-bottom:8px;">🔐</div>
+      <h3 style="margin:0 0 6px; font-size:20px; font-weight:800; color:#0f172a;">Xác Thực Quyền Quản Trị</h3>
+      <p style="margin:0 0 20px; font-size:13px; color:#64748b; line-height:1.5;">Vui lòng đăng nhập tài khoản Quản trị viên (Admin) để tiếp tục truy cập Trung Tâm Quản Trị & Đồ Thị Tri Thức.</p>
+
+      <form id="adminGateLoginForm" style="text-align:left;">
+        <div style="margin-bottom:14px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:4px;">Tên đăng nhập:</label>
+          <input type="text" id="adminGateUsername" class="styled-input w-100" value="admin" required autocomplete="username" />
+        </div>
+        <div style="margin-bottom:18px;">
+          <label style="display:block; font-size:12px; font-weight:700; color:#334155; margin-bottom:4px;">Mật khẩu:</label>
+          <input type="password" id="adminGatePassword" class="styled-input w-100" value="admin" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-ebay-primary w-100" style="padding:12px; font-weight:800; font-size:14px; border-radius:8px;">
+          🚀 Đăng Nhập Quản Trị
+        </button>
+        <button type="button" id="btnAdminGateQuickLogin" class="btn btn-ebay-outline w-100" style="margin-top:10px; padding:10px; font-size:13px; font-weight:700; border-radius:8px; background:#eff6ff; color:#1d4ed8; border-color:#93c5fd;">
+          ⚡ Đăng Nhập Nhanh (admin / admin)
+        </button>
+        <div style="margin-top:16px; text-align:center;">
+          <a href="/" style="font-size:12.5px; color:#64748b; text-decoration:none;">← Quay lại Cửa Hàng (Giao diện người dùng)</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="admin.js?v=khmob2"></script>
+  <script src="admin.js?v=khmob3"></script>
 </body>
 </html>
