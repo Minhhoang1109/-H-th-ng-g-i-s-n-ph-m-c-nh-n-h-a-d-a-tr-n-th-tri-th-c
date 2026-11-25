@@ -208,29 +208,47 @@
       }
 
       /* Horizontal Scrollable Pill Tabs */
-      .admin-tabs-nav {
-        display: flex !important;
-        gap: 8px !important;
+      .admin-tabs-nav-wrap {
+        width: 100% !important;
         overflow-x: auto !important;
-        white-space: nowrap !important;
         -webkit-overflow-scrolling: touch !important;
         scrollbar-width: none !important;
-        padding: 4px 2px 10px 2px !important;
         margin-bottom: 14px !important;
+        padding: 2px 0 8px !important;
         border-bottom: 1px solid #e2e8f0 !important;
       }
-      .admin-tabs-nav::-webkit-scrollbar {
+      .admin-tabs-nav-wrap::-webkit-scrollbar {
         display: none !important;
+      }
+      .admin-tabs-nav {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 8px !important;
+        min-width: max-content !important;
+        margin-bottom: 0 !important;
+        border: none !important;
+        padding: 0 !important;
       }
       .admin-tab-btn {
         flex: 0 0 auto !important;
         white-space: nowrap !important;
-        padding: 9px 15px !important;
-        font-size: 12.5px !important;
+        padding: 8px 15px !important;
+        font-size: 13px !important;
+        font-weight: 700 !important;
         border-radius: 20px !important;
         display: inline-flex !important;
         align-items: center !important;
         gap: 6px !important;
+        background: #ffffff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #475569 !important;
+      }
+      .admin-tab-btn.active {
+        background: #2563eb !important;
+        color: #ffffff !important;
+        border-color: #2563eb !important;
+        box-shadow: 0 2px 8px rgba(37,99,235,0.25) !important;
       }
 
       /* Vis.js 2D Graph Canvas */
@@ -282,11 +300,14 @@
       .admin-table-card {
         padding: 14px 12px !important;
         border-radius: 12px !important;
+        background: transparent !important;
+        border: none !important;
       }
       .admin-section-header {
         flex-direction: column !important;
         align-items: stretch !important;
         gap: 10px !important;
+        margin-bottom: 12px !important;
       }
       .admin-section-header .search-table-box {
         width: 100% !important;
@@ -308,20 +329,146 @@
       }
       .table-responsive {
         width: 100% !important;
-        overflow-x: auto !important;
-        -webkit-overflow-scrolling: touch !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 8px !important;
-        margin-top: 8px !important;
+        overflow: visible !important;
+        border: none !important;
+        background: transparent !important;
+        margin-top: 4px !important;
+      }
+
+      /* Convert Products Table to Clean Cards on Mobile */
+      #adminProductsTable thead {
+        display: none !important;
+      }
+      #adminProductsTable,
+      #adminProductsTable tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+      #adminProductsTable tr {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
         background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        padding: 14px !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+        gap: 8px !important;
+        position: relative !important;
       }
-      .styled-table {
-        min-width: 680px !important;
-        white-space: nowrap !important;
-        font-size: 12.5px !important;
+      #adminProductsTable tr td {
+        padding: 0 !important;
+        border: none !important;
       }
-      .styled-table th, .styled-table td {
-        padding: 10px 10px !important;
+      #adminProductsTable tr td:nth-child(1) {
+        order: 1;
+        font-size: 11px !important;
+      }
+      #adminProductsTable tr td:nth-child(8) {
+        order: 2;
+        margin-left: auto !important;
+      }
+      #adminProductsTable tr td:nth-child(8) button {
+        padding: 5px 12px !important;
+        font-size: 12px !important;
+        border-radius: 6px !important;
+      }
+      #adminProductsTable tr td:nth-child(2) {
+        order: 3;
+      }
+      #adminProductsTable tr td:nth-child(2) img {
+        width: 54px !important;
+        height: 54px !important;
+        border-radius: 8px !important;
+        object-fit: cover !important;
+      }
+      #adminProductsTable tr td:nth-child(3) {
+        order: 4;
+        flex: 1 1 calc(100% - 74px) !important;
+      }
+      #adminProductsTable tr td:nth-child(3) strong {
+        font-size: 14px !important;
+        color: #0f172a !important;
+        display: block !important;
+        margin-bottom: 2px !important;
+      }
+      #adminProductsTable tr td:nth-child(3) p {
+        display: none !important;
+      }
+      #adminProductsTable tr td:nth-child(4) {
+        order: 5;
+        font-size: 11px !important;
+      }
+      #adminProductsTable tr td:nth-child(5) {
+        order: 6;
+      }
+      #adminProductsTable tr td:nth-child(6) {
+        order: 7;
+        margin-left: auto !important;
+        font-size: 15px !important;
+        font-weight: 800 !important;
+        color: #e53238 !important;
+      }
+      #adminProductsTable tr td:nth-child(7) {
+        order: 8;
+        font-size: 11.5px !important;
+      }
+
+      /* Convert Bank Accounts Table to Clean Cards on Mobile */
+      #adminBankAccountsTable thead {
+        display: none !important;
+      }
+      #adminBankAccountsTable,
+      #adminBankAccountsTable tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+      #adminBankAccountsTable tr {
+        display: flex !important;
+        flex-direction: column !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        padding: 14px !important;
+        gap: 10px !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+      }
+      #adminBankAccountsTable tr td {
+        padding: 0 !important;
+        border: none !important;
+      }
+
+      /* Convert Payment Codes Table to Clean Cards on Mobile */
+      #adminPaymentCodesTable thead {
+        display: none !important;
+      }
+      #adminPaymentCodesTable,
+      #adminPaymentCodesTable tbody {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px !important;
+        width: 100% !important;
+        min-width: 0 !important;
+      }
+      #adminPaymentCodesTable tr {
+        display: flex !important;
+        flex-direction: column !important;
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 14px !important;
+        padding: 14px !important;
+        gap: 10px !important;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+      }
+      #adminPaymentCodesTable tr td {
+        padding: 0 !important;
+        border: none !important;
       }
 
       /* Gemini AI Admin Form on Mobile */
@@ -426,12 +573,14 @@
     </div>
 
     <!-- Admin Sub-navigation / Tabs -->
-    <div class="admin-tabs-nav" style="margin-bottom:16px;">
-      <button class="admin-tab-btn active" data-admin-view="canvas">🌐 Khám Phá Đồ Thị 2D (Vis.js Canvas)</button>
-      <button class="admin-tab-btn" data-admin-view="products">📦 Quản Lý Danh Mục Sản Phẩm (CRUD)</button>
-      <button class="admin-tab-btn" data-admin-view="users">👥 Quản Lý Người Dùng & Hồ Sơ KG</button>
-      <button class="admin-tab-btn" data-admin-view="payments">💳 Quản Lý Thanh Toán & Ngân Hàng</button>
-      <button class="admin-tab-btn" data-admin-view="gemini">🤖 Cấu Hình Trợ Lý Gemini AI</button>
+    <div class="admin-tabs-nav-wrap">
+      <div class="admin-tabs-nav" id="adminTabsNav">
+        <button class="admin-tab-btn active" data-admin-view="canvas">🌐 Đồ Thị 2D</button>
+        <button class="admin-tab-btn" data-admin-view="products">📦 Sản Phẩm</button>
+        <button class="admin-tab-btn" data-admin-view="users">👥 Người Dùng</button>
+        <button class="admin-tab-btn" data-admin-view="payments">💳 Thanh Toán & Mã</button>
+        <button class="admin-tab-btn" data-admin-view="gemini">🤖 Gemini AI</button>
+      </div>
     </div>
 
     <!-- ADMIN VIEW 1: VIS.JS GRAPH CANVAS -->
@@ -970,6 +1119,6 @@
   <!-- Toast Notification -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="admin.js?v=khmob3"></script>
+  <script src="admin.js?v=khmob4"></script>
 </body>
 </html>
