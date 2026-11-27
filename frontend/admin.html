@@ -2,7 +2,10 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>K/H Store - Trung Tâm Quản Trị & Đồ Thị Tri Thức</title>
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,8 +18,18 @@
       document.write('<script src="https://unpkg.com/vis-network@9.1.9/standalone/umd/vis-network.min.js"><\\/script>');
     }
   </script>
-  <link rel="stylesheet" href="style.css?v=khmob2" />
+  <link rel="stylesheet" href="style.css?v=khmob6" />
   <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
     .admin-navbar {
       background: #1e293b;
       color: #fff;
@@ -329,10 +342,12 @@
       }
       .table-responsive {
         width: 100% !important;
-        overflow: visible !important;
+        max-width: 100% !important;
+        overflow-x: hidden !important;
         border: none !important;
         background: transparent !important;
         margin-top: 4px !important;
+        -webkit-overflow-scrolling: touch !important;
       }
 
       /* Convert Products Table to Clean Cards on Mobile */
@@ -346,18 +361,22 @@
         gap: 12px !important;
         width: 100% !important;
         min-width: 0 !important;
+        max-width: 100% !important;
       }
       #adminProductsTable tr {
         display: flex !important;
         flex-wrap: wrap !important;
         align-items: center !important;
         background: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
+        border: 1px solid #cbd5e1 !important;
         border-radius: 14px !important;
         padding: 14px !important;
-        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
         gap: 8px !important;
         position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
       }
       #adminProductsTable tr td {
         padding: 0 !important;
@@ -367,17 +386,9 @@
         order: 1;
         font-size: 11px !important;
       }
-      #adminProductsTable tr td:nth-child(8) {
-        order: 2;
-        margin-left: auto !important;
-      }
-      #adminProductsTable tr td:nth-child(8) button {
-        padding: 5px 12px !important;
-        font-size: 12px !important;
-        border-radius: 6px !important;
-      }
       #adminProductsTable tr td:nth-child(2) {
-        order: 3;
+        order: 2;
+        margin-top: 4px !important;
       }
       #adminProductsTable tr td:nth-child(2) img {
         width: 54px !important;
@@ -386,7 +397,7 @@
         object-fit: cover !important;
       }
       #adminProductsTable tr td:nth-child(3) {
-        order: 4;
+        order: 3;
         flex: 1 1 calc(100% - 74px) !important;
       }
       #adminProductsTable tr td:nth-child(3) strong {
@@ -399,22 +410,45 @@
         display: none !important;
       }
       #adminProductsTable tr td:nth-child(4) {
-        order: 5;
+        order: 4;
         font-size: 11px !important;
       }
       #adminProductsTable tr td:nth-child(5) {
-        order: 6;
+        order: 5;
       }
       #adminProductsTable tr td:nth-child(6) {
-        order: 7;
+        order: 6;
         margin-left: auto !important;
         font-size: 15px !important;
         font-weight: 800 !important;
         color: #e53238 !important;
       }
       #adminProductsTable tr td:nth-child(7) {
-        order: 8;
+        order: 7;
         font-size: 11.5px !important;
+        width: 100% !important;
+        color: #64748b !important;
+      }
+      #adminProductsTable tr td:nth-child(8) {
+        order: 8;
+        width: 100% !important;
+        border-top: 1px dashed #e2e8f0 !important;
+        padding-top: 10px !important;
+        margin-top: 4px !important;
+      }
+      #adminProductsTable tr td:nth-child(8) div {
+        display: flex !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
+      #adminProductsTable tr td:nth-child(8) button {
+        flex: 1 !important;
+        padding: 8px 12px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        border-radius: 8px !important;
+        text-align: center !important;
+        justify-content: center !important;
       }
 
       /* Convert Bank Accounts Table to Clean Cards on Mobile */
@@ -428,20 +462,97 @@
         gap: 12px !important;
         width: 100% !important;
         min-width: 0 !important;
+        max-width: 100% !important;
       }
       #adminBankAccountsTable tr {
         display: flex !important;
         flex-direction: column !important;
         background: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
+        border: 1px solid #cbd5e1 !important;
         border-radius: 14px !important;
-        padding: 14px !important;
-        gap: 10px !important;
-        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+        padding: 14px 16px !important;
+        gap: 8px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
       }
       #adminBankAccountsTable tr td {
+        display: block !important;
         padding: 0 !important;
         border: none !important;
+        width: 100% !important;
+      }
+      #adminBankAccountsTable tr td:nth-child(1) {
+        order: 1;
+      }
+      #adminBankAccountsTable tr td:nth-child(2) {
+        order: 2;
+        font-size: 15px !important;
+      }
+      #adminBankAccountsTable tr td:nth-child(2)::before {
+        content: "Số TK: ";
+        font-size: 12px;
+        color: #64748b;
+        font-weight: normal;
+      }
+      #adminBankAccountsTable tr td:nth-child(3) {
+        order: 3;
+        font-size: 13px !important;
+      }
+      #adminBankAccountsTable tr td:nth-child(3)::before {
+        content: "Chủ TK: ";
+        font-size: 12px;
+        color: #64748b;
+        font-weight: normal;
+      }
+      #adminBankAccountsTable tr td:nth-child(4) {
+        order: 4;
+        font-size: 12px !important;
+      }
+      #adminBankAccountsTable tr td:nth-child(4)::before {
+        content: "Chi nhánh: ";
+        font-size: 12px;
+        color: #64748b;
+      }
+      #adminBankAccountsTable tr td:nth-child(5) {
+        order: 5;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        margin: 2px 0 !important;
+      }
+      #adminBankAccountsTable tr td:nth-child(6) {
+        order: 6;
+        margin-top: 2px !important;
+      }
+      #adminBankAccountsTable tr td:nth-child(6) button {
+        width: 100% !important;
+        padding: 8px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        border-radius: 8px !important;
+      }
+      #adminBankAccountsTable tr td:nth-child(7) {
+        order: 7;
+        border-top: 1px dashed #e2e8f0 !important;
+        padding-top: 10px !important;
+        margin-top: 4px !important;
+      }
+      #adminBankAccountsTable tr td:nth-child(7) div {
+        display: flex !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
+      #adminBankAccountsTable tr td:nth-child(7) button {
+        flex: 1 !important;
+        padding: 8px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        justify-content: center !important;
+        border-radius: 8px !important;
       }
 
       /* Convert Payment Codes Table to Clean Cards on Mobile */
@@ -455,20 +566,126 @@
         gap: 12px !important;
         width: 100% !important;
         min-width: 0 !important;
+        max-width: 100% !important;
       }
       #adminPaymentCodesTable tr {
         display: flex !important;
         flex-direction: column !important;
         background: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
+        border: 1px solid #cbd5e1 !important;
         border-radius: 14px !important;
-        padding: 14px !important;
-        gap: 10px !important;
-        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+        padding: 14px 16px !important;
+        gap: 8px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
       }
       #adminPaymentCodesTable tr td {
+        display: block !important;
         padding: 0 !important;
         border: none !important;
+        width: 100% !important;
+      }
+      #adminPaymentCodesTable tr td:nth-child(1) {
+        order: 1;
+      }
+      #adminPaymentCodesTable tr td:nth-child(2) {
+        order: 2;
+        font-size: 15px !important;
+      }
+      #adminPaymentCodesTable tr td:nth-child(2)::before {
+        content: "Mức giảm: ";
+        font-size: 12px;
+        color: #64748b;
+        font-weight: normal;
+      }
+      #adminPaymentCodesTable tr td:nth-child(3) {
+        order: 3;
+        font-size: 12.5px !important;
+      }
+      #adminPaymentCodesTable tr td:nth-child(3)::before {
+        content: "Đơn tối thiểu: ";
+        font-size: 12px;
+        color: #64748b;
+      }
+      #adminPaymentCodesTable tr td:nth-child(4) {
+        order: 4;
+        font-size: 12px !important;
+        color: #475569 !important;
+      }
+      #adminPaymentCodesTable tr td:nth-child(4)::before {
+        content: "Mô tả: ";
+        font-size: 12px;
+        color: #64748b;
+      }
+      #adminPaymentCodesTable tr td:nth-child(5) {
+        order: 5;
+        font-size: 12px !important;
+      }
+      #adminPaymentCodesTable tr td:nth-child(5)::before {
+        content: "Hạn dùng: ";
+        font-size: 12px;
+        color: #64748b;
+      }
+      #adminPaymentCodesTable tr td:nth-child(6) {
+        order: 6;
+        font-size: 12px !important;
+      }
+      #adminPaymentCodesTable tr td:nth-child(6)::before {
+        content: "Lượt dùng: ";
+        font-size: 12px;
+        color: #64748b;
+      }
+      #adminPaymentCodesTable tr td:nth-child(7) {
+        order: 7;
+        margin-top: 4px !important;
+      }
+      #adminPaymentCodesTable tr td:nth-child(8) {
+        order: 8;
+        border-top: 1px dashed #e2e8f0 !important;
+        padding-top: 10px !important;
+        margin-top: 4px !important;
+      }
+      #adminPaymentCodesTable tr td:nth-child(8) div {
+        display: flex !important;
+        gap: 8px !important;
+        width: 100% !important;
+      }
+      #adminPaymentCodesTable tr td:nth-child(8) button {
+        flex: 1 !important;
+        padding: 8px !important;
+        font-size: 12.5px !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        justify-content: center !important;
+        border-radius: 8px !important;
+      }
+
+      /* Admin Users List on Mobile */
+      .admin-users-grid .user-card {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+        padding: 14px !important;
+        border-radius: 14px !important;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+      .admin-users-grid .user-card > div:first-child {
+        flex-direction: row !important;
+        align-items: flex-start !important;
+        gap: 12px !important;
+        width: 100% !important;
+      }
+      .admin-users-grid .user-card > div:last-child {
+        text-align: left !important;
+        align-items: center !important;
+        width: 100% !important;
+        border-top: 1px dashed #e2e8f0 !important;
+        padding-top: 10px !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
       }
 
       /* Gemini AI Admin Form on Mobile */
@@ -1119,6 +1336,6 @@
   <!-- Toast Notification -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="admin.js?v=khmob4"></script>
+  <script src="admin.js?v=khmob6"></script>
 </body>
 </html>

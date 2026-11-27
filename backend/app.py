@@ -58,6 +58,14 @@ def serve_index():
 def serve_admin():
     return send_from_directory(app.static_folder, 'admin.html')
 
+@app.after_request
+def add_cache_headers(response):
+    if response.mimetype == 'text/html':
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
+
 # --- AUTHENTICATION ROUTES ---
 @app.route('/api/auth/register', methods=['POST'])
 def auth_register():

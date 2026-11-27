@@ -115,7 +115,10 @@ function setupAdminTabs() {
       }
 
       if (view === 'canvas' && adminState.visNetwork) {
-        setTimeout(() => adminState.visNetwork.fit(), 200);
+        setTimeout(() => {
+          adminState.visNetwork.redraw();
+          adminState.visNetwork.fit();
+        }, 150);
       } else if (view === 'products') {
         if (!adminState.products || adminState.products.length === 0) {
           loadAdminProducts();

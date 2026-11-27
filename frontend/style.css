@@ -4648,19 +4648,30 @@ body.modal-open .chatbot-floating-trigger {
   }
 
   .graph-canvas-container {
-    flex-direction: column;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
+    min-height: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 
   .vis-network-box {
+    display: block !important;
     height: 380px !important;
+    min-height: 340px !important;
     width: 100% !important;
+    max-width: 100% !important;
   }
 
   .vis-node-detail-panel {
+    display: block !important;
     width: 100% !important;
-    max-height: 250px;
+    max-width: 100% !important;
+    max-height: 250px !important;
     border-left: none !important;
-    border-top: 1px solid var(--border-light);
+    border-top: 1px solid var(--border-light) !important;
+    padding: 14px !important;
   }
 
   /* Survey Tab on Mobile */
