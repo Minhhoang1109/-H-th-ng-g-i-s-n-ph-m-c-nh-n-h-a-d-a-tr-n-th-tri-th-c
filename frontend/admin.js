@@ -213,25 +213,34 @@ async function initAdminGraph() {
       'Spec': '#64748b'
     };
 
-    const nodesList = (graphData.nodes || []).map(n => ({
-      id: n.id,
-      label: n.label || n.name || n.id,
-      title: `${n.type}: ${n.name || n.label || n.id}`,
-      color: {
-        background: colorMap[n.type] || '#94a3b8',
-        border: '#ffffff',
-        highlight: { background: '#ef4444', border: '#1e293b' }
-      },
-      font: { color: '#1e293b', size: 12, face: 'Inter' },
-      shape: n.type === 'Product' ? 'box' : (n.type === 'User' ? 'circle' : 'ellipse'),
-      raw: n
-    }));
+    const isMobile = window.innerWidth <= 768;
+
+    const nodesList = (graphData.nodes || []).map(n => {
+      const rawName = n.name || n.label || n.id;
+      const maxLen = isMobile ? 14 : 22;
+      const displayLabel = rawName.length > maxLen ? rawName.slice(0, maxLen - 2) + '...' : rawName;
+
+      return {
+        id: n.id,
+        label: displayLabel,
+        title: `${n.type}: ${rawName}`,
+        color: {
+          background: colorMap[n.type] || '#94a3b8',
+          border: '#ffffff',
+          highlight: { background: '#ef4444', border: '#1e293b' }
+        },
+        font: { color: '#0f172a', size: isMobile ? 11 : 12, face: 'Inter', multi: false },
+        shape: n.type === 'Product' ? 'box' : (n.type === 'User' ? 'circle' : (n.type === 'Brand' ? 'diamond' : 'ellipse')),
+        margin: { top: 6, bottom: 6, left: 8, right: 8 },
+        raw: n
+      };
+    });
 
     const edgesList = (graphData.edges || graphData.links || []).map(l => ({
       from: l.from || l.source,
       to: l.to || l.target,
       label: l.label || l.type || l.relation || '',
-      arrows: 'to',
+      arrows: { to: { enabled: true, scaleFactor: 0.6 } },
       font: { size: 9, color: '#64748b', align: 'middle' },
       color: { color: '#cbd5e1', highlight: '#3b82f6' }
     }));
@@ -240,13 +249,36 @@ async function initAdminGraph() {
     const edges = new vis.DataSet(edgesList);
 
     const options = {
-      nodes: { borderWidth: 2, shadow: true },
-      edges: { smooth: { type: 'continuous' } },
-      physics: {
-        stabilization: true,
-        barnesHut: { gravitationalConstant: -2500, springLength: 120 }
+      nodes: {
+        borderWidth: 2,
+        shadow: true,
+        shapeProperties: { borderRadius: 6 }
       },
-      interaction: { hover: true, tooltipDelay: 200 }
+      edges: {
+        smooth: { type: 'continuous' }
+      },
+      physics: {
+        solver: 'forceAtlas2Based',
+        forceAtlas2Based: {
+          gravitationalConstant: isMobile ? -80 : -100,
+          centralGravity: 0.005,
+          springLength: isMobile ? 160 : 180,
+          springConstant: 0.05,
+          damping: 0.45,
+          avoidOverlap: 0.85
+        },
+        stabilization: {
+          enabled: true,
+          iterations: 180,
+          updateInterval: 25
+        }
+      },
+      interaction: {
+        hover: true,
+        tooltipDelay: 150,
+        zoomView: true,
+        dragView: true
+      }
     };
 
     adminState.visNetwork = new vis.Network(container, { nodes, edges }, options);
